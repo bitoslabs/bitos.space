@@ -1,0 +1,35 @@
+# BitOS - Decentralized Enterprise Network
+
+## What is BitOS?
+BitOS is a decentralized enterprise social network (ESN) built on the Nostr protocol. It is designed to provide organizations with a secure, censorship-resistant, and self-hosted platform for communication and collaboration.
+
+## Core Features
+- **Nostr Protocol**: Uses decentralized relays instead of central servers.
+- **Privacy First**: End-to-end encrypted messaging (Direct Messages and Group Chats).
+- **ERP & CRM**: Modular components for Enterprise Resource Planning and Customer Relationship Management.
+- **AI Agents**: Integrated AI for automated workflows, team assistance, and financial insights.
+- **DAO Governance**: Tools for decentralized autonomous organizations, including voting and treasury management.
+- **Self-Hosted**: Full control over data and infrastructure.
+
+## Technical Stack
+- **Frontend**: Pure HTML, CSS, JS (Landing Page), Nuxt 3 (App).
+- **Protocol**: Nostr (NIPs supported: 01, 04, 07, etc.).
+- **Storage**: Decentralized options (IPFS, Arweave).
+
+## Live Apps (ecosystem)
+- **Social**: https://social.bitos.space/ — local-first Nostr social client (feed, chat, relays)
+- **PocketZap**: https://pocket.bitos.space/ — private journal and sats
+- **Learn**: https://learn.bitos.space/ — offline-first education platform
+- **Vatta**: https://vatta.bitos.space/ — 2D story game about life and rebirth
+- **Vault**: https://github.com/bitoslabs/bitos-vault — local-first password generator and encrypted vault (Chromium extension, NIP-78 relay sync)
+- **Demo (ERP, CRM, chat, AI agents)**: https://app.bitos.space
+
+## Links
+- **Core protocol / relay**: https://github.com/bitoslabs/bitos-nostr
+- **Client app (ERP, CRM, chat, AI agents)**: https://github.com/bitoslabs/bitos-native-app
+- **Password vault (Chromium extension)**: https://github.com/bitoslabs/bitos-vault
+- **Data Standard (open event conventions)**: https://bitos.space/data-standard.html
+- **Demo**: https://app.bitos.space
+
+## Summary for Agents
+BitOS is an open-source alternative to Slack/Salesforce, built on Bitcoin principles and Nostr architecture. It prioritizes data sovereignty and resistance to censorship. It is local-first and supports federation between shops, branches, and partner organizations.

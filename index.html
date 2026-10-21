@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <meta
+      name="theme-color"
+      content="#0b0b0b"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta
+      name="theme-color"
+      content="#f8f9fa"
+      media="(prefers-color-scheme: light)"
+    />
+    <title>bitos.space - Decentralized Enterprise Network</title>
+    <meta
+      name="description"
+      content="bitos.space is a decentralized enterprise social network built on Nostr. It combines private messaging, ERP, CRM, AI agents, and DAO tools in a secure, self-hosted platform."
+    />
+    <meta
+      name="keywords"
+      content="Nostr, Decentralized, Enterprise, ERP, CRM, DAO, AI Agents, Privacy, Open Source, Self-hosted, Blockchain, Bitcoin"
+    />
+    <meta name="author" content="bitos.space" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://bitos.space/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bitos.space/" />
+    <meta
+      property="og:title"
+      content="bitos.space - Decentralized Enterprise Network"
+    />
+    <meta
+      property="og:description"
+      content="A decentralized enterprise platform combining private messaging, ERP, CRM, AI agents, and DAO tools — all under your infrastructure."
+    />
+    <!-- Placeholder image URL - user should update -->
+    <meta property="og:image" content="https://bitos.space/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://bitos.space/" />
+    <meta
+      property="twitter:title"
+      content="bitos.space - Decentralized Enterprise Network"
+    />
+    <meta
+      property="twitter:description"
+      content="A decentralized enterprise platform combining private messaging, ERP, CRM, AI agents, and DAO tools."
+    />
+    <meta property="twitter:image" content="https://bitos.space/og-image.png" />
+
+    <!-- JSON-LD for LLMs and Search Engines -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "bitos.space",
+        "applicationCategory": "EnterpriseApplication",
+        "operatingSystem": "Web, Self-hosted",
+        "offers": {
+          "@type": "Offer",
+          "price": "0.00",
+          "priceCurrency": "USD"
+        },
+        "description": "A decentralized enterprise social network built on Nostr. Features include ERP, CRM, AI Agents, and DAO tools.",
+        "featureList": "Nostr Protocol, AI Agents, DAO Governance, ERP Modules, CRM, Privacy First",
+        "url": "https://bitos.space",
+        "author": {
+          "@type": "Organization",
+          "name": "bitos.space",
+          "url": "https://github.com/bitoslabs"
+        },
+        "sameAs": [
+          "https://github.com/bitoslabs/bitos-nostr",
+          "https://github.com/bitoslabs/bitos-native-app"
+        ]
+      }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.mts.la" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Lao font (Chanthavong) served from the fast CDN -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.mts.la/fonts/chanthavong/chanthavong.css"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/fonts/stylesheet.css" />
+    <link rel="stylesheet" href="styles.css?v=15" />
+
+    <!-- title tab icon -->
+    <link rel="icon" href="assets/bee.svg" type="image/svg+xml" />
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="assets/icons/bee-icon-180.png" />
+  </head>
+  <body>
+    <!-- Theme: dark is the default; restore a saved light preference before paint -->
+    <script>
+      if (localStorage.getItem("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+    <a class="skip-link" href="#home" data-i18n="skip_link"
+      >Skip to content</a
+    >
+    <div class="noise-overlay"></div>
+
+    <header class="navbar">
+      <div class="container">
+        <a href="#" class="logo" aria-label="BitOS">
+          <span class="logo-icon">
+            <img
+              src="assets/bee-animated.svg"
+              height="44"
+              alt=""
+              aria-hidden="true"
+            />
+          </span>
+          <span class="logo-text">Bit<span class="highlight">OS</span></span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="#home" data-i18n="nav_home">Home</a>
+          <a href="#features" data-i18n="nav_features">Features</a>
+          <a href="#ecosystem" data-i18n="nav_eco">Ecosystem</a>
+          <a href="#about" data-i18n="nav_about">About</a>
+          <a href="#community" data-i18n="nav_community">Community</a>
+          <a href="data-standard.html" data-i18n="nav_data">Data Standard</a>
+        </nav>
+
+        <div class="nav-actions">
+          <div class="nav-tools">
+            <button
+              id="cmdk-open"
+              class="nav-tool"
+              aria-label="Open quick navigation"
+              title="Quick navigation (⌘K)"
+            >
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#search"></use></svg>
+            </button>
+            <button
+              id="theme-toggle"
+              class="nav-tool"
+              aria-label="Toggle color theme"
+              title="Toggle theme"
+            >
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#moon"></use></svg>
+            </button>
+            <button
+              id="lang-toggle"
+              class="nav-tool nav-tool--lang"
+              aria-label="Change language"
+              title="Change language"
+            >
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#globe"></use></svg>
+              <span id="current-lang" class="en">EN</span>
+            </button>
+          </div>
+          <a
+            href="https://app.bitos.space"
+            target="_blank"
+            rel="noopener"
+            class="btn-primary nav-cta"
+          >
+            <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#rocket"></use></svg>
+            <span data-i18n="hero_demo">Get Started</span>
+          </a>
+          <a
+            href="https://github.com/bitoslabs/bitos-nostr"
+            target="_blank"
+            rel="noopener"
+            class="nav-tool nav-github"
+            aria-label="View source on GitHub"
+            title="Source on GitHub"
+          >
+            <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#github"></use></svg>
+          </a>
+          <button
+            class="mobile-menu-btn"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="mobile-nav"
+          >
+            <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#menu"></use></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="mobile-nav" id="mobile-nav">
+      <a href="#home" data-i18n="nav_home">Home</a>
+      <a href="#features" data-i18n="nav_features">Features</a>
+      <a href="#ecosystem" data-i18n="nav_eco">Ecosystem</a>
+      <a href="#how" data-i18n="nav_how">How it works</a>
+      <a href="#about" data-i18n="nav_about">About</a>
+      <a href="#faq" data-i18n="nav_faq">FAQ</a>
+      <a href="#community" data-i18n="nav_community">Community</a>
+      <a href="data-standard.html" data-i18n="nav_data">Data Standard</a>
+      <a
+        href="https://app.bitos.space"
+        target="_blank"
+        rel="noopener"
+        class="btn-primary"
+        data-i18n="hero_demo"
+        >Get Started</a
+      >
+    </div>
+
+    <main>
+      <section id="home" class="hero-section">
+        <canvas class="hero-grid" aria-hidden="true"></canvas>
+        <div class="container">
+          <div class="hero-content">
+            <div class="hero-badges">
+              <div class="badge-new" data-i18n="hero_badge">
+                Decentralized Enterprise
+              </div>
+              <div class="badge-nostr">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#zap"></use></svg>
+                <span data-i18n="hero_protocol">Built on Nostr</span>
+              </div>
+            </div>
+            <h1 class="hero-title">
+              <span data-i18n="hero_title_1">The Future of</span> <br />
+              <span class="text-gradient" data-i18n="hero_title_2"
+                >Work on Nostr</span
+              >
+            </h1>
+            <p class="hero-subtitle" data-i18n="hero_subtitle">
+              A decentralized enterprise platform combining private messaging,
+              ERP, CRM, AI agents, and DAO tools — all under your own
+              infrastructure.
+            </p>
+            <div class="hero-buttons">
+              <a
+                href="https://app.bitos.space"
+                target="_blank"
+                rel="noopener"
+                class="btn-primary large"
+              >
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#rocket"></use></svg>
+                <span data-i18n="hero_demo">Get Started</span>
+              </a>
+              <a
+                href="https://github.com/bitoslabs/bitos-nostr"
+                target="_blank"
+                rel="noopener"
+                class="btn-glass large"
+              >
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#github"></use></svg>
+                <span data-i18n="hero_source">Source Code</span>
+              </a>
+            </div>
+
+            <ul class="hero-stats">
+              <li>
+                <strong>100%</strong>
+                <span data-i18n="stat_open">Open Source</span>
+              </li>
+              <li>
+                <strong>E2E</strong>
+                <span data-i18n="stat_e2e">Encrypted</span>
+              </li>
+              <li>
+                <strong>0</strong>
+                <span data-i18n="stat_servers">Central Servers</span>
+              </li>
+              <li>
+                <strong>NIP</strong>
+                <span data-i18n="stat_nostr">Nostr Native</span>
+              </li>
+            </ul>
+          </div>
+          <div class="hero-visual">
+            <div class="orb">
+              <div class="orb__ring orb__ring--outer">
+                <span class="chip chip--1">
+                  <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#satellite-dish"></use></svg>
+                  <span data-i18n="chip_nostr">Nostr Protocol</span>
+                </span>
+                <span class="chip chip--2">
+                  <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#lock"></use></svg>
+                  <span data-i18n="chip_e2e">E2E Encrypted</span>
+                </span>
+                <span class="chip chip--3">
+                  <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#server"></use></svg>
+                  <span data-i18n="chip_self">Self-hosted</span>
+                </span>
+                <span class="chip chip--4">
+                  <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#zap"></use></svg>
+                  <span data-i18n="chip_lightning">Lightning</span>
+                </span>
+              </div>
+              <div class="orb__ring orb__ring--inner">
+                <span class="chip chip--5">
+                  <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#boxes"></use></svg>
+                  <span data-i18n="chip_erp">ERP &amp; CRM</span>
+                </span>
+                <span class="chip chip--6">
+                  <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#bot"></use></svg>
+                  <span data-i18n="chip_ai">AI Agents</span>
+                </span>
+              </div>
+              <div class="orb__core">
+                <img
+                  class="bee-logo"
+                  src="assets/bee-animated.svg"
+                  alt="bitos.space"
+                />
+              </div>
+              <div class="orb__platform"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="features-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-kicker" data-i18n="features_kicker"
+              >Features</span
+            >
+            <h2 data-i18n="features_title">The complete enterprise suite</h2>
+            <p data-i18n="features_desc">
+              Everything you need to run a decentralized organization.
+            </p>
+          </div>
+
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="icon-box">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#satellite-dish"></use></svg>
+              </div>
+              <h3 data-i18n="feat_1_title" class="en">Nostr Protocol</h3>
+              <p data-i18n="feat_1_desc">
+                Censorship-resistant, no central servers, and end-to-end
+                encrypted messaging.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box"><svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#bot"></use></svg></div>
+              <h3 data-i18n="feat_2_title" class="en">AI Agents</h3>
+              <p data-i18n="feat_2_desc">
+                Automated workflows, team assistants, and finance insights
+                powered by AI.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box"><svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#landmark"></use></svg></div>
+              <h3 data-i18n="feat_3_title" class="en">DAO Governance</h3>
+              <p data-i18n="feat_3_desc">
+                Built-in voting reform, treasury management, and multi-sig
+                wallet coordination.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#boxes"></use></svg>
+              </div>
+              <h3 data-i18n="feat_4_title" class="en">ERP & CRM</h3>
+              <p data-i18n="feat_4_desc">
+                Manage inventory, HR, leads, and customer pipelines in a
+                decentralized way.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box"><svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#wallet"></use></svg></div>
+              <h3 data-i18n="feat_5_title" class="en">Finance & Wallet</h3>
+              <p data-i18n="feat_5_desc">
+                Track income, expenses, and integrate with Lightning Network and
+                Nostr Zaps.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box"><svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#lock"></use></svg></div>
+              <h3 data-i18n="feat_6_title">Privacy First</h3>
+              <p data-i18n="feat_6_desc">
+                Self-hostable and open-source. Your data belongs to you.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="ecosystem" class="ecosystem-section">
+        <div class="container">
+          <div class="section-header reveal">
+            <span class="section-kicker" data-i18n="eco_kicker">The network</span>
+            <h2 data-i18n="eco_title">Explore the BitOS ecosystem</h2>
+            <p data-i18n="eco_desc">
+              A flagship workspace plus five focused apps — all running on the
+              same open protocol. No account, no sign-up wall.
+            </p>
+          </div>
+
+          <a
+            class="app-feature reveal"
+            href="https://app.bitos.space/"
+            target="_blank"
+            rel="noopener"
+          >
+            <div class="app-feature-body">
+              <span class="app-tag" data-i18n="eco_app_tag">Flagship</span>
+              <h3 class="en">BNOS — the BitOS App</h3>
+              <p data-i18n="eco_app_desc">
+                The full workspace: point of sale, commerce, ERP, CRM, chat,
+                and AI agents — your daily driver on Nostr.
+              </p>
+              <span class="app-open">
+                <span data-i18n="eco_app_open">Open the app</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#external-link"></use></svg>
+              </span>
+            </div>
+            <div class="app-feature-icon" aria-hidden="true">
+              <img
+                src="assets/icons/app-bnos.png"
+                alt=""
+                width="512"
+                height="512"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          </a>
+
+          <div class="app-grid">
+            <a
+              class="app-card reveal"
+              href="https://social.bitos.space/"
+              target="_blank"
+              rel="noopener"
+            >
+              <div class="app-head">
+                <span class="app-icon"
+                  ><img
+                    src="assets/icons/social.png"
+                    alt=""
+                    width="192"
+                    height="192"
+                    loading="lazy"
+                    decoding="async"
+                /></span>
+                <span class="app-tag" data-i18n="eco_social_tag">Social</span>
+              </div>
+              <h3 class="en">BitOS Social</h3>
+              <p data-i18n="eco_social_desc">
+                A local-first Nostr social client — feed, chat, and relays
+                without a central server.
+              </p>
+              <span class="app-open">
+                <span data-i18n="eco_open">Open app</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#external-link"></use></svg>
+              </span>
+            </a>
+
+            <a
+              class="app-card reveal"
+              href="https://pocket.bitos.space/"
+              target="_blank"
+              rel="noopener"
+            >
+              <div class="app-head">
+                <span class="app-icon"
+                  ><img
+                    src="assets/icons/pocket.svg"
+                    alt=""
+                    width="1024"
+                    height="1024"
+                    loading="lazy"
+                    decoding="async"
+                /></span>
+                <span class="app-tag" data-i18n="eco_pocket_tag">Private</span>
+              </div>
+              <h3 class="en">PocketZap</h3>
+              <p data-i18n="eco_pocket_desc">
+                A private journal that pays you back — write, lock your notes,
+                and earn sats while your keys stay on device.
+              </p>
+              <span class="app-open">
+                <span data-i18n="eco_open">Open app</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#external-link"></use></svg>
+              </span>
+            </a>
+
+            <a
+              class="app-card reveal"
+              href="https://learn.bitos.space/"
+              target="_blank"
+              rel="noopener"
+            >
+              <div class="app-head">
+                <span class="app-icon"
+                  ><img
+                    src="assets/icons/learn.svg"
+                    alt=""
+                    width="512"
+                    height="512"
+                    loading="lazy"
+                    decoding="async"
+                /></span>
+                <span class="app-tag" data-i18n="eco_learn_tag">Education</span>
+              </div>
+              <h3 class="en">BitOS Learn</h3>
+              <p data-i18n="eco_learn_desc">
+                An offline-first learning platform for teams and classrooms,
+                built on the same open protocol.
+              </p>
+              <span class="app-open">
+                <span data-i18n="eco_open">Open app</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#external-link"></use></svg>
+              </span>
+            </a>
+
+            <a
+              class="app-card reveal"
+              href="https://vatta.bitos.space/"
+              target="_blank"
+              rel="noopener"
+            >
+              <div class="app-head">
+                <span class="app-icon"
+                  ><img
+                    src="assets/icons/vatta.svg"
+                    alt=""
+                    width="128"
+                    height="128"
+                    loading="lazy"
+                    decoding="async"
+                /></span>
+                <span class="app-tag" data-i18n="eco_vatta_tag">Game</span>
+              </div>
+              <h3 class="en">Vatta</h3>
+              <p data-i18n="eco_vatta_desc">
+                A 2D story game about life, death, and rebirth — a calm way to
+                learn Lao wisdom through play.
+              </p>
+              <span class="app-open">
+                <span data-i18n="eco_open">Open app</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#external-link"></use></svg>
+              </span>
+            </a>
+
+            <a
+              class="app-card reveal"
+              href="https://github.com/bitoslabs/bitos-vault"
+              target="_blank"
+              rel="noopener"
+            >
+              <div class="app-head">
+                <span class="app-icon"
+                  ><img
+                    src="assets/icons/vault.svg"
+                    alt=""
+                    width="128"
+                    height="128"
+                    loading="lazy"
+                    decoding="async"
+                /></span>
+                <span class="app-tag" data-i18n="eco_vault_tag">Security</span>
+              </div>
+              <h3 class="en">BitOS Vault</h3>
+              <p data-i18n="eco_vault_desc">
+                A local-first password generator and encrypted vault — strong
+                secrets sealed on device, with optional Nostr relay sync.
+              </p>
+              <span class="app-open">
+                <span data-i18n="eco_vault_open">View on GitHub</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#external-link"></use></svg>
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="how" class="how-section">
+        <div class="container">
+          <div class="section-header reveal">
+            <span class="section-kicker" data-i18n="how_kicker"
+              >How it works</span
+            >
+            <h2 data-i18n="how_title">Live in three steps</h2>
+            <p data-i18n="how_desc">
+              No migration project, no vendor onboarding. Bring your keys and
+              your team — the rest is open protocol.
+            </p>
+          </div>
+          <ol class="how-grid">
+            <li class="how-card reveal">
+              <span class="how-num" aria-hidden="true">01</span>
+              <h3 data-i18n="how_1_title">Create your identity</h3>
+              <p data-i18n="how_1_desc">
+                Generate a keypair on your device. You own it — no email, no
+                password, no account to lose.
+              </p>
+            </li>
+            <li class="how-card reveal">
+              <span class="how-num" aria-hidden="true">02</span>
+              <h3 data-i18n="how_2_title">Connect a relay</h3>
+              <p data-i18n="how_2_desc">
+                Use relay.bitos.space or run your own. Your workspace lives on
+                infrastructure you control.
+              </p>
+            </li>
+            <li class="how-card reveal">
+              <span class="how-num" aria-hidden="true">03</span>
+              <h3 data-i18n="how_3_title">Invite your team</h3>
+              <p data-i18n="how_3_desc">
+                Add shops, branches, and partners. Data syncs peer-to-peer and
+                stays private end to end.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="about" class="about-section">
+        <div class="container about-grid">
+          <div class="about-content reveal">
+            <span class="section-kicker" data-i18n="about_kicker"
+              >Why bitos.space</span
+            >
+            <h2 data-i18n="about_title">
+              Software your organization actually owns
+            </h2>
+            <p data-i18n="about_body_1">
+              Most enterprise tools keep your people, your money, and your data
+              locked inside someone else's cloud. bitos.space flips that: it is
+              a local-first enterprise social network built on Nostr, where your
+              relay, your keys, and your records stay yours.
+            </p>
+            <p data-i18n="about_body_2">
+              Run it for a single shop or a federation of branches — the same
+              open protocol connects them without a central gatekeeper.
+            </p>
+            <ul class="about-points">
+              <li>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#circle-check"></use></svg>
+                <span data-i18n="about_p1"
+                  >Local-first: works offline, syncs when connected</span
+                >
+              </li>
+              <li>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#circle-check"></use></svg>
+                <span data-i18n="about_p2"
+                  >Your own keys and relay — zero vendor lock-in</span
+                >
+              </li>
+              <li>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#circle-check"></use></svg>
+                <span data-i18n="about_p3"
+                  >Federated: connect shops, branches, and partners</span
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="about-panel reveal">
+            <div class="panel-bar"></div>
+            <div class="ledger-cap">
+              <span data-i18n="ledger_cap">Specification</span>
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#circle-check"></use></svg>
+            </div>
+            <div class="code-line">
+              <span class="code-key">relay</span>
+              <span class="code-val">wss://relay.bitos.space</span>
+            </div>
+            <div class="code-line">
+              <span class="code-key">protocol</span>
+              <span class="code-val">Nostr / NIP-01</span>
+            </div>
+            <div class="code-line">
+              <span class="code-key">messaging</span>
+              <span class="code-val">NIP-04 / NIP-17</span>
+            </div>
+            <div class="code-line">
+              <span class="code-key">storage</span>
+              <span class="code-val">local + federated</span>
+            </div>
+            <div class="code-line">
+              <span class="code-key">license</span>
+              <span class="code-val">open source</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="protocol" class="protocol-section">
+        <div class="container">
+          <div class="section-header reveal">
+            <span class="section-kicker" data-i18n="proto_kicker"
+              >Nostr native</span
+            >
+            <h2 data-i18n="proto_title">Open protocol, real portability</h2>
+            <p data-i18n="proto_desc">
+              Everything is built on public Nostr NIPs, so your data stays
+              readable by any client — and keeps working even if this app
+              disappears.
+            </p>
+          </div>
+          <ul class="nip-grid">
+            <li class="nip-card reveal">
+              <span class="nip-id">NIP-01</span>
+              <p data-i18n="nip_01">
+                Base protocol: events, relays, and subscriptions.
+              </p>
+            </li>
+            <li class="nip-card reveal">
+              <span class="nip-id">NIP-19</span>
+              <p data-i18n="nip_19">
+                Portable identities: <code>npub</code> and
+                <code>nprofile</code>.
+              </p>
+            </li>
+            <li class="nip-card reveal">
+              <span class="nip-id">NIP-04 / 17</span>
+              <p data-i18n="nip_17">
+                Encrypted direct messages — legacy and private DMs.
+              </p>
+            </li>
+            <li class="nip-card reveal">
+              <span class="nip-id">NIP-57</span>
+              <p data-i18n="nip_57">Lightning zaps, straight to your wallet.</p>
+            </li>
+            <li class="nip-card reveal">
+              <span class="nip-id">NIP-25</span>
+              <p data-i18n="nip_25">Reactions and lightweight social signals.</p>
+            </li>
+            <li class="nip-card reveal">
+              <span class="nip-id">NIP-09</span>
+              <p data-i18n="nip_09">Owner-controlled event deletion requests.</p>
+            </li>
+          </ul>
+          <div class="proto-strip reveal">
+            <div class="proto-relay">
+              <span class="proto-label" data-i18n="proto_relay"
+                >Your relay</span
+              >
+              <code id="relay-url">wss://relay.bitos.space</code>
+              <button
+                class="copy-btn"
+                type="button"
+                data-copy="wss://relay.bitos.space"
+                data-i18n-title="proto_copy"
+                title="Copy relay URL"
+              >
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#copy"></use></svg>
+                <span data-i18n="proto_copy">Copy</span>
+              </button>
+            </div>
+            <div class="proto-clients">
+              <span class="proto-label" data-i18n="proto_clients"
+                >Portable to any client</span
+              >
+              <ul class="client-chips">
+                <li>Damus</li>
+                <li>Amethyst</li>
+                <li>Snort</li>
+                <li>Primal</li>
+                <li>Coracle</li>
+              </ul>
+            </div>
+          </div>          <div class="stream reveal">
+            <div class="stream__bar">
+              <span class="stream__live" aria-hidden="true"></span>
+              <span class="stream__title" data-i18n="stream_title"
+                >relay stream</span
+              >
+              <span class="stream__tag" data-i18n="stream_preview"
+                >illustrative preview</span
+              >
+            </div>
+            <ul class="stream__lines" id="stream-lines" aria-hidden="true"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="audience" class="audience-section">
+        <div class="container">
+          <div class="section-header reveal">
+            <span class="section-kicker" data-i18n="aud_kicker"
+              >Who it's for</span
+            >
+            <h2 data-i18n="aud_title">Built for how real teams work</h2>
+            <p data-i18n="aud_desc">
+              From a single shop counter to a federation of branches and
+              partners.
+            </p>
+          </div>
+          <div class="audience-grid">
+            <article class="audience-card reveal">
+              <div class="icon-box">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#store"></use></svg>
+              </div>
+              <h3 data-i18n="aud_1_title">Local businesses</h3>
+              <p data-i18n="aud_1_desc">
+                Point of sale, inventory, and payments that keep working even
+                when the internet doesn't.
+              </p>
+            </article>
+            <article class="audience-card reveal">
+              <div class="icon-box">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#users"></use></svg>
+              </div>
+              <h3 data-i18n="aud_2_title">Teams &amp; cooperatives</h3>
+              <p data-i18n="aud_2_desc">
+                Chat, tasks, and approvals in one workspace your members
+                actually co-own.
+              </p>
+            </article>
+            <article class="audience-card reveal">
+              <div class="icon-box">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#code"></use></svg>
+              </div>
+              <h3 data-i18n="aud_3_title">Developers</h3>
+              <p data-i18n="aud_3_desc">
+                An open event standard and reference apps you can extend without
+                asking permission.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="repos" class="repos-section">
+        <div class="container">
+          <div class="section-header reveal">
+            <span class="section-kicker" data-i18n="repos_kicker">Source</span>
+            <h2 data-i18n="repos_title">Built in the open</h2>
+            <p data-i18n="repos_desc">
+              Real code, real commits. Pick the piece you need.
+            </p>
+          </div>
+          <div class="repo-grid">
+            <a
+              class="repo-card reveal"
+              href="https://github.com/bitoslabs/bitos-nostr"
+              target="_blank"
+              rel="noopener"
+            >
+              <div class="repo-head">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#satellite-dish"></use></svg>
+                <span class="repo-tag" data-i18n="repo_org">Org</span>
+              </div>
+              <h3 class="en">bitos-nostr</h3>
+              <p data-i18n="repo_nostr_desc">
+                Nostr protocol layer — relays, events, and the enterprise data
+                standard that powers everything else.
+              </p>
+              <span class="repo-link en"
+                >github.com/bitoslabs/bitos-nostr
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#external-link"></use></svg></span>
+            </a>
+            <a
+              class="repo-card reveal"
+              href="https://github.com/bitoslabs/bitos-native-app"
+              target="_blank"
+              rel="noopener"
+            >
+              <div class="repo-head">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#smartphone"></use></svg>
+                <span class="repo-tag" data-i18n="repo_app">App</span>
+              </div>
+              <h3 class="en">bitos-native-app</h3>
+              <p data-i18n="repo_app_desc">
+                The client application for teams: chat, ERP, CRM, finance, and
+                AI agents in one workspace.
+              </p>
+              <span class="repo-link en"
+                >github.com/bitoslabs/bitos-native-app
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#external-link"></use></svg></span>
+            </a>
+            <a
+              class="repo-card reveal"
+              href="data-standard.html"
+            >
+              <div class="repo-head">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#book"></use></svg>
+                <span class="repo-tag" data-i18n="repo_spec">Spec</span>
+              </div>
+              <h3 data-i18n="repo_std_title" class="en">Data Standard</h3>
+              <p data-i18n="repo_std_desc">
+                Open Nostr event conventions for POS, ERP, CRM, inventory,
+                payments, and business federation.
+              </p>
+              <span class="repo-link" data-i18n="repo_std_link"
+                >Read the specification
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#arrow-right"></use></svg></span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" class="faq-section">
+        <div class="container">
+          <div class="section-header reveal">
+            <span class="section-kicker" data-i18n="faq_kicker">FAQ</span>
+            <h2 data-i18n="faq_title">Questions, answered</h2>
+            <p data-i18n="faq_desc">
+              The short version. Ask anything on GitHub for the long one.
+            </p>
+          </div>
+          <div class="faq-list reveal">
+            <details class="faq-item">
+              <summary>
+                <span data-i18n="faq_1_q">What exactly is bitos.space?</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#plus"></use></svg>
+              </summary>
+              <p data-i18n="faq_1_a">
+                A local-first enterprise social network built on Nostr. It
+                brings chat, ERP, CRM, finance, and AI agents together and runs
+                on infrastructure you own instead of a vendor's cloud.
+              </p>
+            </details>
+            <details class="faq-item">
+              <summary>
+                <span data-i18n="faq_2_q">Do I need to run a server?</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#plus"></use></svg>
+              </summary>
+              <p data-i18n="faq_2_a">
+                No. Start on the hosted relay and demo app in seconds. When you
+                are ready, self-host your own relay and point the same app at
+                it — nothing else changes.
+              </p>
+            </details>
+            <details class="faq-item">
+              <summary>
+                <span data-i18n="faq_3_q">Is my data private?</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#plus"></use></svg>
+              </summary>
+              <p data-i18n="faq_3_a">
+                Keys are generated and kept on your device, and messages are
+                end-to-end encrypted. You choose which relay stores your data,
+                so there is no central server reading it.
+              </p>
+            </details>
+            <details class="faq-item">
+              <summary>
+                <span data-i18n="faq_4_q">Does it work offline?</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#plus"></use></svg>
+              </summary>
+              <p data-i18n="faq_4_a">
+                Yes. bitos.space is local-first: you keep working offline and
+                everything syncs automatically when you reconnect.
+              </p>
+            </details>
+            <details class="faq-item">
+              <summary>
+                <span data-i18n="faq_5_q">What does it cost?</span>
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#plus"></use></svg>
+              </summary>
+              <p data-i18n="faq_5_a">
+                The software is open source and free to self-host, with no
+                per-seat fees. You only pay for the infrastructure you choose to
+                run.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section id="community" class="community-section">
+        <div class="container community-inner reveal">
+          <div class="seal" aria-hidden="true">
+            <img src="assets/bee-animated.svg" alt="" width="40" height="40" />
+          </div>
+          <h2 data-i18n="community_title">Join the build</h2>
+          <p data-i18n="community_desc">
+            bitos.space is shaped by the people who use it — shop owners,
+            developers, and decentralized-tech folks.
+          </p>
+          <div class="community-actions">
+            <a
+              href="https://app.bitos.space"
+              target="_blank"
+              rel="noopener"
+              class="btn-primary large"
+            >
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#rocket"></use></svg>
+              <span data-i18n="community_try">Try the Demo</span>
+            </a>
+            <a
+              href="https://github.com/bitoslabs/bitos-nostr"
+              target="_blank"
+              rel="noopener"
+              class="btn-glass large"
+            >
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#github"></use></svg>
+              <span data-i18n="community_star">Star on GitHub</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-brand">
+            <h3 class="en">bitos.space</h3>
+            <p data-i18n="footer_desc">
+              Open source project for local bit spaces.
+            </p>
+            <div class="footer-social">
+              <a
+                href="https://github.com/bitoslabs/bitos-nostr"
+                target="_blank"
+                rel="noopener"
+                aria-label="GitHub"
+                ><svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#github"></use></svg></a>
+              <a
+                href="https://app.bitos.space"
+                target="_blank"
+                rel="noopener"
+                aria-label="Demo"
+                ><svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#rocket"></use></svg></a>
+              <a href="data-standard.html" aria-label="Data Standard"
+                ><svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#book"></use></svg></a>
+            </div>
+          </div>
+          <div class="footer-cols">
+            <div class="footer-col">
+              <h4 data-i18n="footer_product">Product</h4>
+              <a href="#features" data-i18n="nav_features">Features</a>
+              <a href="#about" data-i18n="nav_about">About</a>
+              <a
+                href="https://app.bitos.space"
+                target="_blank"
+                rel="noopener"
+                data-i18n="hero_demo"
+                >Get Started</a
+              >
+            </div>
+            <div class="footer-col">
+              <h4 data-i18n="footer_ecosystem">Ecosystem</h4>
+              <a
+                href="https://social.bitos.space/"
+                target="_blank"
+                rel="noopener"
+                >Social</a
+              >
+              <a
+                href="https://pocket.bitos.space/"
+                target="_blank"
+                rel="noopener"
+                >PocketZap</a
+              >
+              <a
+                href="https://learn.bitos.space/"
+                target="_blank"
+                rel="noopener"
+                >Learn</a
+              >
+              <a
+                href="https://vatta.bitos.space/"
+                target="_blank"
+                rel="noopener"
+                >Vatta</a
+              >
+              <a
+                href="https://github.com/bitoslabs/bitos-vault"
+                target="_blank"
+                rel="noopener"
+                >Vault</a
+              >
+            </div>
+            <div class="footer-col">
+              <h4 data-i18n="footer_developers">Developers</h4>
+              <a
+                href="https://github.com/bitoslabs/bitos-nostr"
+                target="_blank"
+                rel="noopener"
+                >bitos-nostr</a
+              >
+              <a
+                href="https://github.com/bitoslabs/bitos-native-app"
+                target="_blank"
+                rel="noopener"
+                >bitos-native-app</a
+              >
+              <a href="data-standard.html" data-i18n="nav_data"
+                >Data Standard</a
+              >
+            </div>
+            <div class="footer-col">
+              <h4 data-i18n="footer_community">Community</h4>
+              <a href="#community" data-i18n="nav_community">Community</a>
+              <a
+                href="https://github.com/bitoslabs/bitos-nostr"
+                target="_blank"
+                rel="noopener"
+                data-i18n="community_star"
+                >Star on GitHub</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>
+            <span class="en"> &copy; <span id="year">2026</span> bitos.space.</span>
+            <span data-i18n="footer_rights">All rights reserved.</span>
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <button id="back-to-top" class="back-to-top" aria-label="Back to top">
+      <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#arrow-up"></use></svg>
+    </button>
+
+    <div class="cmdk" id="cmdk" hidden>
+      <div class="cmdk__scrim" data-cmdk-close></div>
+      <div
+        class="cmdk__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Quick navigation"
+      >
+        <div class="cmdk__field">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#search"></use></svg>
+          <input
+            id="cmdk-input"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            data-i18n-placeholder="cmdk_placeholder"
+            placeholder="Search sections and actions…"
+          />
+          <kbd class="cmdk__kbd">ESC</kbd>
+        </div>
+        <ul class="cmdk__list" id="cmdk-list" role="listbox"></ul>
+      </div>
+    </div>
+
+    <script src="script.js?v=12"></script>
+  </body>
+</html>

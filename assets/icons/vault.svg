@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="BitOS Vault">
+  <title>BitOS Vault — encrypted password vault</title>
+  <rect width="128" height="128" rx="28" fill="#0b0b0b"/>
+  <path d="M42 60 V48 a22 22 0 0 1 44 0 v12" fill="none" stroke="#f7931a" stroke-width="9" stroke-linecap="round"/>
+  <rect x="28" y="58" width="72" height="52" rx="13" fill="#ffc107"/>
+  <circle cx="64" cy="80" r="8.5" fill="#0b0b0b"/>
+  <path d="M64 86 v11" stroke="#0b0b0b" stroke-width="7" stroke-linecap="round"/>
+</svg>

@@ -198,20 +198,33 @@ async function publishOne(relay, event, timeoutMs) {
 export async function publishToRelays(
   relays,
   event,
-  { timeout = RELAY_PUBLISH_TIMEOUT } = {}
+  { timeout = RELAY_PUBLISH_TIMEOUT, onProgress } = {}
 ) {
+  const total = relays.length;
+  let done = 0;
+
   return Promise.all(
     relays.map(async (relay) => {
+      let result;
       try {
         const message = await publishOne(relay, event, timeout);
-        return { relay, ok: true, message };
+        result = { relay, ok: true, message };
       } catch (error) {
-        return {
+        result = {
           relay,
           ok: false,
           message: (error && error.message) || "Failed",
         };
       }
+      done += 1;
+      if (onProgress) {
+        try {
+          onProgress({ done, total });
+        } catch {
+          /* progress reporting must not break publishing */
+        }
+      }
+      return result;
     })
   );
 }

@@ -31,11 +31,19 @@ function isDiscoverable(profile) {
   if (!profile) return false;
   const named = Boolean(profile.name || profile.displayName);
   const hasContent = Boolean(
-    profile.headline ||
+    profile.avatar ||
+      profile.banner ||
+      profile.headline ||
       profile.bio ||
+      profile.location ||
+      profile.nip05 ||
       (profile.projects && profile.projects.length) ||
       (profile.gallery && profile.gallery.length) ||
-      (profile.skills && profile.skills.length)
+      (profile.skills && profile.skills.length) ||
+      (profile.links && profile.links.length) ||
+      (profile.contact && profile.contact.url) ||
+      (profile.availability &&
+        (profile.availability.status || profile.availability.note))
   );
   return named && hasContent;
 }

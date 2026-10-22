@@ -15,6 +15,8 @@ export const RELAY_PUBLISH_TIMEOUT = 6_000;
 export const RELAY_SUBSCRIBE_TIMEOUT = 8_000;
 
 export const DEFAULT_RELAYS = [
+  "wss://nostr-01.yakihonne.com",
+  "wss://relay.bitos.space",
   "wss://relay.damus.io",
   "wss://nos.lol",
   "wss://relay.primal.net",

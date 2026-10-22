@@ -94,6 +94,17 @@ export function createEditorView({
   let saveTimer = 0;
   let replaceGalleryIndex = -1;
   let galleryBusy = false;
+  let publishClock = 0;
+
+  const publishTargets = Array.from(
+    new Set([els.publishBtn, ...publishButtons].filter(Boolean))
+  );
+  const publishLabels = publishTargets
+    .map((button) => {
+      const label = button.querySelector("[data-publish-label]");
+      return label ? { label, idle: label.textContent.trim() } : null;
+    })
+    .filter(Boolean);
 
   const nip05 = createNip05Wizard({
     root,
@@ -769,10 +780,29 @@ export function createEditorView({
       return;
     }
 
-    setBusy(true);
+    setBusy(true, "Waiting for signer…");
+    const startedAt = Date.now();
+    clearInterval(publishClock);
+    publishClock = window.setInterval(() => {
+      const seconds = Math.round((Date.now() - startedAt) / 1000);
+      if (seconds >= 3) setPublishLabel(`Waiting for signer… ${seconds}s`);
+    }, 1000);
+
     try {
       saveDraft(false);
-      const result = await publishProfile(current.profile, currentRelays());
+      const result = await publishProfile(current.profile, currentRelays(), {
+        onPhase: (phase, info) => {
+          if (phase === "signing") {
+            setBusy(true, "Waiting for signer…");
+            return;
+          }
+          if (phase === "publishing") {
+            clearInterval(publishClock);
+            publishClock = 0;
+            setPublishLabel(`Publishing ${info.done}/${info.total}…`);
+          }
+        },
+      });
       renderResults(result.results);
       if (!result.accepted) {
         toast("No relay accepted the event. Check the relay list and retry.", true);
@@ -798,13 +828,26 @@ export function createEditorView({
     }
   }
 
-  function setBusy(busy) {
-    els.publishBtn.disabled = busy;
-    els.publishBtn.setAttribute("aria-busy", busy ? "true" : "false");
-    publishButtons.forEach((button) => {
+  function setPublishLabel(text) {
+    publishLabels.forEach((entry) => {
+      entry.label.textContent = text;
+    });
+  }
+
+  function setBusy(busy, label) {
+    publishTargets.forEach((button) => {
       button.disabled = busy;
       button.setAttribute("aria-busy", busy ? "true" : "false");
     });
+    if (busy) {
+      if (label) setPublishLabel(label);
+    } else {
+      clearInterval(publishClock);
+      publishClock = 0;
+      publishLabels.forEach((entry) => {
+        entry.label.textContent = entry.idle;
+      });
+    }
     els.saveDraft.disabled = busy;
     els.discardDraft.disabled = busy;
   }

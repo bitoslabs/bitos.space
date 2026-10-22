@@ -728,6 +728,7 @@ function handlePublished(result) {
   profileService.saveProfileCache(pubkey, state.profile, state.updatedAt);
   renderProfile({ skipView: editor && editor.isOpen() });
   updateAuthUI();
+  if (recentView) recentView.refresh();
 
   if (!state.ref) {
     const npub = hexToNpub(pubkey);

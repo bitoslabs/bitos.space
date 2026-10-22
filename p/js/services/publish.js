@@ -30,7 +30,11 @@ export function buildPortfolioEvent(publicProfile, createdAt) {
   };
 }
 
-export async function publishProfile(profile, relays) {
+export async function publishProfile(
+  profile,
+  relays,
+  { onPhase = () => {} } = {}
+) {
   const validationError = validateProfile(profile);
   if (validationError) throw new Error(validationError);
 
@@ -39,6 +43,7 @@ export async function publishProfile(profile, relays) {
 
   const publicProfile = toPublicProfile(profile);
   const unsigned = buildPortfolioEvent(publicProfile);
+  onPhase("signing");
   const signed = await auth.signEvent(unsigned);
 
   if (!signed || !signed.id || !signed.sig) {
@@ -58,7 +63,10 @@ export async function publishProfile(profile, relays) {
     throw new Error("The signer returned an unexpected event.");
   }
 
-  const results = await publishToRelays(relays, signed);
+  onPhase("publishing", { done: 0, total: relays.length });
+  const results = await publishToRelays(relays, signed, {
+    onProgress: ({ done, total }) => onPhase("publishing", { done, total }),
+  });
   const accepted = results.filter((result) => result.ok).length;
   return { signed, results, accepted, publicProfile };
 }

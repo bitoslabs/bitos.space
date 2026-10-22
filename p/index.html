@@ -432,11 +432,12 @@
               View public page
             </button>
             <button class="btn btn-primary" type="button" data-editor-publish>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <span class="btn-spinner" aria-hidden="true"></span>
+              <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M12 2 4.5 5v6c0 5 3.2 8.6 7.5 10 4.3-1.4 7.5-5 7.5-10V5L12 2Z" />
                 <path d="m8.8 12 2.2 2.2 4.2-4.4" />
               </svg>
-              Publish
+              <span data-publish-label>Publish</span>
             </button>
           </div>
         </header>
@@ -919,7 +920,9 @@
               Save draft
             </button>
             <button class="btn btn-primary btn-sm" type="button" id="publish-btn">
+              <span class="btn-spinner" aria-hidden="true"></span>
               <svg
+                class="btn-icon"
                 width="14"
                 height="14"
                 viewBox="0 0 24 24"
@@ -931,7 +934,7 @@
                 <path d="M12 2 4.5 5v6c0 5 3.2 8.6 7.5 10 4.3-1.4 7.5-5 7.5-10V5L12 2Z" />
                 <path d="m8.8 12 2.2 2.2 4.2-4.4" />
               </svg>
-              Publish to Nostr
+              <span data-publish-label>Publish to Nostr</span>
             </button>
           </div>
         </footer>

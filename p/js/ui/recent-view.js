@@ -158,16 +158,32 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
     if (moreBtn) moreBtn.hidden = !nextUntil;
   }
 
+  function failedHosts(errors) {
+    const hosts = (errors || [])
+      .map((error) => {
+        try {
+          return new URL(error.relay).host;
+        } catch {
+          return "";
+        }
+      })
+      .filter(Boolean);
+    return Array.from(new Set(hosts)).slice(0, 3).join(", ");
+  }
+
   function showEmptyOrError(errors) {
     render();
     const totalRelays = getRelays().length;
     const allFailed = Boolean(
       errors && errors.length > 0 && errors.length >= totalRelays
     );
+    const hosts = failedHosts(errors);
     const message = allFailed
       ? "Discovery is unavailable on these relays."
       : errors && errors.length
-      ? "No public portfolios found. Some relays did not answer."
+      ? hosts
+        ? `No public portfolios found. No answer from ${hosts}.`
+        : "No public portfolios found. Some relays did not answer."
       : "No public portfolios found on these relays yet.";
     setStatus(message, { error: allFailed });
     if (errors && errors.length) {
@@ -238,9 +254,12 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
 
     render();
     writeCache(relays, items, nextUntil);
+    const hosts = failedHosts(result.errors);
     const suffix =
       result.errors && result.errors.length
-        ? " Some relays did not answer."
+        ? hosts
+          ? ` No answer from ${hosts}.`
+          : " Some relays did not answer."
         : "";
     setStatus(
       `${items.length} public portfolio${
@@ -282,7 +301,7 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
   }
 
   function refresh() {
-    if (loading) return;
+    if (!started || loading) return;
     clearCache(getRelays());
     items = [];
     nextUntil = null;

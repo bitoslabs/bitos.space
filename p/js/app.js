@@ -1,0 +1,749 @@
+/**
+ * Composition root. Wires views, services and the URL together.
+ */
+import { $, $$, esc, setHidden } from "./shared/dom.js";
+import { hexToNpub } from "./shared/bech32.js";
+import { profileName, shortKey } from "./shared/format.js";
+import { contactUrl } from "./shared/urls.js";
+import { copyToClipboard } from "./shared/clipboard.js";
+import { fetchJson } from "./shared/fetch.js";
+import { cleanRef, refFromPath, resolveRef } from "./nostr/identity.js";
+import { loadRelays } from "./data/storage.js";
+import { normalizeProfile } from "./data/profile-model.js";
+import * as auth from "./services/auth.js";
+import * as profileService from "./services/profile.js";
+import { initTheme } from "./ui/theme.js";
+import { createToast } from "./ui/toast.js";
+import { renderLandingSession } from "./ui/landing-view.js";
+import { renderState } from "./ui/state-view.js";
+import {
+  renderProfile as renderProfileView,
+  updateNip05Badges,
+} from "./ui/profile-view.js";
+import { createAuthDialog } from "./ui/auth-dialog.js";
+import { renderQr } from "./ui/qr.js";
+import { createEditorView } from "./ui/editor-view.js";
+
+const state = {
+  ref: "",
+  profile: null,
+  profilePubkey: "",
+  updatedAt: 0,
+  meta: null,
+  demo: false,
+  nip05Status: "none",
+  nip05FromRef: "",
+  nip05Checked: "",
+  emptyReason: "",
+  relays: loadRelays(),
+  loadToken: 0,
+  editRequested: false,
+  authReady: false,
+};
+
+let els = {};
+let toast = () => {};
+let authDialog = null;
+let editor = null;
+
+/* ---------------- views ---------------- */
+
+function setView(view) {
+  els.main.hidden = false;
+  setHidden(els.landing, view !== "landing");
+  setHidden(els.stateView, view !== "state");
+  setHidden(els.profile, view !== "profile");
+  setHidden(els.editorView, view !== "editor");
+  setHidden(els.profileNav, view !== "profile");
+  setHidden(els.shareBtn, view !== "profile");
+}
+
+function setChipRef(ref) {
+  els.urlChipPath.textContent = ref ? `/p/${ref}` : "/p/";
+  els.urlChip.title = ref ? profileService.canonicalUrl(ref) : "Canonical public URL";
+}
+
+function setCanonicalDisplay(ref, { title = "", description = "" } = {}) {
+  const url = profileService.canonicalUrl(ref);
+  setChipRef(ref);
+  const span = els.footerUrl.querySelector("span");
+  if (span) span.textContent = profileService.displayUrl(ref);
+  els.footerUrl.title = url;
+  const link = $("#canonical-link");
+  if (link) link.setAttribute("href", url);
+  const ogTitle = $("#og-title");
+  if (ogTitle && title) ogTitle.setAttribute("content", title);
+  const ogDescription = $("#og-description");
+  if (ogDescription && description) {
+    ogDescription.setAttribute("content", description.slice(0, 160));
+  }
+  document.title = title || "Portfolio — bitos.space";
+}
+
+function showLanding() {
+  state.demo = false;
+  state.ref = "";
+  setView("landing");
+  setHidden(els.demoBanner, true);
+  renderLandingSession(els.landingSession, auth.getState());
+  setChipRef("");
+  const span = els.footerUrl.querySelector("span");
+  if (span) span.textContent = "bitos.space/p/";
+  const link = $("#canonical-link");
+  if (link) link.setAttribute("href", profileService.canonicalUrl(""));
+  document.title = "Portfolio on Nostr — bitos.space";
+  maybeOpenRequestedEditor();
+}
+
+function showLoading(title, text) {
+  setView("state");
+  setHidden(els.demoBanner, !state.demo);
+  renderState(els.stateView, { mode: "loading", title, text });
+  setChipRef(state.ref);
+  document.title = "Portfolio — bitos.space";
+}
+
+function showRelayError() {
+  setView("state");
+  setHidden(els.demoBanner, !state.demo);
+  renderState(els.stateView, {
+    mode: "error",
+    title: "Relays are unavailable",
+    text: "The relays configured in this browser did not answer. Check your connection or change the relay list, then retry.",
+    actions: `<button class="btn btn-primary" type="button" data-action="retry">Retry</button>
+      <button class="btn btn-ghost" type="button" data-action="relay-settings">Relay settings</button>`,
+  });
+  setChipRef(state.ref);
+  document.title = "Relays unavailable — bitos.space";
+}
+
+function showResolveError(message) {
+  setView("state");
+  setHidden(els.demoBanner, true);
+  renderState(els.stateView, {
+    mode: "error",
+    title: "Profile not found",
+    text: esc(message || "That reference could not be resolved."),
+    actions: `<button class="btn btn-primary" type="button" data-action="retry">Retry</button>
+      <button class="btn btn-ghost" type="button" data-action="signin">Sign in to manage</button>
+      <a class="btn btn-ghost" href="./">Try another profile</a>`,
+  });
+  setChipRef(state.ref);
+  document.title = "Profile not found — bitos.space";
+}
+
+function renderProfile({ skipView = false } = {}) {
+  if (!state.profile || !state.profilePubkey) return;
+  if (!skipView) setView("profile");
+  setHidden(els.demoBanner, !state.demo);
+
+  const npub = hexToNpub(state.profilePubkey);
+  renderProfileView(els.profile, {
+    profile: state.profile,
+    pubkey: state.profilePubkey,
+    npub,
+    updatedAt: state.updatedAt,
+    isOwner: auth.isOwnerOf(state.profilePubkey),
+    isDemo: state.demo,
+  });
+
+  updateCanonical();
+  if (editor && editor.isOpen()) {
+    document.title = "Edit portfolio — bitos.space";
+  }
+  updateAuthUI();
+  updateNip05Badges(els.profile, normalizeStatus(state.nip05Status));
+  verifyNip05();
+  maybeOpenRequestedEditor();
+}
+
+function updateCanonical() {
+  const ref = profileService.canonicalRef(
+    state.profile,
+    state.profilePubkey,
+    state.nip05Status
+  );
+  setCanonicalDisplay(ref, {
+    title: `${profileName(state.profile)} — Portfolio — bitos.space`,
+    description: state.profile.headline || state.profile.bio || "",
+  });
+}
+
+function renderEmpty() {
+  const npub = hexToNpub(state.profilePubkey);
+  const knownName = state.meta ? profileName(state.meta) : "";
+  const title = knownName
+    ? `${knownName} hasn't published a portfolio yet`
+    : "No portfolio published for this key";
+  const owner = auth.isOwnerOf(state.profilePubkey);
+  let actions = "";
+  if (owner) {
+    actions += `<button class="btn btn-primary" type="button" data-action="create">Create your portfolio</button>`;
+  } else if (auth.getState().pubkey) {
+    actions += `<button class="btn btn-primary" type="button" data-action="signin">Switch signer</button>`;
+  } else {
+    actions += `<button class="btn btn-primary" type="button" data-action="signin">Sign in as the owner</button>`;
+  }
+  actions += `<button class="btn btn-ghost" type="button" data-action="copy" data-copy="${esc(
+    npub
+  )}">Copy npub</button>`;
+
+  const keyLine = `<div class="key-line">
+    <span class="npub-chip"><code>${esc(shortKey(npub))}</code></span>
+    ${
+      state.nip05FromRef
+        ? `<span class="npub-chip"><code>${esc(state.nip05FromRef)}</code></span>`
+        : ""
+    }
+  </div>`;
+
+  setView("state");
+  setHidden(els.demoBanner, !state.demo);
+  renderState(els.stateView, {
+    mode: "empty",
+    title,
+    text: `The key resolves, but no signed portfolio event was found on the configured relays. Only the key holder can publish one.${keyLine}`,
+    actions,
+  });
+  setCanonicalDisplay(npub, {
+    title: `${title} — bitos.space`,
+    description: "This Nostr key has not published a portfolio yet.",
+  });
+  maybeOpenRequestedEditor();
+}
+
+function updateAuthUI() {
+  const authState = auth.getState();
+  if (!authState.pubkey) {
+    els.authBtn.textContent = "Sign in";
+    els.authBtn.setAttribute("aria-label", "Sign in to manage your portfolio");
+  } else {
+    els.authBtn.textContent = "Account";
+    els.authBtn.setAttribute("aria-label", "Manage your Nostr signer");
+  }
+  if (els.landingSigninLabel) {
+    els.landingSigninLabel.textContent = authState.pubkey
+      ? "Manage signer"
+      : "Sign in to manage";
+  }
+}
+
+/* ---------------- NIP-05 ---------------- */
+
+function normalizeStatus(status) {
+  return status === "invalid" ? "unverified" : status;
+}
+
+async function verifyNip05() {
+  if (!state.profile) return;
+  const identifier = (state.profile.nip05 || "").trim();
+  if (!identifier || state.demo) {
+    state.nip05Status = "none";
+    updateNip05Badges(els.profile, "none");
+    updateCanonical();
+    return;
+  }
+  const checkKey = `${state.profilePubkey}|${identifier.toLowerCase()}`;
+  if (state.nip05Checked === checkKey) return;
+  state.nip05Checked = checkKey;
+
+  if (
+    state.nip05FromRef &&
+    state.nip05FromRef.toLowerCase() === identifier.toLowerCase()
+  ) {
+    state.nip05Status = "verified";
+    updateNip05Badges(els.profile, "verified");
+    updateCanonical();
+    return;
+  }
+
+  state.nip05Status = "pending";
+  updateNip05Badges(els.profile, "pending");
+  updateCanonical();
+
+  const result = await profileService.checkNip05(
+    state.profile,
+    state.profilePubkey,
+    state.nip05FromRef
+  );
+  if (checkKey !== state.nip05Checked) return;
+  state.nip05Status = normalizeStatus(result.status);
+  updateNip05Badges(els.profile, state.nip05Status);
+  updateCanonical();
+}
+
+/* ---------------- data loading ---------------- */
+
+async function route() {
+  const params = new URLSearchParams(location.search);
+  state.editRequested = params.get("edit") === "1";
+  if (params.get("demo") === "1") {
+    state.editRequested = false;
+    await loadDemo();
+    return;
+  }
+  const ref = cleanRef(params.get("ref") || refFromPath() || "");
+  state.demo = false;
+  if (!ref) {
+    showLanding();
+    maybeOpenRequestedEditor();
+    return;
+  }
+  await loadByRef(ref);
+}
+
+async function loadByRef(rawRef) {
+  const token = ++state.loadToken;
+  state.ref = cleanRef(rawRef);
+  state.profile = null;
+  state.profilePubkey = "";
+  state.updatedAt = 0;
+  state.meta = null;
+  state.demo = false;
+  state.nip05Status = "none";
+  state.nip05FromRef = "";
+  state.nip05Checked = "";
+  state.emptyReason = "";
+
+  showLoading(
+    "Resolving profile…",
+    `Looking up <span class="mono">${esc(state.ref)}</span>.`
+  );
+
+  let resolved;
+  try {
+    resolved = await resolveRef(state.ref);
+  } catch (error) {
+    if (token !== state.loadToken) return;
+    showResolveError((error && error.message) || "That reference could not be resolved.");
+    return;
+  }
+  if (token !== state.loadToken) return;
+
+  state.profilePubkey = resolved.pubkey;
+  state.nip05FromRef = resolved.nip05 || "";
+  const cached = profileService.loadCachedProfile(resolved.pubkey);
+
+  if (cached) {
+    state.profile = cached.profile;
+    state.updatedAt = cached.createdAt;
+    state.nip05Status =
+      state.profile.nip05 &&
+      state.nip05FromRef &&
+      state.profile.nip05.toLowerCase() === state.nip05FromRef.toLowerCase()
+        ? "verified"
+        : "pending";
+    renderProfile();
+  } else {
+    showLoading(
+      "Loading from relays…",
+      `Asking ${state.relays.length} relay${
+        state.relays.length === 1 ? "" : "s"
+      } for the newest signed portfolio event for <span class="mono">${esc(
+        shortKey(hexToNpub(resolved.pubkey))
+      )}</span>.`
+    );
+  }
+
+  const result = await profileService.loadProfileFromRelays(
+    resolved.pubkey,
+    state.relays
+  );
+  if (token !== state.loadToken) return;
+
+  if (result.profile && (!cached || result.createdAt >= cached.createdAt)) {
+    state.profile = result.profile;
+    state.updatedAt = result.createdAt;
+    state.nip05Status =
+      state.profile.nip05 &&
+      state.nip05FromRef &&
+      state.profile.nip05.toLowerCase() === state.nip05FromRef.toLowerCase()
+        ? "verified"
+        : "pending";
+    profileService.saveProfileCache(
+      resolved.pubkey,
+      state.profile,
+      state.updatedAt
+    );
+    renderProfile();
+    return;
+  }
+
+  if (state.profile) {
+    verifyNip05();
+    return;
+  }
+
+  if (result.meta) state.meta = result.meta;
+  if (result.allFailed) {
+    showRelayError();
+    return;
+  }
+  state.emptyReason = "not-published";
+  renderEmpty();
+}
+
+async function loadDemo() {
+  const token = ++state.loadToken;
+  state.demo = true;
+  state.ref = "";
+  state.profile = null;
+  state.profilePubkey = "";
+  state.updatedAt = 0;
+  state.meta = null;
+  state.emptyReason = "";
+  state.nip05Status = "none";
+  state.nip05FromRef = "";
+  state.nip05Checked = "";
+
+  showLoading("Loading sample portfolio…", "Illustrative data only.");
+  try {
+    const data = await fetchJson("./data/demo.json", 5000);
+    if (!data || !data.profile || !/^[0-9a-f]{64}$/i.test(data.pubkey)) {
+      throw new Error("Sample data is malformed.");
+    }
+    if (token !== state.loadToken) return;
+    state.profilePubkey = data.pubkey.toLowerCase();
+    state.profile = normalizeProfile(data.profile);
+    state.updatedAt = Number(data.created_at) || 0;
+    state.emptyReason = "";
+    renderProfile();
+  } catch (error) {
+    if (token !== state.loadToken) return;
+    setView("state");
+    setHidden(els.demoBanner, false);
+    renderState(els.stateView, {
+      mode: "error",
+      title: "Sample unavailable",
+      text: esc((error && error.message) || "Could not load the sample portfolio."),
+      actions: `<a class="btn btn-primary" href="./">Open a profile</a>`,
+    });
+    setChipRef("");
+    document.title = "Sample unavailable — bitos.space";
+  }
+}
+
+/* ---------------- auth / editor ---------------- */
+
+function handleAuthChange() {
+  if (authDialog) authDialog.render();
+  updateAuthUI();
+  const authState = auth.getState();
+
+  if (editor && editor.isOpen()) {
+    if (!authState.pubkey || (state.profilePubkey && !auth.isOwnerOf(state.profilePubkey))) {
+      editor.close();
+    } else if (state.profile) {
+      renderProfile({ skipView: true });
+    }
+  } else if (state.profile && !els.profile.hidden) {
+    renderProfile();
+  } else if (!els.stateView.hidden && state.emptyReason === "not-published") {
+    renderEmpty();
+  }
+
+  renderLandingSession(els.landingSession, authState);
+  maybeOpenRequestedEditor();
+}
+
+function openEditor() {
+  if (state.demo) {
+    toast("Sample data is read-only. Sign in to create your own portfolio.", true);
+    return;
+  }
+  const authState = auth.getState();
+  if (!authState.pubkey) {
+    authDialog.open();
+    return;
+  }
+  const target = state.profilePubkey || authState.pubkey;
+  if (target !== authState.pubkey) {
+    toast(
+      "This page belongs to a different key. Sign in with the owner key to edit it.",
+      true
+    );
+    return;
+  }
+  if (!state.profile) state.profilePubkey = authState.pubkey;
+  editor.open(state.profile, authState.pubkey, {
+    updatedAt: state.updatedAt,
+  });
+  setView("editor");
+  document.title = "Edit portfolio — bitos.space";
+  setEditParam(true);
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function handlePublished(result) {
+  const pubkey = auth.getState().pubkey;
+  if (!pubkey) return;
+  state.profile = normalizeProfile(result.publicProfile);
+  state.profilePubkey = pubkey;
+  state.updatedAt = result.signed.created_at || Math.floor(Date.now() / 1000);
+  state.demo = false;
+  state.nip05Status = "pending";
+  state.nip05Checked = "";
+  profileService.saveProfileCache(pubkey, state.profile, state.updatedAt);
+  renderProfile({ skipView: editor && editor.isOpen() });
+  updateAuthUI();
+
+  if (!state.ref) {
+    const npub = hexToNpub(pubkey);
+    const url = new URL(location.href);
+    url.searchParams.set("ref", npub);
+    url.searchParams.delete("demo");
+    history.replaceState(null, "", url.toString());
+    state.ref = npub;
+  }
+}
+
+function handleEditorClosed() {
+  clearEditParam();
+  if (state.profile) {
+    setView("profile");
+    renderProfile({ skipView: true });
+  } else if (state.ref && state.profilePubkey) {
+    renderEmpty();
+  } else {
+    state.profilePubkey = "";
+    updateAuthUI();
+    showLanding();
+  }
+  renderLandingSession(els.landingSession, auth.getState());
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function setEditParam(enabled) {
+  const url = new URL(location.href);
+  if (enabled) url.searchParams.set("edit", "1");
+  else url.searchParams.delete("edit");
+  history.replaceState(null, "", url.toString());
+}
+
+function clearEditParam() {
+  state.editRequested = false;
+  setEditParam(false);
+}
+
+function maybeOpenRequestedEditor() {
+  if (!state.editRequested || !state.authReady) return;
+  const authState = auth.getState();
+  if (!authState.pubkey) {
+    state.editRequested = false;
+    setEditParam(false);
+    toast("Sign in as the owner to edit this portfolio.", true);
+    return;
+  }
+  if (state.profilePubkey && !auth.isOwnerOf(state.profilePubkey)) {
+    state.editRequested = false;
+    setEditParam(false);
+    toast(
+      "This portfolio belongs to a different key. Sign in with the owner key to edit it.",
+      true
+    );
+    return;
+  }
+  if (state.ref && !state.profile && state.emptyReason !== "not-published") {
+    return;
+  }
+  if (!state.ref && !state.profilePubkey) {
+    state.editRequested = false;
+    openEditor();
+    return;
+  }
+  if (!state.profilePubkey) return;
+  state.editRequested = false;
+  openEditor();
+}
+
+/* ---------------- actions ---------------- */
+
+function currentCanonicalRef() {
+  if (state.profile) {
+    return profileService.canonicalRef(
+      state.profile,
+      state.profilePubkey,
+      state.nip05Status
+    );
+  }
+  return state.profilePubkey ? hexToNpub(state.profilePubkey) : state.ref;
+}
+
+async function shareProfile() {
+  const ref = currentCanonicalRef();
+  const url = profileService.canonicalUrl(ref);
+  const title = state.profile
+    ? `${profileName(state.profile)} — Portfolio`
+    : "Nostr portfolio";
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, url });
+      return;
+    } catch (error) {
+      if (error && error.name === "AbortError") return;
+    }
+  }
+  const ok = await copyToClipboard(url);
+  toast(ok ? "Link copied." : "Could not copy the link.", !ok);
+}
+
+async function copyAction(target, text) {
+  const ok = await copyToClipboard(text);
+  if (ok) {
+    target.classList.add("done");
+    window.setTimeout(() => target.classList.remove("done"), 1400);
+  }
+  toast(ok ? "Copied." : "Could not copy.", !ok);
+}
+
+function openQr() {
+  const url = profileService.canonicalUrl(currentCanonicalRef());
+  els.profileQrUrl.textContent = url;
+  if (!renderQr(els.profileQr, url)) {
+    toast("QR rendering is unavailable. Copy the link instead.", true);
+  }
+  if (typeof els.qrDialog.showModal === "function") {
+    if (!els.qrDialog.open) els.qrDialog.showModal();
+  } else {
+    els.qrDialog.setAttribute("open", "");
+  }
+}
+
+async function onActionClick(event) {
+  const target = event.target.closest("[data-action]");
+  if (!target) return;
+  const action = target.getAttribute("data-action");
+  if (action === "share") {
+    shareProfile();
+  } else if (action === "copy") {
+    copyAction(target, target.getAttribute("data-copy") || "");
+  } else if (action === "copy-link") {
+    copyAction(target, profileService.canonicalUrl(currentCanonicalRef()));
+  } else if (action === "share-qr") {
+    openQr();
+  } else if (action === "edit" || action === "create") {
+    openEditor();
+  } else if (action === "contact") {
+    const url = contactUrl(target.getAttribute("data-url") || "");
+    if (url) location.href = url;
+    else toast("No contact link is configured.", true);
+  } else if (action === "signin") {
+    authDialog.open();
+  } else if (action === "relay-settings") {
+    authDialog.open({ showRelays: true });
+  } else if (action === "retry") {
+    route();
+  }
+}
+
+/* ---------------- events / boot ---------------- */
+
+function cacheElements() {
+  els = {
+    main: $("#main"),
+    landing: $("#landing-view"),
+    stateView: $("#state-view"),
+    profile: $("#profile-view"),
+    demoBanner: $("#demo-banner"),
+    urlChip: $("#url-chip"),
+    urlChipPath: $("#url-chip-path"),
+    profileNav: $("#profile-nav"),
+    shareBtn: $("#share-btn"),
+    authBtn: $("#auth-btn"),
+    themeBtn: $("#theme-btn"),
+    landingSession: $("#landing-session"),
+    lookupForm: $("#lookup-form"),
+    lookupInput: $("#lookup-input"),
+    landingSignin: $("#landing-signin"),
+    landingSigninLabel: $("#landing-signin-label"),
+    footerUrl: $("#footer-url"),
+    signinDialog: $("#signin-dialog"),
+    editorView: $("#editor-view"),
+    qrDialog: $("#qr-dialog"),
+    profileQr: $("#profile-qr"),
+    profileQrUrl: $("#profile-qr-url"),
+    copyProfileQr: $("#copy-profile-qr"),
+    toast: $("#toast"),
+  };
+}
+
+function bindEvents() {
+  els.lookupForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const value = cleanRef(els.lookupInput.value);
+    if (!value) {
+      toast("Enter an npub, NIP-05 address, or alias.", true);
+      return;
+    }
+    const url = new URL(location.href);
+    url.search = "";
+    url.searchParams.set("ref", value);
+    location.assign(url.toString());
+  });
+
+  els.landingSignin.addEventListener("click", () => authDialog.open());
+  els.shareBtn.addEventListener("click", shareProfile);
+  els.copyProfileQr.addEventListener("click", () => {
+    copyAction(els.copyProfileQr, els.profileQrUrl.textContent);
+  });
+  els.authBtn.addEventListener("click", () => authDialog.open());
+
+  document.addEventListener("click", onActionClick);
+  $$("[data-close]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const dialog = document.getElementById(button.getAttribute("data-close"));
+      if (!dialog) return;
+      if (dialog.open) dialog.close();
+      else dialog.removeAttribute("open");
+    });
+  });
+  [els.signinDialog, els.qrDialog].forEach((dialog) => {
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  });
+}
+
+function init() {
+  cacheElements();
+  toast = createToast(els.toast);
+  initTheme(els.themeBtn);
+
+  authDialog = createAuthDialog({
+    dialog: els.signinDialog,
+    toast,
+    onAuthChanged: handleAuthChange,
+    onRelaysChanged: (list) => {
+      state.relays = list;
+    },
+  });
+  editor = createEditorView({
+    root: els.editorView,
+    toast,
+    onPublished: handlePublished,
+    onClosed: handleEditorClosed,
+    onRelaysChanged: (list) => {
+      state.relays = list;
+    },
+  });
+
+  bindEvents();
+  auth.onChange(handleAuthChange);
+  route();
+  auth
+    .initAuth()
+    .then(() => {
+      state.authReady = true;
+      maybeOpenRequestedEditor();
+    })
+    .catch(() => {
+      state.authReady = true;
+      maybeOpenRequestedEditor();
+    });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}

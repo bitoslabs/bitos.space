@@ -1,0 +1,43 @@
+/**
+ * Application constants shared by the profile app.
+ */
+export const KIND = 30078;
+export const D_TAG = "bitos.space:portfolio:v1";
+
+export const NIP46_KIND = 24133;
+export const NIP46_PERMS = "sign_event:30078";
+export const NIP46_APPROVAL_TIMEOUT = 120_000;
+export const NIP46_CONNECT_TIMEOUT = 180_000;
+export const NIP46_SHORT_TIMEOUT = 10_000;
+
+export const RELAY_QUERY_TIMEOUT = 5_000;
+export const RELAY_PUBLISH_TIMEOUT = 6_000;
+export const RELAY_SUBSCRIBE_TIMEOUT = 8_000;
+
+export const DEFAULT_RELAYS = [
+  "wss://relay.damus.io",
+  "wss://nos.lol",
+  "wss://relay.primal.net",
+];
+
+export const CLIENT_METADATA = {
+  name: "BitOS Portfolio",
+  url: "https://bitos.space/p/",
+};
+
+export const AVAILABILITY = {
+  available: { label: "Available", dot: "" },
+  open: { label: "Open to work", dot: "" },
+  select: { label: "Select projects only", dot: "amber" },
+  unavailable: { label: "Not available", dot: "muted" },
+};
+
+export const STORAGE = {
+  theme: "theme",
+  signer: "bitos.signer",
+  pubkey: "bitos.pubkey",
+  relays: "bitos.relays",
+  auth: "bitos.auth.v2",
+  draft: (pubkey) => `bitos.profile.draft.${pubkey}`,
+  cache: (pubkey) => `bitos.profile.cache.${pubkey}`,
+};

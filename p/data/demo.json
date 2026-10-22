@@ -1,0 +1,126 @@
+{
+  "pubkey": "4f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa",
+  "created_at": 1792454400,
+  "profile": {
+    "version": 1,
+    "name": "Alice Chanthavong",
+    "displayName": "Alice",
+    "nip05": "",
+    "headline": "Product engineer & UX systems designer — I design and build calm, decentralized tools for real organizations.",
+    "bio": "I work with clinics, schools and small teams in Laos on software that has to survive bad connectivity and low trust in platforms. My focus is UX systems: bilingual interfaces, offline-first flows, and design tokens a local team can maintain after I leave.\n\nThis sample shows the personal portfolio shape: selected projects, evidence grades, and a contact path. The real version is signed by the key that owns the page.",
+    "location": "Vientiane, Laos",
+    "timezone": "UTC+7",
+    "languages": [
+      "EN",
+      "ລາວ",
+      "TH"
+    ],
+    "availability": {
+      "status": "available",
+      "note": "Available for select projects"
+    },
+    "avatar": "",
+    "banner": "",
+    "contact": {
+      "label": "Request contact",
+      "url": "mailto:hello@example.com"
+    },
+    "links": [
+      {
+        "label": "GitHub",
+        "url": "https://github.com/bitoslabs"
+      },
+      {
+        "label": "Writing",
+        "url": "https://example.com/notes"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Design systems",
+        "evidence": "issuer",
+        "issuer": "Interaction Guild"
+      },
+      {
+        "name": "Product engineering",
+        "evidence": "issuer",
+        "issuer": "Interaction Guild"
+      },
+      {
+        "name": "Service design",
+        "evidence": "self",
+        "issuer": ""
+      },
+      {
+        "name": "Data visualization",
+        "evidence": "self",
+        "issuer": ""
+      }
+    ],
+    "projects": [
+      {
+        "id": "pr_mekong",
+        "title": "Mekong Care — patient record platform",
+        "summary": "Offline-tolerant records for three rural clinics: Laos-first bilingual UI, Lightning-based micro-payments for lab results, and a care-team inbox built on Nostr private groups.",
+        "description": "A record system designed for intermittent power and connectivity. The field team needed a queue that survives a dropped connection and a review flow that does not lose paper handoffs.",
+        "role": "UX architecture & front-end",
+        "contribution": "60% · design system, patient flows",
+        "year": "2025 — 2026",
+        "tags": [
+          "Healthcare",
+          "Design system",
+          "Offline-first",
+          "Nostr"
+        ],
+        "link": "https://example.com/mekong-care",
+        "media": "",
+        "public": true
+      },
+      {
+        "id": "pr_saisana",
+        "title": "Saisana School — enrollment & payments",
+        "summary": "Parent-facing enrollment flow with Lightning fee payment and bilingual notices.",
+        "description": "One enrollment form for families who mostly use a phone, with printable fallbacks for the school office.",
+        "role": "Product design",
+        "contribution": "640 enrollments processed · 0 lost forms",
+        "year": "2024 — 2025",
+        "tags": [
+          "Education",
+          "Payments",
+          "Bilingual"
+        ],
+        "link": "",
+        "media": "",
+        "public": true
+      },
+      {
+        "id": "pr_sabai",
+        "title": "Sabai Marketplace",
+        "summary": "Peer-to-peer storefronts for local sellers; escrow UX and dispute flows.",
+        "description": "A small commerce prototype exploring how a buyer and seller can agree on a handoff without a central marketplace holding the money.",
+        "role": "Interaction design",
+        "contribution": "35% · escrow and dispute flows",
+        "year": "2024",
+        "tags": [
+          "Marketplace",
+          "Escrow UX",
+          "P2P"
+        ],
+        "link": "",
+        "media": "",
+        "public": true
+      }
+    ],
+    "credentials": [
+      {
+        "id": "cr_92md",
+        "title": "Advanced UX Systems",
+        "issuer": "Interaction Guild",
+        "year": "2025",
+        "status": "Valid · expires 2027",
+        "note": "Shared only with people I choose — recruiters, clients, organizations.",
+        "public": true
+      }
+    ]
+  }
+}

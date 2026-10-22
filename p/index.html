@@ -8,12 +8,7 @@
     <meta
       name="theme-color"
       content="#0b0b0b"
-      media="(prefers-color-scheme: dark)"
-    />
-    <meta
-      name="theme-color"
-      content="#f8f9fa"
-      media="(prefers-color-scheme: light)"
+      id="theme-color"
     />
     <title>Portfolio — bitos.space</title>
     <meta
@@ -44,18 +39,24 @@
       rel="stylesheet"
       href="https://fonts.mts.la/fonts/chanthavong/chanthavong.css"
     />
-    <link rel="stylesheet" href="css/tokens.css?v=1" />
-    <link rel="stylesheet" href="css/header.css?v=1" />
-    <link rel="stylesheet" href="css/landing.css?v=1" />
-    <link rel="stylesheet" href="css/profile.css?v=1" />
-    <link rel="stylesheet" href="css/editor.css?v=1" />
-    <link rel="stylesheet" href="css/responsive.css?v=1" />
+    <link rel="stylesheet" href="css/tokens.css?v=3" />
+    <link rel="stylesheet" href="css/header.css?v=3" />
+    <link rel="stylesheet" href="css/landing.css?v=3" />
+    <link rel="stylesheet" href="css/profile.css?v=3" />
+    <link rel="stylesheet" href="css/editor.css?v=3" />
+    <link rel="stylesheet" href="css/responsive.css?v=3" />
     <link rel="modulepreload" href="vendor/nostr-tools.js" />
     <link rel="icon" href="../assets/bee.svg" type="image/svg+xml" />
     <link rel="icon" href="../favicon.ico" sizes="any" />
     <script>
-      if (localStorage.getItem("theme") === "light") {
-        document.documentElement.classList.add("light-mode");
+      try {
+        const saved = localStorage.getItem("theme");
+        const light =
+          saved === "light" ||
+          (!saved && window.matchMedia("(prefers-color-scheme: light)").matches);
+        if (light) document.documentElement.classList.add("light-mode");
+      } catch {
+        /* storage unavailable */
       }
     </script>
   </head>
@@ -112,10 +113,11 @@
             class="icon-btn"
             id="theme-btn"
             type="button"
-            aria-label="Toggle color theme"
+            aria-label="Switch to light theme"
             title="Toggle theme"
           >
             <svg
+              class="theme-icon theme-icon--moon"
               width="16"
               height="16"
               viewBox="0 0 24 24"
@@ -125,6 +127,19 @@
               aria-hidden="true"
             >
               <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8Z" />
+            </svg>
+            <svg
+              class="theme-icon theme-icon--sun"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
             </svg>
           </button>
           <button
@@ -1044,6 +1059,6 @@
     </noscript>
 
     <script src="vendor/qrcode.js"></script>
-    <script type="module" src="js/app.js?v=1"></script>
+    <script type="module" src="js/app.js?v=3"></script>
   </body>
 </html>

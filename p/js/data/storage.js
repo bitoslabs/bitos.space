@@ -41,7 +41,15 @@ function readJson(key) {
 }
 
 export function getTheme() {
-  return readRaw(STORAGE.theme) === "light" ? "light" : "dark";
+  const stored = readRaw(STORAGE.theme);
+  if (stored === "light" || stored === "dark") return stored;
+  try {
+    return window.matchMedia("(prefers-color-scheme: light)").matches
+      ? "light"
+      : "dark";
+  } catch {
+    return "dark";
+  }
 }
 
 export function setTheme(theme) {

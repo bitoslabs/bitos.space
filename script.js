@@ -580,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function draw(time) {
             ctx.clearRect(0, 0, width, height);
-            const isLight = document.body.classList.contains('light-mode');
+            const isLight = document.documentElement.classList.contains('light-mode');
             for (let k = 0; k < dots.length; k++) {
                 const d = dots[k];
                 const ox = d.x + Math.sin(time * 0.0005 + d.y * 0.015) * 2.5;
@@ -702,28 +702,56 @@ document.addEventListener('DOMContentLoaded', () => {
     // Theme Setup
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeIcon = themeToggleBtn.querySelector('use');
+    const themeColorMeta = document.getElementById('theme-color');
+    const themeMedia = window.matchMedia('(prefers-color-scheme: light)');
 
-    function setTheme(isLight) {
-        if (isLight) {
-            document.body.classList.add('light-mode');
-            themeIcon.setAttribute('href', ICON_SPRITE + '#sun');
-            localStorage.setItem('theme', 'light');
-        } else {
-            document.body.classList.remove('light-mode');
-            themeIcon.setAttribute('href', ICON_SPRITE + '#moon');
-            localStorage.setItem('theme', 'dark');
+    function storedTheme() {
+        try {
+            const saved = localStorage.getItem('theme');
+            return saved === 'light' || saved === 'dark' ? saved : null;
+        } catch {
+            return null;
         }
     }
 
-    // Check saved theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        setTheme(true);
+    function currentTheme() {
+        return document.documentElement.classList.contains('light-mode') ? 'light' : 'dark';
     }
 
+    function setTheme(theme, persist = true) {
+        const isLight = theme === 'light';
+        document.documentElement.classList.toggle('light-mode', isLight);
+        themeIcon.setAttribute('href', ICON_SPRITE + (isLight ? '#sun' : '#moon'));
+        themeToggleBtn.setAttribute(
+            'aria-label',
+            isLight ? 'Switch to dark theme' : 'Switch to light theme'
+        );
+        if (themeColorMeta) {
+            themeColorMeta.setAttribute('content', isLight ? '#f8f9fa' : '#0b0b0b');
+        }
+        if (persist) {
+            try {
+                localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            } catch {
+                /* storage unavailable */
+            }
+        }
+    }
+
+    setTheme(storedTheme() || (themeMedia.matches ? 'light' : 'dark'), false);
+
     themeToggleBtn.addEventListener('click', () => {
-        const isLight = document.body.classList.contains('light-mode');
-        setTheme(!isLight);
+        setTheme(currentTheme() === 'light' ? 'dark' : 'light');
+    });
+
+    themeMedia.addEventListener('change', (event) => {
+        if (!storedTheme()) setTheme(event.matches ? 'light' : 'dark', false);
+    });
+
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'theme') {
+            setTheme(storedTheme() || (themeMedia.matches ? 'light' : 'dark'), false);
+        }
     });
 
     // Feature Card Spotlight Effect

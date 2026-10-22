@@ -502,7 +502,7 @@ html.light-mode .meta-links {
   text-align: center;
   color: var(--text-muted);
   font-size: 13.5px;
-  background: rgba(255, 255, 255, 0.015);
+  background: var(--surface-1);
 }
 
 .section-empty .btn {
@@ -615,9 +615,9 @@ html.light-mode .tile:hover {
   gap: 6px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #f8f9fa;
   background: rgba(11, 11, 11, 0.62);
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--r-full);
   padding: 5px 11px;
   backdrop-filter: blur(10px);
@@ -625,11 +625,11 @@ html.light-mode .tile:hover {
 }
 
 .case-badge svg {
-  color: var(--ok);
+  color: #34d399;
 }
 
 .case-badge .lao {
-  color: var(--text-secondary);
+  color: rgba(248, 249, 250, 0.72);
   font-weight: 400;
 }
 
@@ -639,9 +639,9 @@ html.light-mode .tile:hover {
   right: 12px;
   font-family: var(--font-mono);
   font-size: 10.5px;
-  color: var(--text-secondary);
+  color: #f8f9fa;
   background: rgba(11, 11, 11, 0.62);
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--r-full);
   padding: 5px 10px;
   backdrop-filter: blur(10px);
@@ -922,7 +922,7 @@ html.light-mode .mini-hex {
   font-weight: 600;
   color: var(--ok);
   background: var(--ok-soft);
-  border: 1px solid rgba(52, 211, 153, 0.3);
+  border: 1px solid var(--ok-line);
   border-radius: var(--r-full);
   padding: 4px 10px;
   margin-bottom: 12px;

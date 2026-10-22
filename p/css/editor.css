@@ -534,7 +534,7 @@ html.light-mode .publish-row {
 }
 
 .toast.is-error {
-  border-color: rgba(248, 113, 113, 0.4);
+  border-color: var(--danger-line);
 }
 
 .noscript {
@@ -936,13 +936,13 @@ html.light-mode .nip05-panel {
 .my-portfolio-status.is-ok {
   color: var(--ok);
   background: var(--ok-soft);
-  border-color: rgba(52, 211, 153, 0.3);
+  border-color: var(--ok-line);
 }
 
 .my-portfolio-status.is-error {
   color: var(--danger);
   background: var(--danger-soft);
-  border-color: rgba(248, 113, 113, 0.3);
+  border-color: var(--danger-line);
 }
 
 .my-portfolio-url {

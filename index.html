@@ -7,13 +7,19 @@
     <meta
       name="theme-color"
       content="#0b0b0b"
-      media="(prefers-color-scheme: dark)"
+      id="theme-color"
     />
-    <meta
-      name="theme-color"
-      content="#f8f9fa"
-      media="(prefers-color-scheme: light)"
-    />
+    <script>
+      try {
+        const saved = localStorage.getItem("theme");
+        const light =
+          saved === "light" ||
+          (!saved && window.matchMedia("(prefers-color-scheme: light)").matches);
+        if (light) document.documentElement.classList.add("light-mode");
+      } catch {
+        /* storage unavailable */
+      }
+    </script>
     <title>bitos.space - Decentralized Enterprise Network</title>
     <meta
       name="description"
@@ -98,7 +104,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/fonts/stylesheet.css" />
-    <link rel="stylesheet" href="styles.css?v=15" />
+    <link rel="stylesheet" href="styles.css?v=16" />
 
     <!-- title tab icon -->
     <link rel="icon" href="assets/bee.svg" type="image/svg+xml" />
@@ -106,12 +112,6 @@
     <link rel="apple-touch-icon" href="assets/icons/bee-icon-180.png" />
   </head>
   <body>
-    <!-- Theme: dark is the default; restore a saved light preference before paint -->
-    <script>
-      if (localStorage.getItem("theme") === "light") {
-        document.body.classList.add("light-mode");
-      }
-    </script>
     <a class="skip-link" href="#home" data-i18n="skip_link"
       >Skip to content</a
     >
@@ -154,7 +154,7 @@
             <button
               id="theme-toggle"
               class="nav-tool"
-              aria-label="Toggle color theme"
+              aria-label="Switch to light theme"
               title="Toggle theme"
             >
               <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#moon"></use></svg>
@@ -1145,6 +1145,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=12"></script>
+    <script src="script.js?v=13"></script>
   </body>
 </html>

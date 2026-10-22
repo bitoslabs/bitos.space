@@ -39,7 +39,8 @@ signs in and edits it; visitors get a read-only public page.
   a public lightbox for visitors.
 - Three portfolio styles — Spotlight/Obsidian, Editorial/Parchment and
   Dossier/Signal — are published in the same event and change both layout and
-  palette, including `theme-color`.
+  palette, including `theme-color`. Visitors can switch dark/light without
+  losing the owner's layout.
 - Supports pretty URLs (`/p/{ref}`) through `_redirects`.
 
 Source layout under `p/`:

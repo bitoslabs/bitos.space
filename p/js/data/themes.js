@@ -13,6 +13,7 @@ export const THEMES = [
     layoutName: "Spotlight",
     mode: "dark",
     color: "#0b0b0b",
+    colors: { dark: "#0b0b0b", light: "#f4f2fb" },
   },
   {
     id: "parchment",
@@ -22,6 +23,7 @@ export const THEMES = [
     layoutName: "Editorial",
     mode: "light",
     color: "#f4efe6",
+    colors: { light: "#f4efe6", dark: "#17120e" },
   },
   {
     id: "signal",
@@ -31,6 +33,7 @@ export const THEMES = [
     layoutName: "Dossier",
     mode: "dark",
     color: "#05070a",
+    colors: { dark: "#05070a", light: "#f4f8fa" },
   },
 ];
 

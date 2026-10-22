@@ -5,8 +5,45 @@
    then overrides the palette below.
    ============================================================ */
 
-html[data-portfolio-theme] #theme-btn {
-  display: none;
+/* ============ Obsidian ============ */
+html[data-portfolio-theme="obsidian"].light-mode {
+  color-scheme: light;
+
+  --bg: #f4f2fb;
+  --bg-elevated: #fbf9ff;
+  --surface-solid: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.84);
+  --card-bg-solid: #ffffff;
+
+  --text-primary: #1b1726;
+  --text-secondary: #5b526e;
+  --text-muted: #8a819c;
+
+  --nostr: #7c3aed;
+  --nostr-bright: #6d28d9;
+  --nostr-soft: rgba(124, 58, 237, 0.09);
+  --nostr-line: rgba(124, 58, 237, 0.24);
+
+  --brand-color: #b45309;
+  --brand-soft: rgba(180, 83, 9, 0.1);
+  --brand-line: rgba(180, 83, 9, 0.24);
+
+  --ok: #047857;
+  --ok-soft: rgba(4, 120, 87, 0.1);
+  --ok-line: rgba(4, 120, 87, 0.28);
+  --warn: #b45309;
+  --danger: #b91c1c;
+  --danger-soft: rgba(185, 28, 28, 0.08);
+  --danger-line: rgba(185, 28, 28, 0.28);
+
+  --nav-bg: rgba(244, 242, 251, 0.86);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(27, 23, 38, 0.13);
+  --glass-shadow: 0 10px 30px rgba(40, 30, 70, 0.1);
+  --border-strong: rgba(27, 23, 38, 0.2);
+  --input-bg: rgba(27, 23, 38, 0.04);
+  --surface-1: rgba(27, 23, 38, 0.035);
+  --surface-2: rgba(27, 23, 38, 0.06);
 }
 
 /* ============ Parchment ============ */
@@ -203,6 +240,134 @@ html[data-portfolio-theme="parchment"] ::selection {
   color: #211b14;
 }
 
+/* ============ Parchment dark ============ */
+html[data-portfolio-theme="parchment"]:not(.light-mode) {
+  color-scheme: dark;
+
+  --bg: #17120e;
+  --bg-elevated: #1e1712;
+  --surface-solid: #231b15;
+  --card-bg: rgba(35, 27, 21, 0.78);
+  --card-bg-solid: #231b15;
+
+  --text-primary: #f4eadb;
+  --text-secondary: #c5b4a0;
+  --text-muted: #907f6c;
+
+  --nostr: #ea8a4a;
+  --nostr-bright: #fdba74;
+  --nostr-soft: rgba(234, 138, 74, 0.11);
+  --nostr-line: rgba(234, 138, 74, 0.28);
+
+  --brand-color: #f0b45a;
+  --brand-soft: rgba(240, 180, 90, 0.1);
+  --brand-line: rgba(240, 180, 90, 0.26);
+
+  --ok: #86efac;
+  --ok-soft: rgba(134, 239, 172, 0.1);
+  --ok-line: rgba(134, 239, 172, 0.26);
+  --warn: #fbbf24;
+  --danger: #fb7185;
+  --danger-soft: rgba(251, 113, 133, 0.09);
+  --danger-line: rgba(251, 113, 133, 0.28);
+
+  --nav-bg: rgba(23, 18, 14, 0.86);
+  --glass-bg: rgba(35, 27, 21, 0.6);
+  --glass-border: rgba(244, 234, 219, 0.13);
+  --glass-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  --border-strong: rgba(244, 234, 219, 0.2);
+  --input-bg: rgba(244, 234, 219, 0.05);
+  --surface-1: rgba(244, 234, 219, 0.04);
+  --surface-2: rgba(244, 234, 219, 0.08);
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) body::before {
+  background:
+    radial-gradient(720px 420px at 10% -6%, rgba(234, 138, 74, 0.16), transparent 62%),
+    radial-gradient(640px 420px at 96% 4%, rgba(240, 180, 90, 0.1), transparent 60%),
+    radial-gradient(900px 560px at 50% 116%, rgba(234, 138, 74, 0.08), transparent 64%);
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) body::after {
+  opacity: 0.06;
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) .hex-inner {
+  background: linear-gradient(160deg, #2b2018 0%, #17100b 100%);
+  color: #fdba74;
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) .case-media {
+  background: #1b140f;
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) .art-a {
+  background:
+    radial-gradient(440px 250px at 82% -18%, rgba(234, 138, 74, 0.42), transparent 62%),
+    radial-gradient(380px 270px at 8% 118%, rgba(240, 180, 90, 0.24), transparent 58%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(244, 234, 219, 0.035) 0,
+      rgba(244, 234, 219, 0.035) 1px,
+      transparent 1px,
+      transparent 10px
+    ),
+    linear-gradient(150deg, #2b1e15 0%, #1a120d 60%, #21150e 100%);
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) .art-b {
+  background:
+    radial-gradient(440px 270px at 14% -20%, rgba(240, 180, 90, 0.26), transparent 60%),
+    radial-gradient(400px 250px at 88% 120%, rgba(234, 138, 74, 0.38), transparent 62%),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(244, 234, 219, 0.03) 0,
+      rgba(244, 234, 219, 0.03) 1px,
+      transparent 1px,
+      transparent 9px
+    ),
+    linear-gradient(150deg, #291c13 0%, #18110c 55%, #22150e 100%);
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) .art-c {
+  background:
+    radial-gradient(440px 250px at 50% -30%, rgba(234, 138, 74, 0.36), transparent 62%),
+    radial-gradient(360px 220px at 22% 120%, rgba(240, 180, 90, 0.18), transparent 58%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(244, 234, 219, 0.03) 0,
+      rgba(244, 234, 219, 0.03) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    linear-gradient(160deg, #2a1d14 0%, #170f0a 100%);
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) .case-badge,
+html[data-portfolio-theme="parchment"]:not(.light-mode) .case-year {
+  color: #f4eadb;
+  background: rgba(10, 7, 5, 0.66);
+  border-color: rgba(244, 234, 219, 0.16);
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) .case-badge svg {
+  color: #86efac;
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) .mini-hex {
+  background: linear-gradient(140deg, #2b2018, #17100b);
+  color: #fdba74;
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) .footer {
+  background: linear-gradient(180deg, transparent, rgba(234, 138, 74, 0.05));
+}
+
+html[data-portfolio-theme="parchment"]:not(.light-mode) ::selection {
+  background: rgba(234, 138, 74, 0.3);
+  color: #fff7ed;
+}
+
 /* ============ Signal ============ */
 html[data-portfolio-theme="signal"] {
   color-scheme: dark;
@@ -382,6 +547,80 @@ html[data-portfolio-theme="signal"] .tag {
 html[data-portfolio-theme="signal"] ::selection {
   background: rgba(34, 211, 238, 0.28);
   color: #e6f7ff;
+}
+
+/* ============ Signal light ============ */
+html[data-portfolio-theme="signal"].light-mode {
+  color-scheme: light;
+
+  --bg: #f4f8fa;
+  --bg-elevated: #ffffff;
+  --surface-solid: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.82);
+  --card-bg-solid: #ffffff;
+
+  --text-primary: #0b1a20;
+  --text-secondary: #42606d;
+  --text-muted: #6d8794;
+
+  --nostr: #0891b2;
+  --nostr-bright: #0e7490;
+  --nostr-soft: rgba(8, 145, 178, 0.09);
+  --nostr-line: rgba(8, 145, 178, 0.24);
+
+  --brand-color: #4d7c0f;
+  --brand-soft: rgba(77, 124, 15, 0.1);
+  --brand-line: rgba(77, 124, 15, 0.24);
+
+  --ok: #4d7c0f;
+  --ok-soft: rgba(77, 124, 15, 0.1);
+  --ok-line: rgba(77, 124, 15, 0.26);
+  --warn: #a16207;
+  --danger: #be123c;
+  --danger-soft: rgba(190, 18, 60, 0.08);
+  --danger-line: rgba(190, 18, 60, 0.26);
+
+  --nav-bg: rgba(244, 248, 250, 0.86);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(11, 26, 32, 0.13);
+  --glass-shadow: 0 10px 30px rgba(11, 26, 32, 0.08);
+  --border-strong: rgba(11, 26, 32, 0.2);
+  --input-bg: rgba(11, 26, 32, 0.04);
+  --surface-1: rgba(11, 26, 32, 0.035);
+  --surface-2: rgba(11, 26, 32, 0.06);
+}
+
+html[data-portfolio-theme="signal"].light-mode body::before {
+  background:
+    radial-gradient(720px 420px at 12% -4%, rgba(8, 145, 178, 0.12), transparent 62%),
+    radial-gradient(640px 420px at 96% 6%, rgba(77, 124, 15, 0.06), transparent 60%),
+    radial-gradient(900px 560px at 50% 116%, rgba(8, 145, 178, 0.07), transparent 64%),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 3px,
+      rgba(8, 145, 178, 0.02) 3px,
+      rgba(8, 145, 178, 0.02) 4px
+    );
+}
+
+html[data-portfolio-theme="signal"].light-mode .hex-inner {
+  background: linear-gradient(160deg, #e6f6fa 0%, #ffffff 100%);
+  color: #0e7490;
+}
+
+html[data-portfolio-theme="signal"].light-mode .mini-hex {
+  background: linear-gradient(140deg, #e6f6fa, #ffffff);
+  color: #0e7490;
+}
+
+html[data-portfolio-theme="signal"].light-mode .footer {
+  background: linear-gradient(180deg, transparent, rgba(8, 145, 178, 0.04));
+}
+
+html[data-portfolio-theme="signal"].light-mode ::selection {
+  background: rgba(8, 145, 178, 0.2);
+  color: #0b1a20;
 }
 
 /* ============ theme picker ============ */

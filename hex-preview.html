@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hex background preview</title>
+<meta name="robots" content="noindex" />
+<style>
+  :root {
+    --bg-color: #0b0b0b;
+    --bg-elevated: #121214;
+    --text-primary: #f8f9fa;
+    --text-secondary: #a0a0a0;
+    --brand-color: #ffc107;
+    --accent-primary: #f7931a;
+    --brand-line: rgba(255, 193, 7, 0.24);
+    --brand-soft: rgba(255, 193, 7, 0.1);
+    --card-bg: rgba(22, 22, 24, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --r-md: 14px;
+    --hex-size: 36px;
+    --hex-opacity: 0.45;
+    --hex-color: var(--brand-line);
+  }
+  html.light-mode {
+    --bg-color: #f8f9fa;
+    --bg-elevated: #ffffff;
+    --text-primary: #0b0b0b;
+    --text-secondary: #55585e;
+    --brand-color: #b45309;
+    --accent-primary: #c2410c;
+    --brand-line: rgba(194, 65, 12, 0.22);
+    --brand-soft: rgba(247, 147, 26, 0.1);
+    --card-bg: #ffffff;
+    --glass-border: rgba(11, 11, 11, 0.1);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  .stage {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .hex-fade, .hex-fade-full {
+    position: absolute;
+    inset: 0;
+  }
+  .hex-fade {
+    -webkit-mask-image: radial-gradient(75% 55% at 50% 20%, #000 0%, transparent 80%);
+    mask-image: radial-gradient(75% 55% at 50% 20%, #000 0%, transparent 80%);
+  }
+  .hex-fade-full { -webkit-mask-image: none; mask-image: none; }
+  .hex {
+    position: absolute;
+    inset: 0;
+    background-color: var(--hex-color);
+    opacity: var(--hex-opacity);
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+  }
+  /* 120x120 tile: one hex per cell, 16px vertical gap */
+  .hex--grid {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='30,0 90,0 120,52 90,104 30,104 0,52' fill='%23000'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='30,0 90,0 120,52 90,104 30,104 0,52' fill='%23000'/%3E%3C/svg%3E");
+    -webkit-mask-size: var(--hex-size) var(--hex-size);
+    mask-size: var(--hex-size) var(--hex-size);
+  }
+  /* 180x104 tile: staggered rows, 52px row pitch, 0.95 scale for an even gap */
+  .hex--honeycomb {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='180' height='104' viewBox='0 0 180 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000'%3E%3Cpolygon points='-28.5,-49.4 28.5,-49.4 57,0 28.5,49.4 -28.5,49.4 -57,0'/%3E%3Cpolygon points='151.5,-49.4 208.5,-49.4 237,0 208.5,49.4 151.5,49.4 123,0'/%3E%3Cpolygon points='61.5,2.6 118.5,2.6 147,52 118.5,101.4 61.5,101.4 33,52'/%3E%3Cpolygon points='-28.5,54.6 28.5,54.6 57,104 28.5,153.4 -28.5,153.4 -57,104'/%3E%3Cpolygon points='151.5,54.6 208.5,54.6 237,104 208.5,153.4 151.5,153.4 123,104'/%3E%3C/g%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg width='180' height='104' viewBox='0 0 180 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000'%3E%3Cpolygon points='-28.5,-49.4 28.5,-49.4 57,0 28.5,49.4 -28.5,49.4 -57,0'/%3E%3Cpolygon points='151.5,-49.4 208.5,-49.4 237,0 208.5,49.4 151.5,49.4 123,0'/%3E%3Cpolygon points='61.5,2.6 118.5,2.6 147,52 118.5,101.4 61.5,101.4 33,52'/%3E%3Cpolygon points='-28.5,54.6 28.5,54.6 57,104 28.5,153.4 -28.5,153.4 -57,104'/%3E%3Cpolygon points='151.5,54.6 208.5,54.6 237,104 208.5,153.4 151.5,153.4 123,104'/%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-size: calc(var(--hex-size) * 1.5) calc(var(--hex-size) * 0.8667);
+    mask-size: calc(var(--hex-size) * 1.5) calc(var(--hex-size) * 0.8667);
+  }
+  .glow {
+    position: absolute;
+    left: 50%;
+    top: 18%;
+    width: 620px;
+    height: 620px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(247, 147, 26, 0.22), transparent 65%);
+    pointer-events: none;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 {
+    font-size: 30px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+  }
+  p.lead { margin: 0 0 32px; color: var(--text-secondary); }
+  .panel {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-md);
+    padding: 20px;
+    backdrop-filter: blur(12px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px 24px;
+  }
+  label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 6px; }
+  input[type="range"] { width: 100%; accent-color: var(--brand-color); }
+  select, button {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 13px;
+  }
+  button { cursor: pointer; }
+  .value { float: right; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  pre {
+    margin: 20px 0 0;
+    padding: 16px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--glass-border);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .hint { font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="glow"></div>
+  <div class="hex-fade" id="fade"><div class="hex hex--honeycomb" id="hexEl"></div></div>
+</div>
+
+<div class="wrap">
+  <h1>Hex background — small size</h1>
+  <p class="lead">Tune the values, then copy the CSS into <code>styles.css</code>. Pattern is a mask, so it tints with the theme.</p>
+
+  <section class="panel">
+    <div>
+      <label>Size <span class="value" id="sizeOut">36px</span></label>
+      <input type="range" id="size" min="16" max="96" step="2" value="36" />
+    </div>
+    <div>
+      <label>Opacity <span class="value" id="opacityOut">0.45</span></label>
+      <input type="range" id="opacity" min="0.05" max="1" step="0.05" value="0.45" />
+    </div>
+    <div>
+      <label>Tint</label>
+      <select id="tint">
+        <option value="var(--brand-line)">brand-line</option>
+        <option value="var(--brand-soft)">brand-soft</option>
+        <option value="var(--accent-primary)">accent-primary</option>
+        <option value="var(--text-primary)">text-primary</option>
+      </select>
+    </div>
+    <div>
+      <label>Pattern</label>
+      <select id="pattern">
+        <option value="honeycomb">Honeycomb (staggered)</option>
+        <option value="grid">Grid (one hex per cell)</option>
+      </select>
+    </div>
+    <div>
+      <label>Fade</label>
+      <button id="fadeBtn" type="button">Radial fade: on</button>
+    </div>
+    <div>
+      <label>Theme</label>
+      <button id="themeBtn" type="button">Dark</button>
+    </div>
+  </section>
+
+  <pre id="out"></pre>
+  <p class="hint">Honeycomb fixes the vertical rhythm: rows are 52 units apart and staggered, so the 16px gap in the 120×120 tile disappears. The tile is 180×104 with hexes scaled to 0.95 for an even gap. Recommendation: 28–44px, opacity 0.3–0.5 on <code>brand-line</code>, radial fade on. Smaller than 24px turns into noise behind text; larger than 64px reads as a logo motif.</p>
+</div>
+
+<script>
+  const MASK_GRID = "url(\"data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='30,0 90,0 120,52 90,104 30,104 0,52' fill='%23000'/%3E%3C/svg%3E\")";
+  const MASK_HONEYCOMB = `url("data:image/svg+xml,%3Csvg width='180' height='104' viewBox='0 0 180 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000'%3E%3Cpolygon points='-28.5,-49.4 28.5,-49.4 57,0 28.5,49.4 -28.5,49.4 -57,0'/%3E%3Cpolygon points='151.5,-49.4 208.5,-49.4 237,0 208.5,49.4 151.5,49.4 123,0'/%3E%3Cpolygon points='61.5,2.6 118.5,2.6 147,52 118.5,101.4 61.5,101.4 33,52'/%3E%3Cpolygon points='-28.5,54.6 28.5,54.6 57,104 28.5,153.4 -28.5,153.4 -57,104'/%3E%3Cpolygon points='151.5,54.6 208.5,54.6 237,104 208.5,153.4 151.5,153.4 123,104'/%3E%3C/g%3E%3C/svg%3E")`;
+
+  const root = document.documentElement;
+  const stage = document.getElementById("fade");
+  const hexEl = document.getElementById("hexEl");
+  const size = document.getElementById("size");
+  const opacity = document.getElementById("opacity");
+  const tint = document.getElementById("tint");
+  const pattern = document.getElementById("pattern");
+  const fadeBtn = document.getElementById("fadeBtn");
+  const themeBtn = document.getElementById("themeBtn");
+  const out = document.getElementById("out");
+  const sizeOut = document.getElementById("sizeOut");
+  const opacityOut = document.getElementById("opacityOut");
+  let faded = true;
+
+  function render() {
+    root.style.setProperty("--hex-size", size.value + "px");
+    root.style.setProperty("--hex-opacity", opacity.value);
+    root.style.setProperty("--hex-color", tint.value);
+    sizeOut.textContent = size.value + "px";
+    opacityOut.textContent = Number(opacity.value).toFixed(2);
+    stage.className = faded ? "hex-fade" : "hex-fade-full";
+
+    const honeycomb = pattern.value === "honeycomb";
+    hexEl.className = "hex hex--" + pattern.value;
+
+    const mask = honeycomb ? MASK_HONEYCOMB : MASK_GRID;
+    const sz = size.value;
+    const maskSize = honeycomb
+      ? "calc(" + sz + "px * 1.5) calc(" + sz + "px * 0.8667)"
+      : sz + "px " + sz + "px";
+
+    out.textContent = [
+      ".hex-field {",
+      "  position: fixed;",
+      "  inset: 0;",
+      "  z-index: -1;",
+      "  pointer-events: none;",
+      "  background-color: " + tint.value + ";",
+      "  opacity: " + Number(opacity.value).toFixed(2) + ";",
+      "  -webkit-mask-image: " + mask + ";",
+      "  mask-image: " + mask + ";",
+      "  -webkit-mask-size: " + maskSize + ";",
+      "  mask-size: " + maskSize + ";",
+      "  -webkit-mask-repeat: repeat;",
+      "  mask-repeat: repeat;",
+      "}"
+    ].join("\n");
+  }
+
+  size.addEventListener("input", render);
+  opacity.addEventListener("input", render);
+  tint.addEventListener("change", render);
+  pattern.addEventListener("change", render);
+
+  fadeBtn.addEventListener("click", () => {
+    faded = !faded;
+    fadeBtn.textContent = "Radial fade: " + (faded ? "on" : "off");
+    render();
+  });
+
+  themeBtn.addEventListener("click", () => {
+    const light = root.classList.toggle("light-mode");
+    themeBtn.textContent = light ? "Light" : "Dark";
+  });
+
+  render();
+</script>
+</body>
+</html>

@@ -646,6 +646,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Parallax for the hero honeycomb backplate
+    const heroHex = document.querySelector('.hero-hex');
+    const heroVisual = heroHex ? heroHex.parentElement : null;
+    if (heroVisual && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        let hexRaf = null;
+        let pointerX = 0;
+        let pointerY = 0;
+        const applyHexOffset = () => {
+            hexRaf = null;
+            const rect = heroVisual.getBoundingClientRect();
+            const offsetX = ((pointerX - rect.left) / rect.width - 0.5) * 14;
+            const offsetY = ((pointerY - rect.top) / rect.height - 0.5) * 14;
+            heroHex.style.transform =
+                'translate(calc(-50% + ' + offsetX.toFixed(2) + 'px), calc(-50% + ' + offsetY.toFixed(2) + 'px))';
+        };
+        heroVisual.addEventListener('pointermove', e => {
+            pointerX = e.clientX;
+            pointerY = e.clientY;
+            if (!hexRaf) hexRaf = window.requestAnimationFrame(applyHexOffset);
+        });
+        heroVisual.addEventListener('pointerleave', () => {
+            if (hexRaf) {
+                window.cancelAnimationFrame(hexRaf);
+                hexRaf = null;
+            }
+            heroHex.style.transform = 'translate(-50%, -50%)';
+        });
+    }
+
     // Illustrative relay stream console
     const streamLines = document.getElementById('stream-lines');
     if (streamLines) {

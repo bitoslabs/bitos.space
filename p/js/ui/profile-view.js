@@ -11,6 +11,7 @@ import {
 } from "../shared/format.js";
 import { contactUrl, httpUrl } from "../shared/urls.js";
 import { isDataImage, isDataVideo } from "../shared/media.js";
+import { layoutForTheme } from "../data/themes.js";
 
 function iconSvg(name) {
   const icons = {
@@ -193,6 +194,7 @@ function metaRow(icon, label, value) {
  */
 export function renderProfile(container, model) {
   const { profile, pubkey, npub, updatedAt, isOwner, isDemo } = model;
+  container.setAttribute("data-layout", layoutForTheme(profile.theme));
   const name = profile.name || profile.displayName || npub;
   const avatar = httpUrl(profile.avatar);
   const banner = httpUrl(profile.banner);
@@ -347,7 +349,7 @@ export function renderProfile(container, model) {
     )
     .join("");
 
-  const portfolioSection = `<div class="section" id="portfolio">
+  const portfolioSection = `<div class="section section--portfolio" id="portfolio">
     <div class="wrap">
       <div class="section-head">
         <div class="head-flex">
@@ -422,7 +424,7 @@ export function renderProfile(container, model) {
     .join("");
 
   const gallerySection = gallery.length || isOwner
-    ? `<div class="section" id="gallery">
+    ? `<div class="section section--gallery" id="gallery">
         <div class="wrap">
           <div class="section-head">
             <div class="head-flex">
@@ -461,7 +463,7 @@ export function renderProfile(container, model) {
     : "";
 
   const hasSkills = Boolean(skills.length || credentials.length);
-  const skillsSection = `<div class="section" id="skills">
+  const skillsSection = `<div class="section section--skills" id="skills">
     <div class="wrap">
       <div class="section-head">
         <div class="kicker">03 — Skills &amp; evidence</div>
@@ -504,7 +506,7 @@ export function renderProfile(container, model) {
     )
     .join("");
 
-  const aboutSection = `<div class="section" id="about">
+  const aboutSection = `<div class="section section--about" id="about">
     <div class="wrap">
       <div class="section-head">
         <div class="kicker">04 — About</div>

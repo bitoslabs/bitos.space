@@ -138,22 +138,44 @@ html[data-portfolio-theme="parchment"] .case-media {
 
 html[data-portfolio-theme="parchment"] .art-a {
   background:
-    radial-gradient(420px 240px at 82% -18%, rgba(154, 52, 18, 0.34), transparent 62%),
-    radial-gradient(360px 260px at 8% 118%, rgba(217, 119, 6, 0.24), transparent 58%),
-    linear-gradient(150deg, #f6ead8 0%, #efe1cb 60%, #ead7bd 100%);
+    radial-gradient(440px 250px at 82% -18%, rgba(154, 52, 18, 0.42), transparent 62%),
+    radial-gradient(380px 270px at 8% 118%, rgba(217, 119, 6, 0.32), transparent 58%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(64, 48, 32, 0.055) 0,
+      rgba(64, 48, 32, 0.055) 1px,
+      transparent 1px,
+      transparent 10px
+    ),
+    linear-gradient(150deg, #f6e8d3 0%, #eedcc0 60%, #e6cfa9 100%);
 }
 
 html[data-portfolio-theme="parchment"] .art-b {
   background:
-    radial-gradient(420px 260px at 14% -20%, rgba(217, 119, 6, 0.26), transparent 60%),
-    radial-gradient(380px 240px at 88% 120%, rgba(154, 52, 18, 0.28), transparent 62%),
-    linear-gradient(150deg, #f3e8d6 0%, #eee0c8 55%, #e7d3b8 100%);
+    radial-gradient(440px 270px at 14% -20%, rgba(217, 119, 6, 0.34), transparent 60%),
+    radial-gradient(400px 250px at 88% 120%, rgba(154, 52, 18, 0.36), transparent 62%),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(64, 48, 32, 0.05) 0,
+      rgba(64, 48, 32, 0.05) 1px,
+      transparent 1px,
+      transparent 9px
+    ),
+    linear-gradient(150deg, #f3e5cf 0%, #ecd9ba 55%, #e2c9a3 100%);
 }
 
 html[data-portfolio-theme="parchment"] .art-c {
   background:
-    radial-gradient(420px 240px at 50% -30%, rgba(154, 52, 18, 0.24), transparent 62%),
-    linear-gradient(160deg, #f7efe2 0%, #eadfcd 100%);
+    radial-gradient(440px 250px at 50% -30%, rgba(154, 52, 18, 0.34), transparent 62%),
+    radial-gradient(360px 220px at 22% 120%, rgba(217, 119, 6, 0.24), transparent 58%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(64, 48, 32, 0.045) 0,
+      rgba(64, 48, 32, 0.045) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    linear-gradient(160deg, #f7ebd8 0%, #e7d3b2 100%);
 }
 
 html[data-portfolio-theme="parchment"] .case-badge,
@@ -407,8 +429,10 @@ html[data-portfolio-theme="signal"] ::selection {
 }
 
 .theme-swatch {
-  display: flex;
-  height: 56px;
+  display: grid;
+  height: 64px;
+  padding: 5px;
+  gap: 3px;
   overflow: hidden;
   border: 1px solid var(--glass-border);
   border-radius: var(--r-sm);
@@ -416,46 +440,94 @@ html[data-portfolio-theme="signal"] ::selection {
 
 .theme-swatch i {
   display: block;
-  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 2px;
+}
+
+.theme-swatch--obsidian {
+  grid-template-columns: 1.6fr 1fr 1fr;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  background: #0b0b0b;
 }
 
 .theme-swatch--obsidian i:nth-child(1) {
-  background: #0b0b0b;
+  grid-row: span 2;
+  background: #8b5cf6;
 }
 .theme-swatch--obsidian i:nth-child(2) {
   background: #8b5cf6;
+  opacity: 0.55;
 }
 .theme-swatch--obsidian i:nth-child(3) {
   background: #ffc107;
 }
 .theme-swatch--obsidian i:nth-child(4) {
+  grid-column: 2 / 4;
   background: #f8f9fa;
+  opacity: 0.26;
+}
+.theme-swatch--obsidian i:nth-child(5),
+.theme-swatch--obsidian i:nth-child(6) {
+  display: none;
+}
+
+.theme-swatch--parchment {
+  grid-template-columns: 1fr 1.9fr;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  background: #f5f0e6;
 }
 
 .theme-swatch--parchment i:nth-child(1) {
-  background: #f5f0e6;
-}
-.theme-swatch--parchment i:nth-child(2) {
+  grid-row: span 2;
   background: #9a3412;
 }
+.theme-swatch--parchment i:nth-child(2) {
+  background: #211b14;
+  opacity: 0.8;
+}
 .theme-swatch--parchment i:nth-child(3) {
-  background: #d97706;
+  background: #211b14;
+  opacity: 0.42;
 }
 .theme-swatch--parchment i:nth-child(4) {
-  background: #211b14;
+  grid-column: 1 / -1;
+  background: #d97706;
+  opacity: 0.55;
+}
+.theme-swatch--parchment i:nth-child(5),
+.theme-swatch--parchment i:nth-child(6) {
+  display: none;
+}
+
+.theme-swatch--signal {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  background: #05070a;
 }
 
 .theme-swatch--signal i:nth-child(1) {
-  background: #05070a;
+  background: #22d3ee;
 }
 .theme-swatch--signal i:nth-child(2) {
   background: #22d3ee;
+  opacity: 0.55;
 }
 .theme-swatch--signal i:nth-child(3) {
   background: #a3e635;
+  opacity: 0.85;
 }
 .theme-swatch--signal i:nth-child(4) {
+  background: #22d3ee;
+  opacity: 0.3;
+}
+.theme-swatch--signal i:nth-child(5) {
   background: #e6f7ff;
+  opacity: 0.22;
+}
+.theme-swatch--signal i:nth-child(6) {
+  background: #a3e635;
+  opacity: 0.45;
 }
 
 .theme-card-text {
@@ -470,6 +542,19 @@ html[data-portfolio-theme="signal"] ::selection {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.theme-name b {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .theme-desc {

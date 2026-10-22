@@ -8,21 +8,27 @@ export const THEMES = [
   {
     id: "obsidian",
     name: "Obsidian",
-    description: "Dark violet glass with amber highlights. The signature look.",
+    description: "Spotlight layout: featured bento, sticky details, dark violet glass.",
+    layout: "showcase",
+    layoutName: "Spotlight",
     mode: "dark",
     color: "#0b0b0b",
   },
   {
     id: "parchment",
     name: "Parchment",
-    description: "Warm editorial paper, serif headings and rust accents.",
+    description: "Editorial layout: single-column paper, alternating work rows.",
+    layout: "editorial",
+    layoutName: "Editorial",
     mode: "light",
     color: "#f4efe6",
   },
   {
     id: "signal",
     name: "Signal",
-    description: "High-contrast terminal dark with cyan and lime signals.",
+    description: "Dossier layout: compact terminal grid and a dense media wall.",
+    layout: "dossier",
+    layoutName: "Dossier",
     mode: "dark",
     color: "#05070a",
   },
@@ -42,4 +48,8 @@ export function normalizeTheme(value) {
 export function themeMeta(value) {
   const id = normalizeTheme(value);
   return THEMES.find((theme) => theme.id === id) || THEMES[0];
+}
+
+export function layoutForTheme(value) {
+  return themeMeta(value).layout;
 }

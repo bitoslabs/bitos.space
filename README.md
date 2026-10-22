@@ -37,8 +37,9 @@ signs in and edits it; visitors get a read-only public page.
 - Drafts and preferences live in `localStorage`; publishing is always explicit.
 - Gallery supports compressed inline image uploads and direct video URLs, with
   a public lightbox for visitors.
-- Three portfolio themes — Obsidian, Parchment and Signal — are published in the
-  same event and drive the page palette and `theme-color`.
+- Three portfolio styles — Spotlight/Obsidian, Editorial/Parchment and
+  Dossier/Signal — are published in the same event and change both layout and
+  palette, including `theme-color`.
 - Supports pretty URLs (`/p/{ref}`) through `_redirects`.
 
 Source layout under `p/`:

@@ -45,6 +45,8 @@
     <link rel="stylesheet" href="css/profile.css?v=3" />
     <link rel="stylesheet" href="css/editor.css?v=3" />
     <link rel="stylesheet" href="css/responsive.css?v=3" />
+    <link rel="stylesheet" href="css/gallery.css?v=1" />
+    <link rel="stylesheet" href="css/themes.css?v=1" />
     <link rel="modulepreload" href="vendor/nostr-tools.js" />
     <link rel="icon" href="../assets/bee.svg" type="image/svg+xml" />
     <link rel="icon" href="../favicon.ico" sizes="any" />
@@ -104,6 +106,7 @@
 
         <nav class="navlinks" id="profile-nav" aria-label="Profile sections">
           <a href="#portfolio">Portfolio</a>
+          <a href="#gallery" id="nav-gallery" hidden>Gallery</a>
           <a href="#skills">Skills</a>
           <a href="#about">About</a>
         </nav>
@@ -418,6 +421,15 @@
             type="button"
             role="tab"
             aria-selected="false"
+            data-tab="gallery"
+          >
+            Gallery
+          </button>
+          <button
+            class="editor-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
             data-tab="skills"
           >
             Skills
@@ -498,6 +510,54 @@
                   <input id="f-banner" type="url" placeholder="https://…" />
                 </label>
               </div>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-head">
+                <div>
+                  <h3>Appearance</h3>
+                  <span class="fine"
+                    >Published with your portfolio. Visitors see this theme on
+                    your public page, including the browser theme-color.</span
+                  >
+                </div>
+              </div>
+              <div class="theme-picker" role="radiogroup" aria-label="Portfolio theme">
+                <label class="theme-card">
+                  <input type="radio" name="portfolio-theme" value="obsidian" />
+                  <span class="theme-swatch theme-swatch--obsidian" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i>
+                  </span>
+                  <span class="theme-card-text">
+                    <span class="theme-name">Obsidian</span>
+                    <span class="theme-desc">Dark violet glass with amber accents.</span>
+                  </span>
+                </label>
+                <label class="theme-card">
+                  <input type="radio" name="portfolio-theme" value="parchment" />
+                  <span class="theme-swatch theme-swatch--parchment" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i>
+                  </span>
+                  <span class="theme-card-text">
+                    <span class="theme-name">Parchment</span>
+                    <span class="theme-desc">Warm editorial paper with rust ink.</span>
+                  </span>
+                </label>
+                <label class="theme-card">
+                  <input type="radio" name="portfolio-theme" value="signal" />
+                  <span class="theme-swatch theme-swatch--signal" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i>
+                  </span>
+                  <span class="theme-card-text">
+                    <span class="theme-name">Signal</span>
+                    <span class="theme-desc">Terminal dark with cyan and lime signals.</span>
+                  </span>
+                </label>
+              </div>
+              <p class="fine">
+                The theme is color and type only — your content, media and
+                signed data stay the same.
+              </p>
             </div>
 
             <div class="editor-section">
@@ -584,6 +644,76 @@
                 </button>
               </div>
               <div id="projects-editor" class="repeat-list"></div>
+            </div>
+          </section>
+
+          <!-- GALLERY TAB -->
+          <section class="editor-panel" data-panel="gallery" hidden>
+            <div class="editor-section">
+              <div class="editor-section-head">
+                <div>
+                  <h3>Gallery</h3>
+                  <span class="fine"
+                    >Images are compressed in your browser and embedded in the
+                    signed event. Video stays a direct public URL because it
+                    does not fit inside a relay event.</span
+                  >
+                </div>
+              </div>
+
+              <div class="gallery-drop" id="gallery-drop">
+                <div class="gallery-drop-text">
+                  <strong>Drop images here</strong>
+                  <span>JPEG, PNG, WebP, GIF or AVIF. Each image is resized and compressed before publishing; animated GIFs are stored as a still frame.</span>
+                </div>
+                <div class="hero-actions">
+                  <button class="btn btn-ghost btn-sm" id="gallery-upload" type="button">
+                    Upload images
+                  </button>
+                  <button class="btn btn-ghost btn-sm" id="gallery-add-image-url" type="button">
+                    Add image URL
+                  </button>
+                  <button class="btn btn-ghost btn-sm" id="gallery-add-video" type="button">
+                    Add video link
+                  </button>
+                </div>
+                <input id="gallery-file" type="file" accept="image/*" multiple hidden />
+              </div>
+
+              <div class="media-budget" id="gallery-budget"></div>
+              <div id="gallery-editor" class="repeat-list gallery-editor"></div>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-head">
+                <h3>How media is stored</h3>
+              </div>
+              <ul class="media-notes">
+                <li>
+                  <strong>Uploaded images</strong> travel inside your NIP-78
+                  event as compressed data URLs, so they work without a media
+                  server. Keep the total under the inline budget shown above,
+                  or use a hosted image URL for originals and animation.
+                </li>
+                <li>
+                  <strong>Video</strong> needs a direct MP4 or WebM URL. Upload
+                  the file to a media host you control — for example a Blossom
+                  or NIP-96 server — then paste the link here.
+                </li>
+                <li>
+                  <strong>Alt text and captions</strong> make the gallery
+                  usable for screen readers and give visitors context before
+                  they open an item.
+                </li>
+                <li>
+                  Relays enforce different event size limits. If publishing
+                  fails, remove an inline image or switch it to a hosted URL.
+                </li>
+                <li>
+                  Unchecked items stay in this browser as drafts and are never
+                  included in the signed public event.
+                </li>
+              </ul>
             </div>
           </section>
 
@@ -1049,6 +1179,42 @@
       </div>
     </dialog>
 
+    <!-- ==================== LIGHTBOX ==================== -->
+    <dialog class="dialog dialog--lightbox" id="lightbox-dialog" aria-labelledby="lightbox-title">
+      <div class="lightbox">
+        <div class="lightbox-top">
+          <div class="lightbox-heading">
+            <span class="lightbox-count" id="lightbox-count" aria-live="polite"></span>
+            <h2 id="lightbox-title">Gallery</h2>
+          </div>
+          <button
+            class="dialog-close"
+            type="button"
+            data-close="lightbox-dialog"
+            aria-label="Close gallery"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="lightbox-stage" id="lightbox-stage"></div>
+        <div class="lightbox-foot">
+          <button class="lightbox-nav" id="lightbox-prev" type="button" aria-label="Previous item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+          <p class="lightbox-caption" id="lightbox-caption"></p>
+          <button class="lightbox-nav" id="lightbox-next" type="button" aria-label="Next item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </dialog>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <noscript>
@@ -1059,6 +1225,6 @@
     </noscript>
 
     <script src="vendor/qrcode.js"></script>
-    <script type="module" src="js/app.js?v=4"></script>
+    <script type="module" src="js/app.js?v=5"></script>
   </body>
 </html>

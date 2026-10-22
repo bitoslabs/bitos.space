@@ -10,6 +10,7 @@ import {
   timeAgo,
 } from "../shared/format.js";
 import { contactUrl, httpUrl } from "../shared/urls.js";
+import { isDataImage, isDataVideo } from "../shared/media.js";
 
 function iconSvg(name) {
   const icons = {
@@ -37,8 +38,30 @@ function iconSvg(name) {
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>',
     check:
       '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>',
+    play: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10-6.5-10-6.5Z"/></svg>',
+    image:
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4 17 5-5 4 4 3-3 4 4"/></svg>',
   };
   return icons[name] || "";
+}
+
+function safeGallerySource(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
+  if (raw.startsWith("./") || raw.startsWith("../")) return raw;
+  return httpUrl(raw) || (isDataImage(raw) || isDataVideo(raw) ? raw : "");
+}
+
+export function publicGallery(profile) {
+  return ((profile && profile.gallery) || [])
+    .filter((item) => item && item.public !== false)
+    .map((item) => ({
+      ...item,
+      url: safeGallerySource(item.url),
+      poster: httpUrl(item.poster),
+    }))
+    .filter((item) => item.url);
 }
 
 function availabilityInfo(profile) {
@@ -114,6 +137,38 @@ function renderProjectCard(project, index, span2, isDemo) {
   </article>`;
 }
 
+function renderGalleryItem(item, index) {
+  const video = item.type === "video";
+  const labeled = item.caption || item.alt || (video ? "Video" : "Image");
+  const poster = httpUrl(item.poster);
+  const media = video
+    ? poster
+      ? `<img src="${esc(poster)}" alt="" loading="lazy" decoding="async">`
+      : `<div class="gallery-art" aria-hidden="true"></div>`
+    : `<img src="${esc(item.url)}" alt="${esc(
+        item.alt || item.caption || ""
+      )}" loading="lazy" decoding="async">`;
+
+  return `<button class="gallery-tile${video ? " is-video" : ""}" type="button"
+    data-action="gallery-open" data-index="${index}"
+    aria-label="${video ? "Play video" : "Open image"}: ${esc(labeled)}">
+    <span class="gallery-media">${media}
+      ${
+        video
+          ? `<span class="gallery-play" aria-hidden="true">${iconSvg(
+              "play"
+            )}</span><span class="gallery-kind">Video</span>`
+          : ""
+      }
+    </span>
+    ${
+      item.caption
+        ? `<span class="gallery-cap">${esc(item.caption)}</span>`
+        : ""
+    }
+  </button>`;
+}
+
 function metaRow(icon, label, value) {
   return `<div class="meta-row">
     <span class="meta-ic${icon === "layers" ? " amber" : ""}" aria-hidden="true">${iconSvg(
@@ -153,6 +208,7 @@ export function renderProfile(container, model) {
     .map((item) => ({ label: item.label, url: httpUrl(item.url) }))
     .filter((item) => item.url);
   const availability = availabilityInfo(profile);
+  const gallery = publicGallery(profile);
 
   const statusBits = [];
   if (availability) {
@@ -365,11 +421,50 @@ export function renderProfile(container, model) {
     )
     .join("");
 
+  const gallerySection = gallery.length || isOwner
+    ? `<div class="section" id="gallery">
+        <div class="wrap">
+          <div class="section-head">
+            <div class="head-flex">
+              <div>
+                <div class="kicker">02 — Gallery</div>
+                <h2>Images and motion, chosen by the owner</h2>
+              </div>
+              ${
+                gallery.length
+                  ? `<button class="btn btn-ghost btn-sm" type="button" data-action="gallery-open" data-index="0">${iconSvg(
+                      "image"
+                    )} View all ${gallery.length}</button>`
+                  : ""
+              }
+            </div>
+          </div>
+          ${
+            gallery.length
+              ? `<div class="gallery-grid count-${
+                  gallery.length === 1
+                    ? "1"
+                    : gallery.length === 2
+                    ? "2"
+                    : "many"
+                }">${gallery
+                  .map((item, index) => renderGalleryItem(item, index))
+                  .join("")}</div>`
+              : `<div class="section-empty">No gallery media yet.${
+                  isOwner
+                    ? `<br><button class="btn btn-ghost btn-sm" type="button" data-action="edit">Add images or video</button>`
+                    : ""
+                }</div>`
+          }
+        </div>
+      </div>`
+    : "";
+
   const hasSkills = Boolean(skills.length || credentials.length);
   const skillsSection = `<div class="section" id="skills">
     <div class="wrap">
       <div class="section-head">
-        <div class="kicker">02 — Skills &amp; evidence</div>
+        <div class="kicker">03 — Skills &amp; evidence</div>
         <h2>Two grades, no global score</h2>
       </div>
       ${
@@ -412,7 +507,7 @@ export function renderProfile(container, model) {
   const aboutSection = `<div class="section" id="about">
     <div class="wrap">
       <div class="section-head">
-        <div class="kicker">03 — About</div>
+        <div class="kicker">04 — About</div>
         <h2>The person behind the key</h2>
       </div>
       <div class="about-grid${linkItems ? "" : " single"}">
@@ -509,6 +604,7 @@ export function renderProfile(container, model) {
     </div>
   </header>
   ${portfolioSection}
+  ${gallerySection}
   ${skillsSection}
   ${aboutSection}`;
 }

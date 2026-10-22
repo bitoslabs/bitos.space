@@ -4,6 +4,15 @@
  */
 import { contactUrl, httpUrl, isNip05 } from "../shared/urls.js";
 import { clone } from "../shared/clone.js";
+import {
+  GALLERY_LIMIT,
+  INLINE_IMAGE_BUDGET,
+  formatBytes,
+  inferMediaType,
+  inlineImageBytes,
+  isGalleryMediaUrl,
+} from "../shared/media.js";
+import { normalizeTheme } from "./themes.js";
 
 export function emptyProfile() {
   return {
@@ -23,7 +32,9 @@ export function emptyProfile() {
     links: [],
     skills: [],
     projects: [],
+    gallery: [],
     credentials: [],
+    theme: normalizeTheme(""),
   };
 }
 
@@ -38,6 +49,7 @@ export function normalizeProfile(raw) {
   profile.name = text(raw.name, 80);
   profile.displayName = text(raw.displayName || raw.display_name, 40);
   profile.nip05 = text(raw.nip05, 120);
+  profile.theme = normalizeTheme(raw.theme);
   profile.headline = text(raw.headline || raw.about, 160);
   profile.bio = text(raw.bio || raw.about, 2000);
   profile.location = text(raw.location, 80);
@@ -113,6 +125,30 @@ export function normalizeProfile(raw) {
         })
         .filter((item) => item.title || item.summary || item.description)
         .slice(0, 40)
+    : [];
+
+  profile.gallery = Array.isArray(raw.gallery)
+    ? raw.gallery
+        .map((item, index) => {
+          const media = item && typeof item === "object" ? item : {};
+          const url = text(media.url || media.src, 1_600_000);
+          const declared = media.type === "video" ? "video" : "image";
+          const type =
+            declared === "video" || inferMediaType(url) === "video"
+              ? "video"
+              : "image";
+          return {
+            id: text(media.id, 40) || `md_${index}`,
+            type,
+            url,
+            poster: text(media.poster, 500),
+            caption: text(media.caption || media.title, 160),
+            alt: text(media.alt, 160),
+            public: media.public !== false,
+          };
+        })
+        .filter((item) => item.url)
+        .slice(0, GALLERY_LIMIT)
     : [];
 
   profile.credentials = Array.isArray(raw.credentials)
@@ -202,6 +238,18 @@ export function toPublicProfile(profile) {
       delete copy.public;
       return copy;
     });
+  out.theme = normalizeTheme(out.theme);
+  out.gallery = (out.gallery || [])
+    .filter(
+      (item) =>
+        item.public !== false &&
+        isGalleryMediaUrl(item.url, item.type === "video" ? "video" : "image")
+    )
+    .map((item) => {
+      const copy = { ...item };
+      delete copy.public;
+      return copy;
+    });
   out.credentials = (out.credentials || [])
     .filter(
       (credential) =>
@@ -251,6 +299,34 @@ export function validateProfile(profile) {
     if (project.media && !httpUrl(project.media)) {
       return `Project "${project.title}" has an invalid cover image URL.`;
     }
+  }
+  for (const item of profile.gallery || []) {
+    if (item.public === false) continue;
+    const label = item.caption || item.alt || "Gallery item";
+    if (!item.url) {
+      return `${label} needs an image or video URL.`;
+    }
+    if (
+      !isGalleryMediaUrl(
+        item.url,
+        item.type === "video" ? "video" : "image"
+      )
+    ) {
+      return item.type === "video"
+        ? `${label} needs a direct https:// video URL (MP4 or WebM).`
+        : `${label} needs a valid image URL or an uploaded image.`;
+    }
+    if (item.poster && !httpUrl(item.poster)) {
+      return `${label} has an invalid poster URL.`;
+    }
+  }
+  const inlineBytes = inlineImageBytes(profile.gallery || []);
+  if (inlineBytes > INLINE_IMAGE_BUDGET) {
+    return `Inline gallery images use ${formatBytes(
+      inlineBytes
+    )}; remove an image or use a hosted URL (inline limit ${formatBytes(
+      INLINE_IMAGE_BUDGET
+    )}).`;
   }
   for (const credential of profile.credentials || []) {
     if (

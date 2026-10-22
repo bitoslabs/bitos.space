@@ -35,6 +35,10 @@ signs in and edits it; visitors get a read-only public page.
   `d` tag `bitos.space:portfolio:v1`) and published to Nostr relays.
 - Profile metadata is read from **kind 0** and **NIP-05** identifiers.
 - Drafts and preferences live in `localStorage`; publishing is always explicit.
+- Gallery supports compressed inline image uploads and direct video URLs, with
+  a public lightbox for visitors.
+- Three portfolio themes — Obsidian, Parchment and Signal — are published in the
+  same event and drive the page palette and `theme-color`.
 - Supports pretty URLs (`/p/{ref}`) through `_redirects`.
 
 Source layout under `p/`:
@@ -42,7 +46,7 @@ Source layout under `p/`:
 ```
 p/
 ├── index.html
-├── css/          # tokens, header, landing, profile, editor, responsive
+├── css/          # tokens, header, landing, profile, editor, gallery, themes
 ├── data/         # demo profile and alias fixtures
 ├── js/
 │   ├── app.js

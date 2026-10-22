@@ -99,6 +99,15 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
     const headline = profile.headline || profile.bio || "";
     const skills = (profile.skills || []).slice(0, 3);
     const projectCount = (profile.projects || []).length;
+    const galleryCount = (profile.gallery || []).length;
+    const stats = [
+      projectCount
+        ? `${projectCount} project${projectCount === 1 ? "" : "s"}`
+        : "",
+      galleryCount ? `${galleryCount} media` : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
     const own =
       getAuthPubkey && getAuthPubkey() === item.pubkey
         ? '<span class="recent-own">You</span>'
@@ -119,13 +128,7 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
             timeAgo(item.updatedAt)
           )}</span>
         </span>
-        ${
-          projectCount
-            ? `<span class="recent-count">${projectCount} project${
-                projectCount === 1 ? "" : "s"
-              }</span>`
-            : ""
-        }
+        ${stats ? `<span class="recent-count">${stats}</span>` : ""}
       </div>
       ${
         headline

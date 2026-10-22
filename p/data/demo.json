@@ -15,6 +15,7 @@
       "ລາວ",
       "TH"
     ],
+    "theme": "obsidian",
     "availability": {
       "status": "available",
       "note": "Open to selected projects and partnerships"
@@ -155,6 +156,53 @@
         ],
         "link": "https://vatta.bitos.space",
         "media": "",
+        "public": true
+      }
+    ],
+    "gallery": [
+      {
+        "id": "md_mark",
+        "type": "image",
+        "url": "/assets/bee-animated.svg",
+        "poster": "",
+        "caption": "The BitOS mark, animated",
+        "alt": "Animated golden bee used as the BitOS identity mark",
+        "public": true
+      },
+      {
+        "id": "md_vatta",
+        "type": "image",
+        "url": "/assets/icons/vatta.svg",
+        "poster": "",
+        "caption": "Vatta — a story game in Lao, Thai and English",
+        "alt": "Vatta game icon",
+        "public": true
+      },
+      {
+        "id": "md_learn",
+        "type": "image",
+        "url": "/assets/icons/learn.svg",
+        "poster": "",
+        "caption": "Offline-first learning",
+        "alt": "BitOS Learn icon",
+        "public": true
+      },
+      {
+        "id": "md_vault",
+        "type": "image",
+        "url": "/assets/icons/vault.svg",
+        "poster": "",
+        "caption": "A local-first vault for keys and passwords",
+        "alt": "BitOS Vault icon",
+        "public": true
+      },
+      {
+        "id": "md_motion",
+        "type": "video",
+        "url": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        "poster": "",
+        "caption": "Sample motion clip",
+        "alt": "Short sample video showing gallery video playback",
         "public": true
       }
     ],

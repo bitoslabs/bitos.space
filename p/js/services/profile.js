@@ -32,6 +32,7 @@ function hasPortfolioContent(profile) {
       profile.headline ||
       profile.bio ||
       (profile.projects && profile.projects.length) ||
+      (profile.gallery && profile.gallery.length) ||
       (profile.skills && profile.skills.length)
   );
 }

@@ -17,7 +17,7 @@ BitOS is a decentralized enterprise social network (ESN) built on the Nostr prot
 - **Storage**: Decentralized options (IPFS, Arweave).
 
 ## Live Apps (ecosystem)
-- **Profiles**: https://bitos.space/p/ — personal portfolio addressed by npub or NIP-05; the key holder signs in with NIP-07 and publishes a NIP-78 event (kind 30078).
+- **Profiles**: https://bitos.space/p/ — personal portfolio addressed by npub or NIP-05; the key holder signs in with NIP-07 and publishes a NIP-78 event (kind 30078), with an image/video gallery and three selectable portfolio themes.
 - **Social**: https://social.bitos.space/ — local-first Nostr social client (feed, chat, relays)
 - **PocketZap**: https://pocket.bitos.space/ — private journal and sats
 - **Learn**: https://learn.bitos.space/ — offline-first education platform

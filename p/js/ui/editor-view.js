@@ -9,7 +9,16 @@ import {
   splitList,
   timeAgo,
 } from "../shared/format.js";
-import { parseRelayUrls } from "../shared/urls.js";
+import { httpUrl, parseRelayUrls } from "../shared/urls.js";
+import {
+  GALLERY_LIMIT,
+  INLINE_IMAGE_BUDGET,
+  compressImageFile,
+  formatBytes,
+  inlineImageBytes,
+  isInlineMedia,
+} from "../shared/media.js";
+import { normalizeTheme } from "../data/themes.js";
 import {
   emptyProfile,
   normalizeProfile,
@@ -33,6 +42,7 @@ export function createEditorView({
   onPublished,
   onClosed,
   onRelaysChanged,
+  onThemePreview,
 }) {
   const body = $("#editor-body", root);
   const publishButtons = $$("[data-editor-publish]", root);
@@ -69,10 +79,20 @@ export function createEditorView({
     projects: $("#projects-editor", root),
     skills: $("#skills-editor", root),
     credentials: $("#credentials-editor", root),
+    gallery: $("#gallery-editor", root),
+    galleryDrop: $("#gallery-drop", root),
+    galleryFile: $("#gallery-file", root),
+    galleryUpload: $("#gallery-upload", root),
+    galleryAddVideo: $("#gallery-add-video", root),
+    galleryAddImageUrl: $("#gallery-add-image-url", root),
+    galleryBudget: $("#gallery-budget", root),
+    themeInputs: $$('input[name="portfolio-theme"]', root),
   };
 
   let current = null;
   let saveTimer = 0;
+  let replaceGalleryIndex = -1;
+  let galleryBusy = false;
 
   const nip05 = createNip05Wizard({
     root,
@@ -129,6 +149,7 @@ export function createEditorView({
     els.fContactLabel.value = (profile.contact && profile.contact.label) || "";
     els.fContactUrl.value = (profile.contact && profile.contact.url) || "";
     els.fRelays.value = loadRelays().join("\n");
+    fillTheme(profile.theme);
 
     els.owner.textContent = `Signed in as ${hexToNpub(current.pubkey)} — only this key can sign the update.`;
     els.status.textContent = current.updatedAt
@@ -147,9 +168,11 @@ export function createEditorView({
     renderProjects();
     renderSkills();
     renderCredentials();
+    renderGallery();
     setTab("profile", false);
     nip05.reset();
     current.dirty = false;
+    if (onThemePreview) onThemePreview(profile.theme);
   }
 
   function setTab(tab, sync = true) {
@@ -203,6 +226,10 @@ export function createEditorView({
       label: els.fContactLabel.value.trim(),
       url: els.fContactUrl.value.trim(),
     };
+    profile.theme = normalizeTheme(
+      (root.querySelector('input[name="portfolio-theme"]:checked') || {}).value ||
+        profile.theme
+    );
 
     profile.links = readRows(els.links).map((row) => ({
       label: rowValue(row, "label"),
@@ -229,6 +256,27 @@ export function createEditorView({
       evidence: rowValue(row, "evidence") === "issuer" ? "issuer" : "self",
       issuer: rowValue(row, "issuer"),
     }));
+
+    const previousGallery = profile.gallery || [];
+    profile.gallery = readRows(els.gallery)
+      .map((row, index) => {
+        const rowId = row.getAttribute("data-id");
+        const previous =
+          previousGallery.find((entry) => entry.id === rowId) ||
+          previousGallery[index] ||
+          {};
+        const urlField = row.querySelector('[data-f="url"]');
+        return {
+          id: previous.id || rowId || makeId("md"),
+          type:
+            row.getAttribute("data-media-type") === "video" ? "video" : "image",
+          url: urlField ? rowValue(row, "url") : previous.url || "",
+          poster: rowValue(row, "poster"),
+          caption: rowValue(row, "caption"),
+          alt: rowValue(row, "alt"),
+          public: rowChecked(row, "public"),
+        };
+      });
 
     const previousCredentials = profile.credentials || [];
     profile.credentials = readRows(els.credentials).map((row, index) => ({
@@ -384,6 +432,228 @@ export function createEditorView({
       .join("");
   }
 
+  function fillTheme(theme) {
+    const value = normalizeTheme(theme);
+    els.themeInputs.forEach((input) => {
+      input.checked = input.value === value;
+    });
+  }
+
+  function galleryPreview(item) {
+    const video = item.type === "video";
+    const poster = httpUrl(item.poster);
+    if (video) {
+      return poster
+        ? `<img src="${esc(poster)}" alt="">`
+        : `<span class="gallery-thumb-empty">${icon("play")}</span>`;
+    }
+    const url = isInlineMedia(item.url) ? item.url : httpUrl(item.url);
+    return url
+      ? `<img src="${esc(url)}" alt="">`
+      : `<span class="gallery-thumb-empty">${icon("image")}</span>`;
+  }
+
+  function icon(name) {
+    if (name === "play") {
+      return '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10-6.5-10-6.5Z"/></svg>';
+    }
+    return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4 17 5-5 4 4 3-3 4 4"/></svg>';
+  }
+
+  function renderGallery() {
+    if (!current || !els.gallery) return;
+    const items = current.profile.gallery || [];
+    els.gallery.innerHTML = items
+      .map((item, index) => {
+        const video = item.type === "video";
+        const inline = isInlineMedia(item.url);
+        return `<div class="repeat-row gallery-row" data-index="${index}" data-id="${esc(
+          item.id
+        )}" data-media-type="${video ? "video" : "image"}">
+          <div class="row-head">
+            <span class="row-title">${video ? "Video" : "Image"} ${
+              index + 1
+            } · ${inline ? "embedded" : "link"}</span>
+            <button class="row-remove" type="button" data-gallery-remove="${index}">Remove</button>
+          </div>
+          <div class="gallery-row-body">
+            <div class="gallery-thumb${video ? " is-video" : ""}">${galleryPreview(
+              item
+            )}${video ? `<span class="gallery-play" aria-hidden="true">${icon("play")}</span>` : ""}</div>
+            <div class="gallery-fields">
+              ${
+                video
+                  ? `<label class="field span2"><span>Video URL <b class="req">*</b></span><input data-f="url" type="url" maxlength="500" value="${esc(
+                      item.url
+                    )}" placeholder="https://…/clip.mp4"></label>
+                     <label class="field span2"><span>Poster image URL (optional)</span><input data-f="poster" type="url" maxlength="500" value="${esc(
+                       item.poster
+                     )}" placeholder="https://…/poster.jpg"></label>`
+                  : inline
+                  ? `<div class="inline-media-note">
+                       <span>Embedded image · ${formatBytes(item.url.length)}</span>
+                       <button class="btn btn-ghost btn-sm" type="button" data-gallery-replace="${index}">Replace</button>
+                     </div>`
+                  : `<label class="field span2"><span>Image URL</span><input data-f="url" type="url" maxlength="500" value="${esc(
+                      item.url
+                    )}" placeholder="https://…/image.jpg"></label>`
+              }
+              <label class="field span2"><span>Caption</span><input data-f="caption" type="text" maxlength="160" value="${esc(
+                item.caption
+              )}" placeholder="A short title for visitors"></label>
+              <label class="field span2"><span>Alt text</span><input data-f="alt" type="text" maxlength="160" value="${esc(
+                item.alt
+              )}" placeholder="Describe the image for screen readers"></label>
+              <label class="check-field span2"><input data-f="public" type="checkbox" ${
+                item.public !== false ? "checked" : ""
+              }> Include this item in the published gallery</label>
+            </div>
+          </div>
+        </div>`;
+      })
+      .join("");
+    renderGalleryBudget();
+  }
+
+  function renderGalleryBudget() {
+    if (!els.galleryBudget || !current) return;
+    const items = current.profile.gallery || [];
+    const used = inlineImageBytes(items);
+    const percent = Math.min(100, Math.round((used / INLINE_IMAGE_BUDGET) * 100));
+    els.galleryBudget.classList.toggle("is-high", percent >= 80);
+    els.galleryBudget.innerHTML = `<div class="budget-bar"><span style="width:${percent}%"></span></div>
+      <span class="budget-text">${formatBytes(used)} of ${formatBytes(
+      INLINE_IMAGE_BUDGET
+    )} inline image budget · ${items.length}/${GALLERY_LIMIT} items</span>`;
+  }
+
+  async function addGalleryImages(files) {
+    if (!current || !files || !files.length || galleryBusy) return;
+    syncFromForm();
+    const list = current.profile.gallery;
+    let added = 0;
+
+    galleryBusy = true;
+    setGalleryBusy(true);
+    try {
+      for (const file of Array.from(files)) {
+        if (list.length >= GALLERY_LIMIT) {
+          toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
+          break;
+        }
+        if (!String(file.type || "").startsWith("image/")) {
+          toast("Video files need a public URL. Use “Add video link”.", true);
+          continue;
+        }
+        try {
+          const result = await compressImageFile(file);
+          if (inlineImageBytes(list) + result.bytes > INLINE_IMAGE_BUDGET) {
+            toast(
+              "That image would exceed the inline media budget. Remove an image or use a hosted URL.",
+              true
+            );
+            break;
+          }
+          list.push({
+            id: makeId("md"),
+            type: "image",
+            url: result.dataUrl,
+            poster: "",
+            caption: "",
+            alt: "",
+            public: true,
+          });
+          added += 1;
+        } catch (error) {
+          toast((error && error.message) || "Could not add that image.", true);
+        }
+      }
+    } finally {
+      galleryBusy = false;
+      setGalleryBusy(false);
+    }
+
+    if (added) {
+      markDirty();
+      renderGallery();
+      toast(
+        `${added} image${added === 1 ? "" : "s"} added and optimised in your browser.`
+      );
+    }
+  }
+
+  async function replaceGalleryImage(index, file) {
+    if (!current || !file) return;
+    syncFromForm();
+    const item = current.profile.gallery[index];
+    if (!item) return;
+    try {
+      if (galleryBusy) return;
+      galleryBusy = true;
+      setGalleryBusy(true);
+      const result = await compressImageFile(file);
+      const counted =
+        item.public !== false && isInlineMedia(item.url)
+          ? item.url.length
+          : 0;
+      const others = inlineImageBytes(current.profile.gallery) - counted;
+      if (others + result.bytes > INLINE_IMAGE_BUDGET) {
+        toast(
+          "That replacement would exceed the inline media budget. Remove an image or use a hosted URL.",
+          true
+        );
+        return;
+      }
+      item.type = "image";
+      item.url = result.dataUrl;
+      item.poster = "";
+      markDirty();
+      renderGallery();
+      toast("Image replaced.");
+    } catch (error) {
+      toast((error && error.message) || "Could not replace that image.", true);
+    } finally {
+      galleryBusy = false;
+      setGalleryBusy(false);
+    }
+  }
+
+  function setGalleryBusy(busy) {
+    if (els.galleryUpload) {
+      els.galleryUpload.disabled = busy;
+      els.galleryUpload.textContent = busy ? "Optimising…" : "Upload images";
+    }
+    if (els.galleryAddImageUrl) els.galleryAddImageUrl.disabled = busy;
+    if (els.galleryAddVideo) els.galleryAddVideo.disabled = busy;
+  }
+
+  function addGalleryLink(type) {
+    if (!current) return;
+    syncFromForm();
+    const list = current.profile.gallery;
+    if (list.length >= GALLERY_LIMIT) {
+      toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
+      return;
+    }
+    list.push({
+      id: makeId("md"),
+      type: type === "video" ? "video" : "image",
+      url: "",
+      poster: "",
+      caption: "",
+      alt: "",
+      public: true,
+    });
+    markDirty();
+    renderGallery();
+    const last = els.gallery && els.gallery.lastElementChild;
+    if (last) {
+      last.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      const input = last.querySelector("input");
+      if (input) input.focus();
+    }
+  }
+
   function listFor(type) {
     if (type === "link") return current.profile.links;
     if (type === "project") return current.profile.projects;
@@ -490,7 +760,7 @@ export function createEditorView({
     const validation = validateProfile(current.profile);
     if (validation) {
       toast(validation, true);
-      setTab("profile", false);
+      setTab(/gallery|image|video|poster|media/i.test(validation) ? "gallery" : "profile", false);
       return;
     }
     if (!auth.getState().pubkey) {
@@ -642,11 +912,29 @@ export function createEditorView({
 
   root.addEventListener("click", (event) => {
     const remove = event.target.closest("[data-remove]");
-    if (!remove || !current) return;
-    removeItem(
-      remove.getAttribute("data-remove"),
-      Number(remove.getAttribute("data-index"))
-    );
+    if (remove && current) {
+      removeItem(
+        remove.getAttribute("data-remove"),
+        Number(remove.getAttribute("data-index"))
+      );
+      return;
+    }
+    const galleryRemove = event.target.closest("[data-gallery-remove]");
+    if (galleryRemove && current) {
+      syncFromForm();
+      const index = Number(galleryRemove.getAttribute("data-gallery-remove"));
+      if (Number.isInteger(index) && index >= 0) {
+        current.profile.gallery.splice(index, 1);
+        markDirty();
+        renderGallery();
+      }
+      return;
+    }
+    const replace = event.target.closest("[data-gallery-replace]");
+    if (replace && current) {
+      replaceGalleryIndex = Number(replace.getAttribute("data-gallery-replace"));
+      startGalleryUpload();
+    }
   });
 
   $$("[data-editor-close]", root).forEach((button) => {
@@ -655,12 +943,72 @@ export function createEditorView({
 
   body.addEventListener("input", (event) => {
     if (event.target && event.target.id === "f-relays") return;
+    if (event.target && event.target.id === "gallery-file") return;
     if (event.target && event.target.id === "f-nip05") nip05.reset();
     markDirty();
   });
   body.addEventListener("change", (event) => {
     if (event.target && event.target.id === "f-relays") return;
+    if (event.target && event.target.id === "gallery-file") return;
+    if (event.target && event.target.closest(".gallery-row")) {
+      syncFromForm();
+      renderGalleryBudget();
+    }
     markDirty();
+  });
+
+  function startGalleryUpload() {
+    if (!els.galleryFile || !current) return;
+    if (replaceGalleryIndex < 0 && (current.profile.gallery || []).length >= GALLERY_LIMIT) {
+      toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
+      return;
+    }
+    els.galleryFile.multiple = replaceGalleryIndex < 0;
+    els.galleryFile.click();
+  }
+
+  els.galleryUpload.addEventListener("click", () => {
+    replaceGalleryIndex = -1;
+    startGalleryUpload();
+  });
+  els.galleryAddImageUrl.addEventListener("click", () => addGalleryLink("image"));
+  els.galleryAddVideo.addEventListener("click", () => addGalleryLink("video"));
+  els.galleryFile.addEventListener("change", () => {
+    const files = Array.from(els.galleryFile.files || []);
+    const replaceIndex = replaceGalleryIndex;
+    replaceGalleryIndex = -1;
+    els.galleryFile.value = "";
+    if (!files.length) return;
+    if (replaceIndex >= 0) replaceGalleryImage(replaceIndex, files[0]);
+    else addGalleryImages(files);
+  });
+
+  if (els.galleryDrop) {
+    ["dragenter", "dragover"].forEach((type) => {
+      els.galleryDrop.addEventListener(type, (event) => {
+        event.preventDefault();
+        els.galleryDrop.classList.add("is-drag");
+      });
+    });
+    ["dragleave", "drop"].forEach((type) => {
+      els.galleryDrop.addEventListener(type, (event) => {
+        event.preventDefault();
+        els.galleryDrop.classList.remove("is-drag");
+      });
+    });
+    els.galleryDrop.addEventListener("drop", (event) => {
+      const files = event.dataTransfer && event.dataTransfer.files;
+      if (files && files.length) addGalleryImages(files);
+    });
+  }
+
+  els.themeInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      if (!current) return;
+      current.profile.theme = normalizeTheme(input.value);
+      if (onThemePreview) onThemePreview(current.profile.theme);
+      markDirty();
+    });
   });
   els.saveDraft.addEventListener("click", () => saveDraft(true));
   els.publishBtn.addEventListener("click", publish);

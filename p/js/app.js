@@ -14,11 +14,16 @@ import { normalizeProfile } from "./data/profile-model.js";
 import * as auth from "./services/auth.js";
 import * as profileService from "./services/profile.js";
 import { fetchMyPortfolio } from "./services/my-portfolio.js";
-import { initTheme } from "./ui/theme.js";
+import {
+  applyPortfolioTheme,
+  initTheme,
+  resetPortfolioTheme,
+} from "./ui/theme.js";
 import { createToast } from "./ui/toast.js";
 import { renderLandingSession } from "./ui/landing-view.js";
 import { renderState } from "./ui/state-view.js";
 import {
+  publicGallery,
   renderProfile as renderProfileView,
   updateNip05Badges,
 } from "./ui/profile-view.js";
@@ -26,6 +31,7 @@ import { createAuthDialog } from "./ui/auth-dialog.js";
 import { renderQr } from "./ui/qr.js";
 import { createEditorView } from "./ui/editor-view.js";
 import { createRecentView } from "./ui/recent-view.js";
+import { createLightbox } from "./ui/lightbox.js";
 
 const state = {
   ref: "",
@@ -55,6 +61,7 @@ let toast = () => {};
 let authDialog = null;
 let editor = null;
 let recentView = null;
+let lightbox = null;
 let myProfileToken = 0;
 
 /* ---------------- views ---------------- */
@@ -116,6 +123,7 @@ function setCanonicalDisplay(
 function showLanding() {
   state.demo = false;
   state.ref = "";
+  resetPortfolioTheme();
   setView("landing");
   setHidden(els.demoBanner, true);
   syncMyPortfolio();
@@ -131,6 +139,7 @@ function showLanding() {
 }
 
 function showLoading(title, text) {
+  resetPortfolioTheme();
   setView("state");
   setHidden(els.demoBanner, !state.demo);
   renderState(els.stateView, { mode: "loading", title, text });
@@ -139,6 +148,7 @@ function showLoading(title, text) {
 }
 
 function showRelayError() {
+  resetPortfolioTheme();
   setView("state");
   setHidden(els.demoBanner, !state.demo);
   renderState(els.stateView, {
@@ -153,6 +163,7 @@ function showRelayError() {
 }
 
 function showResolveError(message) {
+  resetPortfolioTheme();
   setView("state");
   setHidden(els.demoBanner, true);
   renderState(els.stateView, {
@@ -173,6 +184,7 @@ function renderProfile({ skipView = false } = {}) {
   setHidden(els.demoBanner, !state.demo);
 
   const npub = hexToNpub(state.profilePubkey);
+  applyPortfolioTheme(state.profile.theme);
   renderProfileView(els.profile, {
     profile: state.profile,
     pubkey: state.profilePubkey,
@@ -181,6 +193,7 @@ function renderProfile({ skipView = false } = {}) {
     isOwner: auth.isOwnerOf(state.profilePubkey),
     isDemo: state.demo,
   });
+  setHidden(els.navGallery, publicGallery(state.profile).length === 0);
 
   updateCanonical();
   if (editor && editor.isOpen()) {
@@ -214,6 +227,7 @@ function updateCanonical() {
 }
 
 function renderEmpty() {
+  resetPortfolioTheme();
   const npub = hexToNpub(state.profilePubkey);
   const knownName = state.meta ? profileName(state.meta) : "";
   const title = knownName
@@ -794,6 +808,11 @@ async function onActionClick(event) {
     copyAction(target, shareUrl());
   } else if (action === "share-qr") {
     openQr();
+  } else if (action === "gallery-open") {
+    const index = Number(target.getAttribute("data-index"));
+    if (lightbox && state.profile) {
+      lightbox.open(publicGallery(state.profile), Number.isFinite(index) ? index : 0);
+    }
   } else if (action === "edit" || action === "create") {
     openEditor();
   } else if (action === "contact") {
@@ -821,6 +840,7 @@ function cacheElements() {
     urlChip: $("#url-chip"),
     urlChipPath: $("#url-chip-path"),
     profileNav: $("#profile-nav"),
+    navGallery: $("#nav-gallery"),
     shareBtn: $("#share-btn"),
     authBtn: $("#auth-btn"),
     myPortfolioLink: $("#my-portfolio-link"),
@@ -837,6 +857,13 @@ function cacheElements() {
     profileQr: $("#profile-qr"),
     profileQrUrl: $("#profile-qr-url"),
     copyProfileQr: $("#copy-profile-qr"),
+    lightboxDialog: $("#lightbox-dialog"),
+    lightboxStage: $("#lightbox-stage"),
+    lightboxTitle: $("#lightbox-title"),
+    lightboxCount: $("#lightbox-count"),
+    lightboxCaption: $("#lightbox-caption"),
+    lightboxPrev: $("#lightbox-prev"),
+    lightboxNext: $("#lightbox-next"),
     toast: $("#toast"),
   };
 }
@@ -871,7 +898,7 @@ function bindEvents() {
       else dialog.removeAttribute("open");
     });
   });
-  [els.signinDialog, els.qrDialog].forEach((dialog) => {
+  [els.signinDialog, els.qrDialog, els.lightboxDialog].forEach((dialog) => {
     dialog.addEventListener("click", (event) => {
       if (event.target === dialog) dialog.close();
     });
@@ -904,6 +931,17 @@ function init() {
       if (recentView) recentView.setRelays(list);
       syncMyPortfolio(true);
     },
+    onThemePreview: (theme) => applyPortfolioTheme(theme),
+  });
+
+  lightbox = createLightbox({
+    dialog: els.lightboxDialog,
+    stage: els.lightboxStage,
+    title: els.lightboxTitle,
+    count: els.lightboxCount,
+    caption: els.lightboxCaption,
+    prevBtn: els.lightboxPrev,
+    nextBtn: els.lightboxNext,
   });
 
   recentView = createRecentView({

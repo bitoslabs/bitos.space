@@ -4,7 +4,7 @@
 import { $, $$, esc, setHidden } from "./shared/dom.js";
 import { hexToNpub } from "./shared/bech32.js";
 import { profileName, shortKey } from "./shared/format.js";
-import { contactUrl } from "./shared/urls.js";
+import { contactUrl, profilePageUrl } from "./shared/urls.js";
 import { copyToClipboard } from "./shared/clipboard.js";
 import { fetchJson } from "./shared/fetch.js";
 import { cleanRef, refFromPath, resolveRef } from "./nostr/identity.js";
@@ -12,6 +12,7 @@ import { loadRelays } from "./data/storage.js";
 import { normalizeProfile } from "./data/profile-model.js";
 import * as auth from "./services/auth.js";
 import * as profileService from "./services/profile.js";
+import { fetchMyPortfolio } from "./services/my-portfolio.js";
 import { initTheme } from "./ui/theme.js";
 import { createToast } from "./ui/toast.js";
 import { renderLandingSession } from "./ui/landing-view.js";
@@ -23,6 +24,7 @@ import {
 import { createAuthDialog } from "./ui/auth-dialog.js";
 import { renderQr } from "./ui/qr.js";
 import { createEditorView } from "./ui/editor-view.js";
+import { createRecentView } from "./ui/recent-view.js";
 
 const state = {
   ref: "",
@@ -39,12 +41,20 @@ const state = {
   loadToken: 0,
   editRequested: false,
   authReady: false,
+  myProfile: {
+    status: "idle",
+    pubkey: null,
+    profile: null,
+    updatedAt: 0,
+  },
 };
 
 let els = {};
 let toast = () => {};
 let authDialog = null;
 let editor = null;
+let recentView = null;
+let myProfileToken = 0;
 
 /* ---------------- views ---------------- */
 
@@ -56,6 +66,16 @@ function setView(view) {
   setHidden(els.editorView, view !== "editor");
   setHidden(els.profileNav, view !== "profile");
   setHidden(els.shareBtn, view !== "profile");
+  if (els.myPortfolioLink) {
+    setHidden(
+      els.myPortfolioLink,
+      view === "editor" || !auth.getState().pubkey
+    );
+  }
+}
+
+function renderSession() {
+  renderLandingSession(els.landingSession, auth.getState(), state.myProfile);
 }
 
 function setChipRef(ref) {
@@ -85,7 +105,9 @@ function showLanding() {
   state.ref = "";
   setView("landing");
   setHidden(els.demoBanner, true);
-  renderLandingSession(els.landingSession, auth.getState());
+  syncMyPortfolio();
+  renderSession();
+  if (recentView) recentView.start();
   setChipRef("");
   const span = els.footerUrl.querySelector("span");
   if (span) span.textContent = "bitos.space/p/";
@@ -154,6 +176,7 @@ function renderProfile({ skipView = false } = {}) {
   updateAuthUI();
   updateNip05Badges(els.profile, normalizeStatus(state.nip05Status));
   verifyNip05();
+  if (auth.isOwnerOf(state.profilePubkey)) syncMyPortfolio();
   maybeOpenRequestedEditor();
 }
 
@@ -225,6 +248,15 @@ function updateAuthUI() {
     els.landingSigninLabel.textContent = authState.pubkey
       ? "Manage signer"
       : "Sign in to manage";
+  }
+  if (els.myPortfolioLink) {
+    if (authState.pubkey) {
+      els.myPortfolioLink.href = profilePageUrl(
+        hexToNpub(authState.pubkey)
+      );
+    }
+    const inEditor = els.editorView && !els.editorView.hidden;
+    setHidden(els.myPortfolioLink, !authState.pubkey || inEditor);
   }
 }
 
@@ -425,6 +457,120 @@ async function loadDemo() {
 
 /* ---------------- auth / editor ---------------- */
 
+function updateMyPortfolioUI() {
+  if (authDialog) authDialog.render();
+  renderSession();
+  updateAuthUI();
+}
+
+function syncMyPortfolio(force = false) {
+  const authState = auth.getState();
+  if (!authState.pubkey) {
+    myProfileToken += 1;
+    state.myProfile = {
+      status: "idle",
+      pubkey: null,
+      profile: null,
+      updatedAt: 0,
+    };
+    updateMyPortfolioUI();
+    return;
+  }
+
+  const pubkey = authState.pubkey;
+  if (state.profile && state.profilePubkey === pubkey) {
+    state.myProfile = {
+      status: "published",
+      pubkey,
+      profile: state.profile,
+      updatedAt: state.updatedAt,
+    };
+    updateMyPortfolioUI();
+    return;
+  }
+
+  if (
+    !force &&
+    state.myProfile.pubkey === pubkey &&
+    ["loading", "published", "empty", "error"].includes(
+      state.myProfile.status
+    )
+  ) {
+    return;
+  }
+
+  loadMyPortfolio(pubkey);
+}
+
+async function loadMyPortfolio(pubkey) {
+  const token = ++myProfileToken;
+  const cached = profileService.loadCachedProfile(pubkey);
+  const knownStatus =
+    state.myProfile.pubkey === pubkey ? state.myProfile.status : "";
+
+  if (cached) {
+    state.myProfile = {
+      status: "published",
+      pubkey,
+      profile: cached.profile,
+      updatedAt: cached.createdAt,
+    };
+  } else if (!["published", "empty", "error"].includes(knownStatus)) {
+    state.myProfile = {
+      status: "loading",
+      pubkey,
+      profile: null,
+      updatedAt: 0,
+    };
+  }
+  updateMyPortfolioUI();
+
+  let result;
+  try {
+    result = await fetchMyPortfolio(pubkey, state.relays);
+  } catch {
+    result = { status: "error" };
+  }
+
+  if (token !== myProfileToken || auth.getState().pubkey !== pubkey) return;
+
+  if (result.status === "published") {
+    state.myProfile = {
+      status: "published",
+      pubkey,
+      profile: result.profile,
+      updatedAt: result.updatedAt || 0,
+    };
+  } else if (result.status === "empty" && state.myProfile.status !== "published") {
+    state.myProfile = {
+      status: "empty",
+      pubkey,
+      profile: result.profile || null,
+      updatedAt: 0,
+    };
+  } else if (
+    result.status === "error" &&
+    !["published", "empty"].includes(state.myProfile.status)
+  ) {
+    state.myProfile = {
+      status: "error",
+      pubkey,
+      profile: null,
+      updatedAt: 0,
+    };
+  }
+
+  updateMyPortfolioUI();
+}
+
+function openAccount(options) {
+  if (auth.getState().pubkey) {
+    const status = state.myProfile.status;
+    syncMyPortfolio(status === "empty" || status === "error" || status === "idle");
+  }
+  authDialog.open(options);
+}
+
 function handleAuthChange() {
   if (authDialog) authDialog.render();
   updateAuthUI();
@@ -442,7 +588,9 @@ function handleAuthChange() {
     renderEmpty();
   }
 
-  renderLandingSession(els.landingSession, authState);
+  syncMyPortfolio();
+  renderSession();
+  if (recentView) recentView.renderAuth();
   maybeOpenRequestedEditor();
 }
 
@@ -453,7 +601,7 @@ function openEditor() {
   }
   const authState = auth.getState();
   if (!authState.pubkey) {
-    authDialog.open();
+    openAccount();
     return;
   }
   const target = state.profilePubkey || authState.pubkey;
@@ -509,7 +657,7 @@ function handleEditorClosed() {
     updateAuthUI();
     showLanding();
   }
-  renderLandingSession(els.landingSession, auth.getState());
+  renderSession();
   window.scrollTo({ top: 0, behavior: "auto" });
 }
 
@@ -628,9 +776,9 @@ async function onActionClick(event) {
     if (url) location.href = url;
     else toast("No contact link is configured.", true);
   } else if (action === "signin") {
-    authDialog.open();
+    openAccount();
   } else if (action === "relay-settings") {
-    authDialog.open({ showRelays: true });
+    openAccount({ showRelays: true });
   } else if (action === "retry") {
     route();
   }
@@ -650,6 +798,7 @@ function cacheElements() {
     profileNav: $("#profile-nav"),
     shareBtn: $("#share-btn"),
     authBtn: $("#auth-btn"),
+    myPortfolioLink: $("#my-portfolio-link"),
     themeBtn: $("#theme-btn"),
     landingSession: $("#landing-session"),
     lookupForm: $("#lookup-form"),
@@ -681,12 +830,12 @@ function bindEvents() {
     location.assign(url.toString());
   });
 
-  els.landingSignin.addEventListener("click", () => authDialog.open());
+  els.landingSignin.addEventListener("click", () => openAccount());
   els.shareBtn.addEventListener("click", shareProfile);
   els.copyProfileQr.addEventListener("click", () => {
     copyAction(els.copyProfileQr, els.profileQrUrl.textContent);
   });
-  els.authBtn.addEventListener("click", () => authDialog.open());
+  els.authBtn.addEventListener("click", () => openAccount());
 
   document.addEventListener("click", onActionClick);
   $$("[data-close]").forEach((button) => {
@@ -713,8 +862,11 @@ function init() {
     dialog: els.signinDialog,
     toast,
     onAuthChanged: handleAuthChange,
+    getMyPortfolio: () => state.myProfile,
     onRelaysChanged: (list) => {
       state.relays = list;
+      if (recentView) recentView.setRelays(list);
+      syncMyPortfolio(true);
     },
   });
   editor = createEditorView({
@@ -724,7 +876,15 @@ function init() {
     onClosed: handleEditorClosed,
     onRelaysChanged: (list) => {
       state.relays = list;
+      if (recentView) recentView.setRelays(list);
+      syncMyPortfolio(true);
     },
+  });
+
+  recentView = createRecentView({
+    section: $("#recent-section"),
+    getRelays: () => state.relays,
+    getAuthPubkey: () => auth.getState().pubkey,
   });
 
   bindEvents();

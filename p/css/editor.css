@@ -884,3 +884,74 @@ html.light-mode .nip05-panel {
 .editor-back-link:hover {
   color: var(--nostr-bright);
 }
+
+/* ============ auth: my portfolio card ============ */
+.my-portfolio-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--nostr-line);
+  border-radius: var(--r-md);
+  background: var(--nostr-soft);
+}
+
+.my-portfolio-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.my-portfolio-kicker {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.my-portfolio-name {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.my-portfolio-status {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-muted);
+  background: var(--input-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-full);
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.my-portfolio-status.is-ok {
+  color: var(--ok);
+  background: var(--ok-soft);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.my-portfolio-status.is-error {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+.my-portfolio-url {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.my-portfolio-card .hero-actions {
+  gap: 8px;
+  margin-top: 2px;
+}

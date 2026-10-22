@@ -4,8 +4,9 @@
  */
 import { $, $$, esc, setHidden } from "../shared/dom.js";
 import { hexToNpub } from "../shared/bech32.js";
+import { profileName, shortKey, timeAgo } from "../shared/format.js";
 import { copyToClipboard } from "../shared/clipboard.js";
-import { parseRelayUrls } from "../shared/urls.js";
+import { parseRelayUrls, profilePageUrl } from "../shared/urls.js";
 import { loadRelays, saveRelays } from "../data/storage.js";
 import { hasSigner } from "../nostr/nip07.js";
 import * as auth from "../services/auth.js";
@@ -16,11 +17,19 @@ export function createAuthDialog({
   toast,
   onAuthChanged,
   onRelaysChanged,
+  getMyPortfolio,
 }) {
   const els = {
+    title: $("#signin-title", dialog),
     signerDot: $("#signer-dot", dialog),
     signerLabel: $("#signer-label", dialog),
     signerId: $("#signer-id", dialog),
+    myPortfolioCard: $("#my-portfolio-card", dialog),
+    myPortfolioName: $("#my-portfolio-name", dialog),
+    myPortfolioStatus: $("#my-portfolio-status", dialog),
+    myPortfolioUrl: $("#my-portfolio-url", dialog),
+    myPortfolioView: $("#my-portfolio-view", dialog),
+    myPortfolioEdit: $("#my-portfolio-edit", dialog),
     connectNip07: $("#connect-signer", dialog),
     connectNip07Label: $("#connect-signer-label", dialog),
     signout: $("#signout-btn", dialog),
@@ -69,9 +78,72 @@ export function createAuthDialog({
     });
   }
 
+  function renderMyPortfolio(state) {
+    if (!els.myPortfolioCard) return;
+    if (!state || !state.pubkey) {
+      setHidden(els.myPortfolioCard, true);
+      return;
+    }
+
+    const portfolioState = getMyPortfolio ? getMyPortfolio() : null;
+    const mine =
+      portfolioState && portfolioState.pubkey === state.pubkey
+        ? portfolioState
+        : null;
+    const npub = hexToNpub(state.pubkey);
+    const profile = mine && mine.profile;
+    const published = Boolean(mine && mine.status === "published");
+    const empty = Boolean(mine && mine.status === "empty");
+    const checking = !mine || mine.status === "loading" || mine.status === "idle";
+    const errored = Boolean(mine && mine.status === "error");
+    const viewUrl = profilePageUrl(npub);
+    const editUrl = profilePageUrl(npub, { edit: true });
+
+    const name =
+      profile && profileName(profile) !== "Unnamed profile"
+        ? profileName(profile)
+        : "Your portfolio";
+
+    els.myPortfolioName.textContent = name;
+    els.myPortfolioUrl.textContent = `bitos.space/p/${shortKey(npub)}`;
+    els.myPortfolioView.href = viewUrl;
+    els.myPortfolioEdit.href = editUrl;
+    els.myPortfolioEdit.textContent = published
+      ? "Edit portfolio"
+      : empty
+      ? "Create portfolio"
+      : "Open portfolio";
+
+    let status = "Checking relays…";
+    let tone = "";
+    if (published) {
+      status = mine.updatedAt
+        ? `Published · ${timeAgo(mine.updatedAt)}`
+        : "Published";
+      tone = "is-ok";
+    } else if (empty) {
+      status = "Not published yet";
+    } else if (errored) {
+      status = "Could not check relays";
+      tone = "is-error";
+    } else if (!checking) {
+      status = "Portfolio status";
+    }
+
+    els.myPortfolioStatus.textContent = status;
+    els.myPortfolioStatus.className = "my-portfolio-status" + (tone ? ` ${tone}` : "");
+    setHidden(els.myPortfolioCard, false);
+  }
+
   function render() {
     const state = auth.getState();
     const detected = hasSigner();
+
+    if (els.title) {
+      els.title.textContent = state.connected
+        ? "Nostr account"
+        : "Sign in with a Nostr signer";
+    }
 
     els.signerDot.className = "signer-dot " + (state.connected ? "ok" : "");
     els.signerLabel.textContent = state.connected
@@ -95,6 +167,8 @@ export function createAuthDialog({
       setHidden(els.connectNip07, false);
     }
 
+    renderMyPortfolio(state);
+
     if (els.nip07Note) {
       els.nip07Note.textContent = detected
         ? "A NIP-07 extension is available in this browser. Your key stays inside the extension."
@@ -106,17 +180,23 @@ export function createAuthDialog({
         : "Retry NIP-07 detection";
     }
     setTab(activeTab);
-
-    els.relays.value = loadRelays().join("\n");
   }
 
   function open() {
-    activeTab = hasSigner() ? "nip07" : "nip46";
+    const state = auth.getState();
+    activeTab = state.connected
+      ? state.type === "nip46"
+        ? "nip46"
+        : "nip07"
+      : hasSigner()
+      ? "nip07"
+      : "nip46";
     setStatus(els.authStatus, "");
     setStatus(els.nip46Status, "");
     setHidden(els.nostrConnectBox, true);
     els.openNostrConnect.hidden = true;
-    els.openNostrConnect.hidden = true;
+    clearQr(els.nostrConnectQr);
+    els.relays.value = loadRelays().join("\n");
     render();
     if (typeof dialog.showModal === "function") {
       if (!dialog.open) dialog.showModal();

@@ -149,6 +149,29 @@
             </svg>
             Share
           </button>
+          <a
+            class="btn btn-ghost btn-sm nav-my-portfolio"
+            id="my-portfolio-link"
+            href="/p/"
+            aria-label="My portfolio"
+            title="My portfolio"
+            hidden
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <rect x="3" y="7" width="18" height="13" rx="2.5" />
+              <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M3 12h18" />
+            </svg>
+            <span class="my-portfolio-label">My portfolio</span>
+          </a>
           <button class="btn btn-primary btn-sm" id="auth-btn" type="button">
             Sign in
           </button>
@@ -279,6 +302,29 @@
             </p>
           </article>
         </div>
+
+        <section class="recent-section" id="recent-section" hidden aria-labelledby="recent-title">
+          <div class="recent-head">
+            <div>
+              <div class="kicker">Recently published</div>
+              <h2 id="recent-title">Portfolios from your relays</h2>
+              <p class="recent-lead">
+                Public portfolio events from the relays configured in this
+                browser — not a global directory.
+              </p>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="recent-refresh" type="button">
+              Refresh
+            </button>
+          </div>
+          <div class="recent-grid" id="recent-grid"></div>
+          <p class="recent-status" id="recent-status" aria-live="polite"></p>
+          <div class="recent-more-wrap">
+            <button class="btn btn-ghost btn-sm" id="recent-more" type="button" hidden>
+              Load more
+            </button>
+          </div>
+        </section>
 
         <div class="landing-foot">
           <span class="mono">NIP-07</span>
@@ -804,6 +850,21 @@
               <span id="signer-label">Not signed in</span>
             </div>
             <div class="signer-id" id="signer-id" hidden></div>
+          </div>
+
+          <div class="my-portfolio-card" id="my-portfolio-card" hidden>
+            <div class="my-portfolio-head">
+              <div>
+                <div class="my-portfolio-kicker">Your portfolio</div>
+                <div class="my-portfolio-name" id="my-portfolio-name">Your portfolio</div>
+              </div>
+              <span class="my-portfolio-status" id="my-portfolio-status">Checking…</span>
+            </div>
+            <div class="my-portfolio-url mono" id="my-portfolio-url"></div>
+            <div class="hero-actions">
+              <a class="btn btn-ghost btn-sm" id="my-portfolio-view" href="/p/">View public page</a>
+              <a class="btn btn-primary btn-sm" id="my-portfolio-edit" href="/p/?edit=1">Edit portfolio</a>
+            </div>
           </div>
 
           <div class="auth-tabs" role="tablist" aria-label="Signer type">

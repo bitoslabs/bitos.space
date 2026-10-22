@@ -27,6 +27,15 @@ export function contactUrl(value) {
   }
 }
 
+/**
+ * Pretty profile URL. Requires the /p/* SPA fallback (see serve.mjs and the
+ * nginx vhost). The app also accepts /p/?ref={ref} as a no-rewrite fallback.
+ */
+export function portfolioUrl(ref, { edit = false } = {}) {
+  const path = `/p/${encodeURIComponent(String(ref || ""))}`;
+  return edit ? `${path}?edit=1` : path;
+}
+
 export function isNip05(value) {
   return /^[^@\s/#?]+@[^@\s/#?]+\.[^@\s/#?]+$/.test(
     String(value || "").trim()
@@ -39,4 +48,14 @@ export function parseRelayUrls(text) {
     .map((item) => item.trim())
     .filter((item) => /^wss?:\/\/[^\s]+$/i.test(item))
     .slice(0, 10);
+}
+
+/**
+ * Static-host-safe internal profile URL. Canonical/share links still use the
+ * pretty /p/<ref> form, but in-app navigation uses ?ref= so it works even when
+ * the host has no rewrite/404 fallback.
+ */
+export function profilePageUrl(ref, { edit = false } = {}) {
+  const url = `/p/?ref=${encodeURIComponent(String(ref || ""))}`;
+  return edit ? `${url}&edit=1` : url;
 }

@@ -210,3 +210,21 @@ html.light-mode .navlinks a:hover {
   flex-shrink: 0;
 }
 
+
+.nav-my-portfolio {
+  gap: 6px;
+}
+
+.nav-my-portfolio .my-portfolio-label {
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .nav-my-portfolio .my-portfolio-label {
+    display: none;
+  }
+
+  .nav-my-portfolio {
+    padding: 8px 10px;
+  }
+}

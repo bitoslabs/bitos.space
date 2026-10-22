@@ -7,6 +7,7 @@ import { newestEvent, queryRelays } from "../nostr/relay.js";
 import { verifyEvent } from "../nostr/crypto.js";
 import { verifyNip05 } from "../nostr/nip05.js";
 import { hexToNpub } from "../shared/bech32.js";
+import { portfolioUrl } from "../shared/urls.js";
 import {
   mergeProfileFallback,
   normalizeProfile,
@@ -125,12 +126,12 @@ export function canonicalRef(profile, pubkey, nip05Status) {
   return pubkey ? hexToNpub(pubkey) : "";
 }
 
-export function canonicalUrl(ref) {
+export function canonicalUrl(ref, options = {}) {
   const base =
     location.protocol === "http:" || location.protocol === "https:"
       ? location.origin
       : "https://bitos.space";
-  return `${base}/p/${encodeURI(ref || "")}`;
+  return `${base}${portfolioUrl(ref, options)}`;
 }
 
 export function displayUrl(ref) {

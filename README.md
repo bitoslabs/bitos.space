@@ -61,16 +61,20 @@ Because `/p/` uses ES modules and pretty URLs, serve the directory over HTTP
 rather than opening the files directly:
 
 ```sh
-python3 -m http.server 8080
+node serve.mjs 8080
 ```
 
-Then visit:
+The included server serves existing files first and falls back to
+`/p/index.html` for `/p/{ref}`, so profile URLs work locally without extra
+configuration. Then visit:
 
 - <http://localhost:8080/>
 - <http://localhost:8080/p/>
+- <http://localhost:8080/p/{npub or NIP-05}>
 
-Any static file server works (`npx serve`, `caddy file-server`, etc.). There are
-no install, build, or test steps.
+A plain `python3 -m http.server` does not support the fallback and will return
+404 for `/p/{ref}`; use `?ref=` in that case. There are no install, build, or
+test steps.
 
 ## Deployment
 

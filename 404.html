@@ -13,7 +13,7 @@
         try {
           var params = new URLSearchParams(location.search);
           params.set("ref", decodeURIComponent(match[1]));
-          target = "/p/index.html?" + params.toString();
+          target = "/p/?" + params.toString();
         } catch (error) {
           /* keep /p/ */
         }

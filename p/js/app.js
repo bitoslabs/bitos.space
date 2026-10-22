@@ -74,9 +74,18 @@ function setView(view) {
   setHidden(els.stateView, view !== "state");
   setHidden(els.profile, view !== "profile");
   setHidden(els.editorView, view !== "editor");
-  setHidden(els.profileNav, view !== "profile");
-  if (els.navToggle) setHidden(els.navToggle, view !== "profile");
-  if (view !== "profile") closeNavMenu();
+  const isProfile = view === "profile";
+  const isLanding = view === "landing";
+  setHidden(els.profileNav, !isProfile);
+  if (els.landingNav) setHidden(els.landingNav, !isLanding);
+  if (els.navToggle) {
+    setHidden(els.navToggle, !isProfile && !isLanding);
+    els.navToggle.setAttribute(
+      "aria-controls",
+      isProfile ? "profile-nav" : isLanding ? "landing-nav" : ""
+    );
+  }
+  closeNavMenu();
   setHidden(els.shareBtn, view !== "profile");
   if (els.myPortfolioLink) {
     setHidden(
@@ -90,30 +99,46 @@ function renderSession() {
   renderLandingSession(els.landingSession, auth.getState(), state.myProfile);
 }
 
+function navMenus() {
+  return [els.profileNav, els.landingNav].filter(Boolean);
+}
+
+function activeNavMenu() {
+  return navMenus().find((nav) => !nav.hidden) || null;
+}
+
+function navMenuLabel(nav) {
+  return nav === els.profileNav ? "profile sections" : "navigation";
+}
+
 function closeNavMenu(focusToggle = false) {
-  if (!els.profileNav) return;
-  const wasOpen = els.profileNav.classList.contains("is-open");
-  els.profileNav.classList.remove("is-open");
+  const navs = navMenus();
+  const open = navs.find((nav) => nav.classList.contains("is-open"));
+  navs.forEach((nav) => nav.classList.remove("is-open"));
   if (els.navToggle) {
     els.navToggle.setAttribute("aria-expanded", "false");
-    els.navToggle.setAttribute("aria-label", "Open profile sections");
-    if (wasOpen && focusToggle) els.navToggle.focus();
+    els.navToggle.setAttribute(
+      "aria-label",
+      `Open ${navMenuLabel(activeNavMenu())}`
+    );
+    if (open && focusToggle) els.navToggle.focus();
   }
 }
 
 function setNavMenu(open, focusFirst = false) {
-  if (!els.profileNav || !els.navToggle) return;
+  const nav = activeNavMenu();
   const canOpen =
-    window.matchMedia("(max-width: 760px)").matches && !els.profileNav.hidden;
-  const next = Boolean(open) && canOpen;
-  els.profileNav.classList.toggle("is-open", next);
-  els.navToggle.setAttribute("aria-expanded", next ? "true" : "false");
+    Boolean(nav) && window.matchMedia("(max-width: 760px)").matches;
+  closeNavMenu();
+  if (!canOpen || !open || !els.navToggle || !nav) return;
+  nav.classList.add("is-open");
+  els.navToggle.setAttribute("aria-expanded", "true");
   els.navToggle.setAttribute(
     "aria-label",
-    next ? "Close profile sections" : "Open profile sections"
+    `Close ${navMenuLabel(nav)}`
   );
-  if (next && focusFirst) {
-    const first = Array.from(els.profileNav.querySelectorAll("a")).find(
+  if (focusFirst) {
+    const first = Array.from(nav.querySelectorAll("a")).find(
       (link) => !link.hidden
     );
     if (first) first.focus();
@@ -873,6 +898,7 @@ function cacheElements() {
     urlChip: $("#url-chip"),
     urlChipPath: $("#url-chip-path"),
     profileNav: $("#profile-nav"),
+    landingNav: $("#landing-nav"),
     navToggle: $("#nav-toggle"),
     navGallery: $("#nav-gallery"),
     shareBtn: $("#share-btn"),
@@ -925,23 +951,24 @@ function bindEvents() {
   els.landingSignin.addEventListener("click", () => openAccount());
   if (els.navToggle) {
     els.navToggle.addEventListener("click", (event) => {
-      setNavMenu(
-        !els.profileNav.classList.contains("is-open"),
-        event.detail === 0
+      const active = activeNavMenu();
+      const open = Boolean(
+        active && active.classList.contains("is-open")
       );
+      setNavMenu(!open, event.detail === 0);
     });
   }
-  if (els.profileNav) {
-    els.profileNav.addEventListener("click", (event) => {
+  navMenus().forEach((nav) => {
+    nav.addEventListener("click", (event) => {
       if (event.target.closest("a")) closeNavMenu();
     });
-  }
+  });
   document.addEventListener("click", (event) => {
-    if (!els.profileNav || !els.profileNav.classList.contains("is-open")) {
-      return;
-    }
+    const open = navMenus().some((nav) => nav.classList.contains("is-open"));
+    if (!open) return;
     if (
       event.target.closest("#profile-nav") ||
+      event.target.closest("#landing-nav") ||
       event.target.closest("#nav-toggle")
     ) {
       return;
@@ -949,11 +976,8 @@ function bindEvents() {
     closeNavMenu();
   });
   document.addEventListener("keydown", (event) => {
-    if (
-      event.key === "Escape" &&
-      els.profileNav &&
-      els.profileNav.classList.contains("is-open")
-    ) {
+    if (event.key !== "Escape") return;
+    if (navMenus().some((nav) => nav.classList.contains("is-open"))) {
       closeNavMenu(true);
     }
   });

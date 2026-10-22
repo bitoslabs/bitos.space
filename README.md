@@ -50,8 +50,8 @@ signs in and edits it; visitors get a read-only public page.
   losing the owner's layout.
 - A theme-tinted honeycomb **brand line** sits behind the page, and project art
   tiles reuse the same brand-line pattern.
-- On small screens the profile section links collapse into an accessible menu
-  button instead of disappearing.
+- The landing navigation and profile section links collapse into an accessible
+  menu button on small screens instead of disappearing.
 - Supports pretty URLs (`/p/{ref}`) through `_redirects`.
 
 Source layout under `p/`:

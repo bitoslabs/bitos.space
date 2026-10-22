@@ -108,7 +108,13 @@
           ><span class="path" id="url-chip-path">/p/</span>
         </span>
 
-        <nav class="navlinks" id="profile-nav" aria-label="Profile sections">
+        <nav class="navlinks" id="landing-nav" aria-label="Portfolio app sections" hidden>
+          <a href="#how">How it works</a>
+          <a href="?demo=1">Sample</a>
+          <a href="../data-standard.html">Data standard</a>
+        </nav>
+
+        <nav class="navlinks" id="profile-nav" aria-label="Profile sections" hidden>
           <a href="#portfolio">Portfolio</a>
           <a href="#gallery" id="nav-gallery" hidden>Gallery</a>
           <a href="#skills">Skills</a>
@@ -275,7 +281,7 @@
               type="text"
               autocomplete="off"
               spellcheck="false"
-              placeholder="npub1…, alice@example.com, or a registered alias"
+              placeholder="npub1…, NIP-05, or alias"
             />
             <button class="btn btn-primary" type="submit">
               Open profile
@@ -328,7 +334,7 @@
           <div class="landing-note" id="landing-session" hidden></div>
         </div>
 
-        <div class="landing-grid">
+        <div class="landing-grid" id="how">
           <article class="tile landing-card">
             <div class="tile-title">01 — Address</div>
             <h3>npub or NIP-05</h3>

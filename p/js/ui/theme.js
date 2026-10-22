@@ -8,11 +8,11 @@ import { normalizeTheme, themeMeta } from "../data/themes.js";
 
 const MEDIA = "(prefers-color-scheme: light)";
 const SITE_COLORS = { dark: "#0b0b0b", light: "#f8f9fa" };
-const PORTFOLIO_MODE_KEY = "portfolio-mode";
+const LEGACY_PORTFOLIO_MODE = "portfolio-mode";
 
 let siteTheme = "dark";
+let preferredMode = "";
 let portfolioTheme = "";
-let portfolioMode = "";
 let toggleButton = null;
 
 function storedTheme() {
@@ -32,19 +32,14 @@ function prefersLight() {
   }
 }
 
-function storedPortfolioMode() {
+function migrateLegacyPortfolioMode() {
   try {
-    const saved = localStorage.getItem(PORTFOLIO_MODE_KEY);
-    return saved === "light" || saved === "dark" ? saved : "";
-  } catch {
-    return "";
-  }
-}
-
-function savePortfolioMode(value) {
-  try {
-    if (value) localStorage.setItem(PORTFOLIO_MODE_KEY, value);
-    else localStorage.removeItem(PORTFOLIO_MODE_KEY);
+    const legacy = localStorage.getItem(LEGACY_PORTFOLIO_MODE);
+    if (!legacy) return;
+    if (!storedTheme() && (legacy === "light" || legacy === "dark")) {
+      setTheme(legacy);
+    }
+    localStorage.removeItem(LEGACY_PORTFOLIO_MODE);
   } catch {
     /* storage may be unavailable */
   }
@@ -52,7 +47,7 @@ function savePortfolioMode(value) {
 
 function paint() {
   const theme = portfolioTheme ? themeMeta(portfolioTheme) : null;
-  const mode = theme ? portfolioMode || theme.mode : siteTheme;
+  const mode = theme ? preferredMode || theme.mode : siteTheme;
   const isLight = mode === "light";
   const root = document.documentElement;
 
@@ -86,25 +81,19 @@ function paint() {
 }
 
 function toggleMode() {
-  if (portfolioTheme) {
-    const theme = themeMeta(portfolioTheme);
-    const current = portfolioMode || theme.mode;
-    const next = current === "light" ? "dark" : "light";
-    portfolioMode = next === theme.mode ? "" : next;
-    savePortfolioMode(portfolioMode);
-  } else {
-    siteTheme = document.documentElement.classList.contains("light-mode")
-      ? "dark"
-      : "light";
-    setTheme(siteTheme);
-  }
+  siteTheme = document.documentElement.classList.contains("light-mode")
+    ? "dark"
+    : "light";
+  preferredMode = siteTheme;
+  setTheme(siteTheme);
   paint();
 }
 
 export function initTheme(button) {
   toggleButton = button || null;
+  migrateLegacyPortfolioMode();
   siteTheme = getTheme();
-  portfolioMode = storedPortfolioMode();
+  preferredMode = storedTheme() || "";
   paint();
 
   if (toggleButton) {
@@ -123,14 +112,9 @@ export function initTheme(button) {
   }
 
   window.addEventListener("storage", (event) => {
-    if (event.key === "portfolio-mode") {
-      portfolioMode = storedPortfolioMode();
-      paint();
-      return;
-    }
     if (event.key !== "theme") return;
-    siteTheme =
-      storedTheme() || (prefersLight() ? "light" : "dark");
+    siteTheme = storedTheme() || (prefersLight() ? "light" : "dark");
+    preferredMode = storedTheme() || "";
     paint();
   });
 }

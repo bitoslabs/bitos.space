@@ -35,6 +35,22 @@ export function createAuthDialog({
     signout: $("#signout-btn", dialog),
     authStatus: $("#auth-status", dialog),
     nip07Note: $("#nip07-note", dialog),
+    nsecKey: $("#nsec-key", dialog),
+    nsecRemember: $("#nsec-remember", dialog),
+    nsecStatus: $("#nsec-status", dialog),
+    toggleNsec: $("#toggle-nsec", dialog),
+    connectNsec: $("#connect-nsec", dialog),
+    createStart: $("#create-start", dialog),
+    createResult: $("#create-result", dialog),
+    createNpub: $("#create-npub", dialog),
+    createNsec: $("#create-nsec", dialog),
+    copyCreateNpub: $("#copy-create-npub", dialog),
+    copyCreateNsec: $("#copy-create-nsec", dialog),
+    createSaved: $("#create-saved", dialog),
+    createRemember: $("#create-remember", dialog),
+    createContinue: $("#create-continue", dialog),
+    createAgain: $("#create-again", dialog),
+    createStatus: $("#create-status", dialog),
     bunkerUrl: $("#bunker-url", dialog),
     connectBunker: $("#connect-bunker", dialog),
     startNostrConnect: $("#start-nostrconnect", dialog),
@@ -51,6 +67,7 @@ export function createAuthDialog({
 
   let nostrConnectController = null;
   let activeTab = "nip07";
+  let generatedAccount = null;
 
   function setStatus(element, message, { error = false, url = "" } = {}) {
     if (!element) return;
@@ -68,6 +85,14 @@ export function createAuthDialog({
 
   function setTab(tab) {
     activeTab = tab;
+    if (els.title) {
+      const state = auth.getState();
+      els.title.textContent = state.connected
+        ? "Nostr account"
+        : tab === "create"
+        ? "Create a Nostr account"
+        : "Sign in with a Nostr signer";
+    }
     $$("[data-auth-tab]", dialog).forEach((button) => {
       const active = button.getAttribute("data-auth-tab") === tab;
       button.classList.toggle("is-active", active);
@@ -139,24 +164,26 @@ export function createAuthDialog({
     const state = auth.getState();
     const detected = hasSigner();
 
-    if (els.title) {
-      els.title.textContent = state.connected
-        ? "Nostr account"
-        : "Sign in with a Nostr signer";
-    }
-
     els.signerDot.className = "signer-dot " + (state.connected ? "ok" : "");
     els.signerLabel.textContent = state.connected
       ? state.type === "nip46"
         ? "Connected with a remote signer"
+        : state.type === "nsec"
+        ? "Connected with a local key"
         : "Connected with NIP-07"
       : "Not signed in";
 
     if (state.connected) {
       const npub = hexToNpub(state.pubkey);
+      const localNote =
+        state.type === "nsec"
+          ? `<br><span>Local key · ${
+              state.remember ? "remembered on this device" : "session only"
+            }</span>`
+          : "";
       els.signerId.innerHTML = `<span class="ok">Signed in</span><br><code>${esc(
         npub
-      )}</code><br><span>${esc(state.pubkey)}</span>`;
+      )}</code><br><span>${esc(state.pubkey)}</span>${localNote}`;
       setHidden(els.signerId, false);
       setHidden(els.signout, false);
       setHidden(els.connectNip07, true);
@@ -166,6 +193,11 @@ export function createAuthDialog({
       setHidden(els.signout, true);
       setHidden(els.connectNip07, false);
     }
+
+    const localConnected = state.connected && state.type === "nsec";
+    els.nsecKey.disabled = localConnected;
+    els.nsecRemember.disabled = localConnected;
+    els.connectNsec.disabled = localConnected;
 
     renderMyPortfolio(state);
 
@@ -187,12 +219,22 @@ export function createAuthDialog({
     activeTab = state.connected
       ? state.type === "nip46"
         ? "nip46"
+        : state.type === "nsec"
+        ? "nsec"
         : "nip07"
       : hasSigner()
       ? "nip07"
-      : "nip46";
+      : "create";
     setStatus(els.authStatus, "");
     setStatus(els.nip46Status, "");
+    setStatus(els.nsecStatus, "");
+    setStatus(els.createStatus, "");
+    resetCreateAccount();
+    els.nsecKey.value = "";
+    els.nsecKey.type = "password";
+    els.nsecRemember.checked = false;
+    els.toggleNsec.setAttribute("aria-label", "Show private key");
+    els.toggleNsec.setAttribute("title", "Show private key");
     setHidden(els.nostrConnectBox, true);
     els.openNostrConnect.hidden = true;
     clearQr(els.nostrConnectQr);
@@ -224,6 +266,103 @@ export function createAuthDialog({
         (error && error.message) || "Sign-in failed.",
         { error: true }
       );
+    }
+  }
+
+  function resetCreateAccount() {
+    generatedAccount = null;
+    els.createResult.hidden = true;
+    els.createStart.hidden = false;
+    els.createNpub.textContent = "";
+    els.createNsec.textContent = "";
+    els.createSaved.checked = false;
+    els.createRemember.checked = false;
+    els.createContinue.disabled = true;
+    setStatus(els.createStatus, "");
+  }
+
+  function startCreateAccount() {
+    try {
+      generatedAccount = auth.generateAccount();
+      els.createNpub.textContent = generatedAccount.npub;
+      els.createNsec.textContent = generatedAccount.nsec;
+      els.createStart.hidden = true;
+      els.createResult.hidden = false;
+      els.createContinue.disabled = true;
+      els.createSaved.checked = false;
+      setStatus(
+        els.createStatus,
+        "Save the nsec shown above. It will not be shown again."
+      );
+      els.createResult.scrollIntoView({ block: "nearest" });
+      els.createSaved.focus();
+    } catch (error) {
+      setStatus(
+        els.createStatus,
+        (error && error.message) || "Could not create an account.",
+        { error: true }
+      );
+    }
+  }
+
+  async function continueCreateAccount() {
+    if (!generatedAccount || !els.createSaved.checked) return;
+    els.createContinue.disabled = true;
+    setStatus(els.createStatus, "Signing in with the new key…");
+    try {
+      await auth.connectNsec(generatedAccount.secretHex, {
+        remember: els.createRemember.checked,
+      });
+      const npub = generatedAccount.npub;
+      resetCreateAccount();
+      if (onAuthChanged) onAuthChanged();
+      close();
+      toast(`Account created. Back up your nsec to keep ${npub.slice(0, 12)}… safe.`);
+    } catch (error) {
+      setStatus(
+        els.createStatus,
+        (error && error.message) || "Could not sign in with the new key.",
+        { error: true }
+      );
+      els.createContinue.disabled = false;
+    }
+  }
+
+  async function copyAccountKey(value, label) {
+    const ok = await copyToClipboard(value);
+    toast(ok ? `${label} copied.` : `Could not copy the ${label.toLowerCase()}.`, !ok);
+  }
+
+  async function connectWithNsec() {
+    const input = els.nsecKey.value.trim();
+    if (!input) {
+      setStatus(els.nsecStatus, "Paste your nsec or secret key first.", {
+        error: true,
+      });
+      els.nsecKey.focus();
+      return;
+    }
+    els.connectNsec.disabled = true;
+    setStatus(els.nsecStatus, "Checking the key…");
+    try {
+      await auth.connectNsec(input, {
+        remember: els.nsecRemember.checked,
+      });
+      els.nsecKey.value = "";
+      setStatus(els.nsecStatus, "Connected.");
+      if (onAuthChanged) onAuthChanged();
+      close();
+      toast("Signed in with a local key.");
+    } catch (error) {
+      setStatus(
+        els.nsecStatus,
+        (error && error.message) || "Could not sign in with that key.",
+        { error: true }
+      );
+    } finally {
+      const state = auth.getState();
+      els.connectNsec.disabled =
+        state.connected && state.type === "nsec";
     }
   }
 
@@ -355,6 +494,26 @@ export function createAuthDialog({
     });
   });
   els.connectNip07.addEventListener("click", connectNip07);
+  els.connectNsec.addEventListener("click", connectWithNsec);
+  els.toggleNsec.addEventListener("click", () => {
+    const reveal = els.nsecKey.type === "password";
+    els.nsecKey.type = reveal ? "text" : "password";
+    const label = reveal ? "Hide private key" : "Show private key";
+    els.toggleNsec.setAttribute("aria-label", label);
+    els.toggleNsec.setAttribute("title", label);
+  });
+  els.createStart.addEventListener("click", startCreateAccount);
+  els.createAgain.addEventListener("click", startCreateAccount);
+  els.createSaved.addEventListener("change", () => {
+    els.createContinue.disabled = !els.createSaved.checked;
+  });
+  els.createContinue.addEventListener("click", continueCreateAccount);
+  els.copyCreateNpub.addEventListener("click", () => {
+    if (generatedAccount) void copyAccountKey(generatedAccount.npub, "npub");
+  });
+  els.copyCreateNsec.addEventListener("click", () => {
+    if (generatedAccount) void copyAccountKey(generatedAccount.nsec, "nsec");
+  });
   els.connectBunker.addEventListener("click", connectBunker);
   els.startNostrConnect.addEventListener("click", startNostrConnect);
   els.cancelNostrConnect.addEventListener("click", cancelNostrConnect);
@@ -370,6 +529,10 @@ export function createAuthDialog({
       nostrConnectController.abort();
       nostrConnectController = null;
     }
+    els.nsecKey.value = "";
+    els.nsecKey.type = "password";
+    els.nsecRemember.checked = false;
+    resetCreateAccount();
   });
 
   return { open, close, render };

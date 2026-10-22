@@ -32,6 +32,7 @@ import { renderQr } from "./ui/qr.js";
 import { createEditorView } from "./ui/editor-view.js";
 import { createRecentView } from "./ui/recent-view.js";
 import { createLightbox } from "./ui/lightbox.js";
+import { createConfirmDialog } from "./ui/confirm-dialog.js";
 
 const state = {
   ref: "",
@@ -62,6 +63,7 @@ let authDialog = null;
 let editor = null;
 let recentView = null;
 let lightbox = null;
+let confirmModal = null;
 let myProfileToken = 0;
 
 /* ---------------- views ---------------- */
@@ -73,6 +75,8 @@ function setView(view) {
   setHidden(els.profile, view !== "profile");
   setHidden(els.editorView, view !== "editor");
   setHidden(els.profileNav, view !== "profile");
+  if (els.navToggle) setHidden(els.navToggle, view !== "profile");
+  if (view !== "profile") closeNavMenu();
   setHidden(els.shareBtn, view !== "profile");
   if (els.myPortfolioLink) {
     setHidden(
@@ -84,6 +88,36 @@ function setView(view) {
 
 function renderSession() {
   renderLandingSession(els.landingSession, auth.getState(), state.myProfile);
+}
+
+function closeNavMenu(focusToggle = false) {
+  if (!els.profileNav) return;
+  const wasOpen = els.profileNav.classList.contains("is-open");
+  els.profileNav.classList.remove("is-open");
+  if (els.navToggle) {
+    els.navToggle.setAttribute("aria-expanded", "false");
+    els.navToggle.setAttribute("aria-label", "Open profile sections");
+    if (wasOpen && focusToggle) els.navToggle.focus();
+  }
+}
+
+function setNavMenu(open, focusFirst = false) {
+  if (!els.profileNav || !els.navToggle) return;
+  const canOpen =
+    window.matchMedia("(max-width: 760px)").matches && !els.profileNav.hidden;
+  const next = Boolean(open) && canOpen;
+  els.profileNav.classList.toggle("is-open", next);
+  els.navToggle.setAttribute("aria-expanded", next ? "true" : "false");
+  els.navToggle.setAttribute(
+    "aria-label",
+    next ? "Close profile sections" : "Open profile sections"
+  );
+  if (next && focusFirst) {
+    const first = Array.from(els.profileNav.querySelectorAll("a")).find(
+      (link) => !link.hidden
+    );
+    if (first) first.focus();
+  }
 }
 
 function setChipRef(ref) {
@@ -681,6 +715,7 @@ function handlePublished(result) {
 }
 
 function handleEditorClosed() {
+  if (confirmModal) confirmModal.close();
   clearEditParam();
   if (state.profile) {
     setView("profile");
@@ -712,9 +747,7 @@ function maybeOpenRequestedEditor() {
   if (!state.editRequested || !state.authReady) return;
   const authState = auth.getState();
   if (!authState.pubkey) {
-    state.editRequested = false;
-    setEditParam(false);
-    toast("Sign in as the owner to edit this portfolio.", true);
+    if (!els.signinDialog.open) openAccount();
     return;
   }
   if (state.profilePubkey && !auth.isOwnerOf(state.profilePubkey)) {
@@ -840,6 +873,7 @@ function cacheElements() {
     urlChip: $("#url-chip"),
     urlChipPath: $("#url-chip-path"),
     profileNav: $("#profile-nav"),
+    navToggle: $("#nav-toggle"),
     navGallery: $("#nav-gallery"),
     shareBtn: $("#share-btn"),
     authBtn: $("#auth-btn"),
@@ -857,6 +891,12 @@ function cacheElements() {
     profileQr: $("#profile-qr"),
     profileQrUrl: $("#profile-qr-url"),
     copyProfileQr: $("#copy-profile-qr"),
+    confirmDialog: $("#confirm-dialog"),
+    confirmKicker: $("#confirm-kicker"),
+    confirmTitle: $("#confirm-title"),
+    confirmMessage: $("#confirm-message"),
+    confirmAccept: $("#confirm-accept"),
+    confirmCancel: $("#confirm-cancel"),
     lightboxDialog: $("#lightbox-dialog"),
     lightboxStage: $("#lightbox-stage"),
     lightboxTitle: $("#lightbox-title"),
@@ -883,6 +923,48 @@ function bindEvents() {
   });
 
   els.landingSignin.addEventListener("click", () => openAccount());
+  if (els.navToggle) {
+    els.navToggle.addEventListener("click", (event) => {
+      setNavMenu(
+        !els.profileNav.classList.contains("is-open"),
+        event.detail === 0
+      );
+    });
+  }
+  if (els.profileNav) {
+    els.profileNav.addEventListener("click", (event) => {
+      if (event.target.closest("a")) closeNavMenu();
+    });
+  }
+  document.addEventListener("click", (event) => {
+    if (!els.profileNav || !els.profileNav.classList.contains("is-open")) {
+      return;
+    }
+    if (
+      event.target.closest("#profile-nav") ||
+      event.target.closest("#nav-toggle")
+    ) {
+      return;
+    }
+    closeNavMenu();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      els.profileNav &&
+      els.profileNav.classList.contains("is-open")
+    ) {
+      closeNavMenu(true);
+    }
+  });
+  try {
+    const mobileNav = window.matchMedia("(max-width: 760px)");
+    mobileNav.addEventListener("change", (event) => {
+      if (!event.matches) closeNavMenu();
+    });
+  } catch {
+    /* matchMedia unavailable */
+  }
   els.shareBtn.addEventListener("click", shareProfile);
   els.copyProfileQr.addEventListener("click", () => {
     copyAction(els.copyProfileQr, els.profileQrUrl.textContent);
@@ -921,9 +1003,19 @@ function init() {
       syncMyPortfolio(true);
     },
   });
+  confirmModal = createConfirmDialog({
+    dialog: els.confirmDialog,
+    kicker: els.confirmKicker,
+    title: els.confirmTitle,
+    message: els.confirmMessage,
+    accept: els.confirmAccept,
+    cancel: els.confirmCancel,
+  });
+
   editor = createEditorView({
     root: els.editorView,
     toast,
+    confirm: confirmModal.open,
     onPublished: handlePublished,
     onClosed: handleEditorClosed,
     onRelaysChanged: (list) => {

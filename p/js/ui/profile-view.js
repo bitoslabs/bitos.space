@@ -88,7 +88,7 @@ function renderProjectCard(project, index, span2, isDemo) {
     ? `<img class="art" src="${esc(media)}" alt="" loading="lazy">`
     : `<div class="art art-${"abc"[index % 3]}" aria-hidden="true"></div>
        <svg class="hexfield" viewBox="0 0 640 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-         <defs><pattern id="hx-${index}" width="56" height="48" patternUnits="userSpaceOnUse"><path d="M28 2 52 15v26L28 46 4 41V15L28 2Z" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="1"/></pattern></defs>
+         <defs><pattern id="hx-${index}" width="56" height="48" patternUnits="userSpaceOnUse"><path d="M28 2 52 15v26L28 46 4 41V15L28 2Z" fill="none" stroke-width="1"/></pattern></defs>
          <rect width="640" height="340" fill="url(#hx-${index})"/>
        </svg>`;
   const link = httpUrl(project.link);

@@ -56,6 +56,8 @@
   --font-lao: "Chanthavong", "Noto Sans Lao", "Phetsarath OT", sans-serif;
 
   --hex: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  --honeycomb-size: 36px;
+  --honeycomb-opacity: 0.42;
   --section-y: clamp(64px, 8vw, 112px);
   --wrap: 1200px;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -144,27 +146,44 @@ html.light-mode body::before {
     radial-gradient(900px 560px at 50% 116%, rgba(109, 40, 217, 0.04), transparent 64%);
 }
 
-body::after {
-  content: "";
+.brand-honeycomb {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.06;
-  background-image: url("data:image/svg+xml,%3Csvg width='180' height='104' viewBox='0 0 180 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff'%3E%3Cpolygon points='-28.5,-49.4 28.5,-49.4 57,0 28.5,49.4 -28.5,49.4 -57,0'/%3E%3Cpolygon points='151.5,-49.4 208.5,-49.4 237,0 208.5,49.4 151.5,49.4 123,0'/%3E%3Cpolygon points='61.5,2.6 118.5,2.6 147,52 118.5,101.4 61.5,101.4 33,52'/%3E%3Cpolygon points='-28.5,54.6 28.5,54.6 57,104 28.5,153.4 -28.5,153.4 -57,104'/%3E%3Cpolygon points='151.5,54.6 208.5,54.6 237,104 208.5,153.4 151.5,153.4 123,104'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 54px 31.2px;
-  mask-image: radial-gradient(1200px 800px at 50% 0%, #000 30%, transparent 85%);
-  -webkit-mask-image: radial-gradient(1200px 800px at 50% 0%, #000 30%, transparent 85%);
+  -webkit-mask-image: radial-gradient(75% 55% at 50% 20%, #000 0%, transparent 80%);
+  mask-image: radial-gradient(75% 55% at 50% 20%, #000 0%, transparent 80%);
 }
 
-html.light-mode body::after {
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg width='180' height='104' viewBox='0 0 180 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230b0b0b'%3E%3Cpolygon points='-28.5,-49.4 28.5,-49.4 57,0 28.5,49.4 -28.5,49.4 -57,0'/%3E%3Cpolygon points='151.5,-49.4 208.5,-49.4 237,0 208.5,49.4 151.5,49.4 123,0'/%3E%3Cpolygon points='61.5,2.6 118.5,2.6 147,52 118.5,101.4 61.5,101.4 33,52'/%3E%3Cpolygon points='-28.5,54.6 28.5,54.6 57,104 28.5,153.4 -28.5,153.4 -57,104'/%3E%3Cpolygon points='151.5,54.6 208.5,54.6 237,104 208.5,153.4 151.5,153.4 123,104'/%3E%3C/g%3E%3C/svg%3E");
+.brand-honeycomb__pattern {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-color: var(--brand-line);
+  opacity: 0;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='180' height='104' viewBox='0 0 180 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000'%3E%3Cpolygon points='-28.5,-49.4 28.5,-49.4 57,0 28.5,49.4 -28.5,49.4 -57,0'/%3E%3Cpolygon points='151.5,-49.4 208.5,-49.4 237,0 208.5,49.4 151.5,49.4 123,0'/%3E%3Cpolygon points='61.5,2.6 118.5,2.6 147,52 118.5,101.4 61.5,101.4 33,52'/%3E%3Cpolygon points='-28.5,54.6 28.5,54.6 57,104 28.5,153.4 -28.5,153.4 -57,104'/%3E%3Cpolygon points='151.5,54.6 208.5,54.6 237,104 208.5,153.4 151.5,153.4 123,104'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg width='180' height='104' viewBox='0 0 180 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000'%3E%3Cpolygon points='-28.5,-49.4 28.5,-49.4 57,0 28.5,49.4 -28.5,49.4 -57,0'/%3E%3Cpolygon points='151.5,-49.4 208.5,-49.4 237,0 208.5,49.4 151.5,49.4 123,0'/%3E%3Cpolygon points='61.5,2.6 118.5,2.6 147,52 118.5,101.4 61.5,101.4 33,52'/%3E%3Cpolygon points='-28.5,54.6 28.5,54.6 57,104 28.5,153.4 -28.5,153.4 -57,104'/%3E%3Cpolygon points='151.5,54.6 208.5,54.6 237,104 208.5,153.4 151.5,153.4 123,104'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: calc(var(--honeycomb-size, 36px) * 1.5) calc(var(--honeycomb-size, 36px) * 0.8667);
+  mask-size: calc(var(--honeycomb-size, 36px) * 1.5) calc(var(--honeycomb-size, 36px) * 0.8667);
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+}
+
+@supports (mask-image: url("")) {
+  .brand-honeycomb__pattern {
+    opacity: var(--honeycomb-opacity, 0.42);
+  }
+}
+
+@supports (-webkit-mask-image: url("")) {
+  .brand-honeycomb__pattern {
+    opacity: var(--honeycomb-opacity, 0.42);
+  }
 }
 
 @media (max-width: 600px) {
-  body::after {
-    background-size: 42px 24.27px;
+  :root {
+    --honeycomb-size: 28px;
   }
 }
 

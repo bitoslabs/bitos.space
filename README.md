@@ -30,17 +30,28 @@ Open `https://bitos.space/p/{npub or NIP-05}` to view a portfolio. The owner
 signs in and edits it; visitors get a read-only public page.
 
 - Identity is a Nostr key — no account, email, or server-side user database.
-- Sign-in via **NIP-07** browser extension or **NIP-46** remote signer.
+- Sign-in via **NIP-07** browser extension, **NIP-46** remote signer, or a
+  local **nsec**. New visitors can create a fresh keypair from the sign-in
+  dialog and must confirm they saved the nsec.
+- A local nsec is kept in **sessionStorage** by default; the optional
+  “Remember this device” setting is the only path that writes it to
+  **localStorage** (plaintext, so only use it on a trusted device).
 - Content is stored as a **NIP-78** replaceable event (kind `30078`,
   `d` tag `bitos.space:portfolio:v1`) and published to Nostr relays.
 - Profile metadata is read from **kind 0** and **NIP-05** identifiers.
 - Drafts and preferences live in `localStorage`; publishing is always explicit.
+  The dark/light preference is shared across the marketing site, data standard
+  and portfolio app through the same `theme` key.
 - Gallery supports compressed inline image uploads and direct video URLs, with
   a public lightbox for visitors.
 - Three portfolio styles — Spotlight/Obsidian, Editorial/Parchment and
   Dossier/Signal — are published in the same event and change both layout and
   palette, including `theme-color`. Visitors can switch dark/light without
   losing the owner's layout.
+- A theme-tinted honeycomb **brand line** sits behind the page, and project art
+  tiles reuse the same brand-line pattern.
+- On small screens the profile section links collapse into an accessible menu
+  button instead of disappearing.
 - Supports pretty URLs (`/p/{ref}`) through `_redirects`.
 
 Source layout under `p/`:
@@ -48,7 +59,7 @@ Source layout under `p/`:
 ```
 p/
 ├── index.html
-├── css/          # tokens, header, landing, profile, editor, gallery, themes
+├── css/          # tokens, header, landing, profile, editor, gallery, themes, layouts
 ├── data/         # demo profile and alias fixtures
 ├── js/
 │   ├── app.js

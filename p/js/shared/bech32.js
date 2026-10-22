@@ -52,18 +52,22 @@ function convertBits(data, from, to, pad) {
 
 function decode(value) {
   const str = String(value || "").toLowerCase();
-  if (str.length < 8 || str.length > 200) throw new Error("Invalid npub");
+  if (str.length < 8 || str.length > 200) {
+    throw new Error("Invalid bech32 key");
+  }
   const split = str.lastIndexOf("1");
-  if (split < 1 || split + 7 > str.length) throw new Error("Invalid npub");
+  if (split < 1 || split + 7 > str.length) {
+    throw new Error("Invalid bech32 key");
+  }
   const hrp = str.slice(0, split);
   const data = [];
   for (const ch of str.slice(split + 1)) {
     const index = CHARSET.indexOf(ch);
-    if (index === -1) throw new Error("Invalid npub character");
+    if (index === -1) throw new Error("Invalid bech32 character");
     data.push(index);
   }
   if (polymod([...hrpExpand(hrp), ...data]) !== 1) {
-    throw new Error("Invalid npub checksum");
+    throw new Error("Invalid bech32 checksum");
   }
   return { hrp, words: data.slice(0, -6) };
 }
@@ -113,4 +117,17 @@ export function hexToNpub(hex) {
   } catch {
     return String(hex || "");
   }
+}
+
+export function nsecToHex(nsec) {
+  const { hrp, words } = decode(nsec);
+  if (hrp !== "nsec") throw new Error("Not an nsec");
+  const bytes = convertBits(words, 5, 8, false);
+  if (bytes.length !== 32) throw new Error("Invalid nsec length");
+  return bytesToHex(bytes);
+}
+
+export function hexToNsec(hex) {
+  const words = convertBits(Array.from(hexToBytes(hex)), 8, 5, true);
+  return encode("nsec", words);
 }

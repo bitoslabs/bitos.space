@@ -39,6 +39,7 @@ import { createNip05Wizard } from "./nip05-wizard.js";
 export function createEditorView({
   root,
   toast,
+  confirm,
   onPublished,
   onClosed,
   onRelaysChanged,
@@ -866,15 +867,21 @@ export function createEditorView({
     }
   }
 
-  function discard() {
+  async function discard() {
     if (!current) return;
-    if (
-      !window.confirm(
-        "Discard the local draft and restore the last published portfolio?"
-      )
-    ) {
-      return;
-    }
+    const question = {
+      kicker: "Local draft",
+      title: "Discard this draft?",
+      message:
+        "This removes the local draft for this key and restores the last published version, or a blank portfolio if nothing was published. This cannot be undone.",
+      confirmLabel: "Discard draft",
+      cancelLabel: "Keep editing",
+      tone: "danger",
+    };
+    const confirmed = confirm
+      ? await confirm(question)
+      : window.confirm(question.message);
+    if (!confirmed || !current) return;
     clearDraft(current.pubkey);
     current.profile = clone(
       current.publishedProfile || emptyProfile()
@@ -1015,7 +1022,9 @@ export function createEditorView({
   publishButtons.forEach((button) => {
     button.addEventListener("click", publish);
   });
-  els.discardDraft.addEventListener("click", discard);
+  els.discardDraft.addEventListener("click", () => {
+    void discard();
+  });
   els.exportBtn.addEventListener("click", exportJson);
   els.importBtn.addEventListener("click", () => els.importFile.click());
   els.importFile.addEventListener("change", () => {

@@ -606,6 +606,10 @@ html.light-mode .tile:hover {
   opacity: 0.5;
 }
 
+.hexfield path {
+  stroke: var(--brand-line);
+}
+
 .case-badge {
   position: absolute;
   top: 12px;

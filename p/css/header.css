@@ -121,6 +121,27 @@ html.light-mode .navlinks a:hover {
   border-color: var(--glass-border);
 }
 
+.nav-toggle {
+  display: none;
+}
+
+.nav-toggle__open,
+.nav-toggle__close {
+  display: block;
+}
+
+.nav-toggle__close {
+  display: none;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle__open {
+  display: none;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle__close {
+  display: block;
+}
+
 .theme-icon--sun {
   display: none;
 }

@@ -99,10 +99,6 @@ html[data-portfolio-theme="parchment"] body::before {
     radial-gradient(900px 560px at 50% 116%, rgba(154, 52, 18, 0.05), transparent 64%);
 }
 
-html[data-portfolio-theme="parchment"] body::after {
-  opacity: 0.04;
-}
-
 html[data-portfolio-theme="parchment"] .noise-overlay {
   opacity: 0.2;
 }
@@ -288,10 +284,6 @@ html[data-portfolio-theme="parchment"]:not(.light-mode) body::before {
     radial-gradient(900px 560px at 50% 116%, rgba(234, 138, 74, 0.08), transparent 64%);
 }
 
-html[data-portfolio-theme="parchment"]:not(.light-mode) body::after {
-  opacity: 0.06;
-}
-
 html[data-portfolio-theme="parchment"]:not(.light-mode) .hex-inner {
   background: linear-gradient(160deg, #2b2018 0%, #17100b 100%);
   color: #fdba74;
@@ -426,10 +418,6 @@ html[data-portfolio-theme="signal"] body::before {
       rgba(103, 232, 249, 0.018) 3px,
       rgba(103, 232, 249, 0.018) 4px
     );
-}
-
-html[data-portfolio-theme="signal"] body::after {
-  opacity: 0.07;
 }
 
 html[data-portfolio-theme="signal"] .id-name h1,

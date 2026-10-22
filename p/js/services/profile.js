@@ -2,7 +2,7 @@
  * Read model for a public portfolio. Verifies event signatures before any
  * remote content reaches the UI.
  */
-import { D_TAG, KIND } from "../config.js";
+import { D_TAG, KIND, SITE_ORIGIN } from "../config.js";
 import { newestEvent, queryRelays } from "../nostr/relay.js";
 import { verifyEvent } from "../nostr/crypto.js";
 import { verifyNip05 } from "../nostr/nip05.js";
@@ -127,11 +127,7 @@ export function canonicalRef(profile, pubkey, nip05Status) {
 }
 
 export function canonicalUrl(ref, options = {}) {
-  const base =
-    location.protocol === "http:" || location.protocol === "https:"
-      ? location.origin
-      : "https://bitos.space";
-  return `${base}${portfolioUrl(ref, options)}`;
+  return `${SITE_ORIGIN}${portfolioUrl(ref, options)}`;
 }
 
 export function displayUrl(ref) {

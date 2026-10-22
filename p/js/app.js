@@ -1,6 +1,7 @@
 /**
  * Composition root. Wires views, services and the URL together.
  */
+import { SITE_ORIGIN } from "./config.js";
 import { $, $$, esc, setHidden } from "./shared/dom.js";
 import { hexToNpub } from "./shared/bech32.js";
 import { profileName, shortKey } from "./shared/format.js";
@@ -83,14 +84,26 @@ function setChipRef(ref) {
   els.urlChip.title = ref ? profileService.canonicalUrl(ref) : "Canonical public URL";
 }
 
-function setCanonicalDisplay(ref, { title = "", description = "" } = {}) {
-  const url = profileService.canonicalUrl(ref);
-  setChipRef(ref);
+function setCanonicalDisplay(
+  ref,
+  { title = "", description = "", url = "", display = "" } = {}
+) {
+  const canonical = url || profileService.canonicalUrl(ref);
+  if (display) {
+    els.urlChipPath.textContent = display;
+    els.urlChip.title = canonical;
+  } else {
+    setChipRef(ref);
+  }
   const span = els.footerUrl.querySelector("span");
-  if (span) span.textContent = profileService.displayUrl(ref);
-  els.footerUrl.title = url;
+  if (span) {
+    span.textContent = display
+      ? `bitos.space${display}`
+      : profileService.displayUrl(ref);
+  }
+  els.footerUrl.title = canonical;
   const link = $("#canonical-link");
-  if (link) link.setAttribute("href", url);
+  if (link) link.setAttribute("href", canonical);
   const ogTitle = $("#og-title");
   if (ogTitle && title) ogTitle.setAttribute("content", title);
   const ogDescription = $("#og-description");
@@ -181,15 +194,23 @@ function renderProfile({ skipView = false } = {}) {
 }
 
 function updateCanonical() {
+  const title = `${profileName(state.profile)} — Portfolio — bitos.space`;
+  const description = state.profile.headline || state.profile.bio || "";
+  if (state.demo) {
+    setCanonicalDisplay("", {
+      title,
+      description,
+      url: shareUrl(),
+      display: "/p/?demo=1",
+    });
+    return;
+  }
   const ref = profileService.canonicalRef(
     state.profile,
     state.profilePubkey,
     state.nip05Status
   );
-  setCanonicalDisplay(ref, {
-    title: `${profileName(state.profile)} — Portfolio — bitos.space`,
-    description: state.profile.headline || state.profile.bio || "",
-  });
+  setCanonicalDisplay(ref, { title, description });
 }
 
 function renderEmpty() {
@@ -717,9 +738,13 @@ function currentCanonicalRef() {
   return state.profilePubkey ? hexToNpub(state.profilePubkey) : state.ref;
 }
 
+function shareUrl() {
+  if (state.demo) return `${SITE_ORIGIN}/p/?demo=1`;
+  return `${SITE_ORIGIN}${profilePageUrl(currentCanonicalRef())}`;
+}
+
 async function shareProfile() {
-  const ref = currentCanonicalRef();
-  const url = profileService.canonicalUrl(ref);
+  const url = shareUrl();
   const title = state.profile
     ? `${profileName(state.profile)} — Portfolio`
     : "Nostr portfolio";
@@ -745,7 +770,7 @@ async function copyAction(target, text) {
 }
 
 function openQr() {
-  const url = profileService.canonicalUrl(currentCanonicalRef());
+  const url = shareUrl();
   els.profileQrUrl.textContent = url;
   if (!renderQr(els.profileQr, url)) {
     toast("QR rendering is unavailable. Copy the link instead.", true);
@@ -766,7 +791,7 @@ async function onActionClick(event) {
   } else if (action === "copy") {
     copyAction(target, target.getAttribute("data-copy") || "");
   } else if (action === "copy-link") {
-    copyAction(target, profileService.canonicalUrl(currentCanonicalRef()));
+    copyAction(target, shareUrl());
   } else if (action === "share-qr") {
     openQr();
   } else if (action === "edit" || action === "create") {

@@ -20,9 +20,11 @@ export const DEFAULT_RELAYS = [
   "wss://relay.primal.net",
 ];
 
+export const SITE_ORIGIN = "https://bitos.space";
+
 export const CLIENT_METADATA = {
   name: "BitOS Portfolio",
-  url: "https://bitos.space/p/",
+  url: `${SITE_ORIGIN}/p/`,
 };
 
 export const AVAILABILITY = {

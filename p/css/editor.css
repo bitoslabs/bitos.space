@@ -605,6 +605,12 @@ html.light-mode .repeat-row {
   color: var(--text-muted);
 }
 
+.tag-hint a {
+  color: var(--nostr-bright);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* gallery reel marker */
 .row-star {
   display: inline-flex;
@@ -1395,4 +1401,25 @@ html.light-mode .nip05-panel {
 .my-portfolio-card .hero-actions {
   gap: 8px;
   margin-top: 2px;
+}
+
+.blossom-field {
+  max-width: 520px;
+  margin-top: 12px;
+}
+
+.gallery-drop.is-busy {
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+.upload-status {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.upload-status:empty {
+  display: none;
 }

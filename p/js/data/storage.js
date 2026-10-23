@@ -1,9 +1,9 @@
 /**
  * Browser persistence. All keys and TTLs live in config.js.
  */
-import { DEFAULT_RELAYS, STORAGE } from "../config.js";
+import { BLOSSOM_SERVER, DEFAULT_RELAYS, STORAGE } from "../config.js";
 import { normalizeProfile } from "./profile-model.js";
-import { parseRelayUrls } from "../shared/urls.js";
+import { normalizeBlossomServer, parseRelayUrls } from "../shared/urls.js";
 
 function readRaw(key) {
   try {
@@ -105,6 +105,17 @@ export function writeDraft(pubkey, profile) {
 
 export function clearDraft(pubkey) {
   removeRaw(STORAGE.draft(pubkey));
+}
+
+export function loadBlossomServer() {
+  return (
+    normalizeBlossomServer(readRaw(STORAGE.blossom)) || BLOSSOM_SERVER
+  );
+}
+
+export function saveBlossomServer(server) {
+  const normalized = normalizeBlossomServer(server);
+  return normalized ? writeRaw(STORAGE.blossom, normalized) : false;
 }
 
 /**

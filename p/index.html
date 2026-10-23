@@ -43,7 +43,7 @@
     <link rel="stylesheet" href="css/header.css?v=5" />
     <link rel="stylesheet" href="css/landing.css?v=4" />
     <link rel="stylesheet" href="css/profile.css?v=6" />
-    <link rel="stylesheet" href="css/editor.css?v=5" />
+    <link rel="stylesheet" href="css/editor.css?v=6" />
     <link rel="stylesheet" href="css/responsive.css?v=3" />
     <link rel="stylesheet" href="css/gallery.css?v=1" />
     <link rel="stylesheet" href="css/themes.css?v=1" />
@@ -741,21 +741,29 @@
                 <div>
                   <h3>Gallery</h3>
                   <span class="fine"
-                    >Images are compressed in your browser and embedded in the
-                    signed event. Video stays a direct public URL because it
-                    does not fit inside a relay event.</span
+                    >Uploads go to BitOS media storage first; if that service is
+                    unavailable, the Blossom server below is used as a fallback.
+                    Your event stores only the returned links, so media stays
+                    out of the signed data.</span
                   >
                 </div>
               </div>
 
               <div class="gallery-drop" id="gallery-drop">
                 <div class="gallery-drop-text">
-                  <strong>Drop images here</strong>
-                  <span>JPEG, PNG, WebP, GIF or AVIF. Each image is resized and compressed before publishing; animated GIFs are stored as a still frame.</span>
+                  <strong>Drop images or video here</strong>
+                  <span>Files upload to BitOS with your Blossom server as
+                  fallback; only the returned links are stored in your event.
+                  Images up to 20 MB, MP4/WebM up to 100 MB.</span>
                 </div>
                 <div class="hero-actions">
-                  <button class="btn btn-ghost btn-sm" id="gallery-upload" type="button">
-                    Upload images
+                  <button
+                    class="btn btn-primary btn-sm"
+                    id="gallery-upload-media"
+                    type="button"
+                    title="Upload images or video to your Blossom server"
+                  >
+                    Upload media
                   </button>
                   <button class="btn btn-ghost btn-sm" id="gallery-add-image-url" type="button">
                     Add image URL
@@ -764,8 +772,42 @@
                     Add video link
                   </button>
                 </div>
-                <input id="gallery-file" type="file" accept="image/*" multiple hidden />
+                <input
+                  id="gallery-media-file"
+                  type="file"
+                  accept="image/*,video/mp4,video/webm"
+                  multiple
+                  hidden
+                />
               </div>
+
+              <p
+                class="upload-status"
+                id="gallery-upload-status"
+                role="status"
+                aria-live="polite"
+              ></p>
+
+              <label class="field blossom-field">
+                <span>Blossom fallback server</span>
+                <input
+                  id="f-blossom"
+                  type="url"
+                  spellcheck="false"
+                  placeholder="https://blossom.primal.net"
+                />
+                <span class="tag-hint"
+                  >Used only if the BitOS media service is unavailable. Files
+                  stay on that server and are linked into your event — the event
+                  never contains the media bytes. Saved in this browser.
+                  <a
+                    href="https://github.com/hzrd149/blossom"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Blossom spec</a
+                  >.</span
+                >
+              </label>
 
               <div class="media-budget" id="gallery-budget"></div>
               <div id="gallery-editor" class="repeat-list gallery-editor"></div>
@@ -777,15 +819,21 @@
               </div>
               <ul class="media-notes">
                 <li>
-                  <strong>Uploaded images</strong> travel inside your NIP-78
-                  event as compressed data URLs, so they work without a media
-                  server. Keep the total under the inline budget shown above,
-                  or use a hosted image URL for originals and animation.
+                  <strong>Upload media</strong> sends images or video to the
+                  BitOS media service first. If it is unavailable, the Blossom
+                  server above is used with a signed upload request. Only the
+                  returned https:// links are stored in your event, so keep the
+                  files available at those hosts.
                 </li>
                 <li>
-                  <strong>Video</strong> needs a direct MP4 or WebM URL. Upload
-                  the file to a media host you control — for example a Blossom
-                  or NIP-96 server — then paste the link here.
+                  <strong>Images and video</strong> can also be added as hosted
+                  URLs. Images are never embedded into the event anymore; older
+                  profiles with embedded images remain readable and are shown
+                  with the legacy budget above.
+                </li>
+                <li>
+                  <strong>Video previews</strong> use a generated poster frame,
+                  uploaded alongside the video and stored as a link.
                 </li>
                 <li>
                   <strong>Alt text and captions</strong> make the gallery
@@ -793,8 +841,8 @@
                   they open an item.
                 </li>
                 <li>
-                  Relays enforce different event size limits. If publishing
-                  fails, remove an inline image or switch it to a hosted URL.
+                  Relays enforce different event size limits. Media links keep
+                  the signed event small; publishing only sends the links.
                 </li>
                 <li>
                   Unchecked items stay in this browser as drafts and are never
@@ -1463,6 +1511,6 @@
     </noscript>
 
     <script src="vendor/qrcode.js"></script>
-    <script type="module" src="js/app.js?v=8"></script>
+    <script type="module" src="js/app.js?v=10"></script>
   </body>
 </html>

@@ -60,7 +60,7 @@ export function publicGallery(profile) {
     .map((item) => ({
       ...item,
       url: safeGallerySource(item.url),
-      poster: httpUrl(item.poster),
+      poster: isDataImage(item.poster) ? item.poster : httpUrl(item.poster),
     }))
     .filter((item) => item.url);
 }
@@ -141,7 +141,9 @@ function renderProjectCard(project, index, span2, isDemo) {
 function renderGalleryItem(item, index) {
   const video = item.type === "video";
   const labeled = item.caption || item.alt || (video ? "Video" : "Image");
-  const poster = httpUrl(item.poster);
+  const poster = isDataImage(item.poster)
+    ? item.poster
+    : httpUrl(item.poster);
   const media = video
     ? poster
       ? `<img src="${esc(poster)}" alt="" loading="lazy" decoding="async">`
@@ -658,7 +660,7 @@ export function renderProfile(container, model) {
           <span class="hero-reel-kicker">Show reel</span>
           <span class="hero-reel-empty-title">Add a show reel</span>
           <span class="hero-reel-empty-text">Upload a video or lead with your best image.</span>
-          <button class="btn btn-ghost btn-sm" type="button" data-action="edit">Add media</button>
+          <button class="btn btn-ghost btn-sm" type="button" data-action="edit-media">Add media</button>
         </span>
       </div>`
     : "";

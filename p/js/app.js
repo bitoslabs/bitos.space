@@ -738,7 +738,7 @@ function handleAuthChange() {
   maybeOpenRequestedEditor();
 }
 
-function openEditor() {
+function openEditor({ tab = "profile" } = {}) {
   if (state.demo) {
     toast("Sample data is read-only. Sign in to create your own portfolio.", true);
     return;
@@ -759,6 +759,7 @@ function openEditor() {
   if (!state.profile) state.profilePubkey = authState.pubkey;
   editor.open(state.profile, authState.pubkey, {
     updatedAt: state.updatedAt,
+    tab,
   });
   setView("editor");
   document.title = "Edit portfolio — bitos.space";
@@ -924,6 +925,8 @@ async function onActionClick(event) {
     }
   } else if (action === "edit" || action === "create") {
     openEditor();
+  } else if (action === "edit-media") {
+    openEditor({ tab: "gallery" });
   } else if (action === "contact") {
     const url = contactUrl(target.getAttribute("data-url") || "");
     if (url) location.href = url;

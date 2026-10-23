@@ -9,6 +9,7 @@ export const GALLERY_LIMIT = 12;
 export const INLINE_IMAGE_BUDGET = 600 * 1024;
 export const INLINE_IMAGE_TARGET = 120 * 1024;
 export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+export const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024;
 export const MAX_IMAGE_EDGE = 1400;
 
 const DATA_IMAGE = /^data:image\/(?:png|jpe?g|webp|gif|avif);base64,/i;
@@ -44,9 +45,110 @@ export function isGalleryMediaUrl(value, type = "image") {
 
 export function inlineImageBytes(gallery) {
   return (gallery || []).reduce((total, item) => {
-    if (!item || item.public === false || item.type === "video") return total;
-    return isDataImage(item.url) ? total + String(item.url).length : total;
+    if (!item || item.public === false) return total;
+    let bytes = total;
+    if (item.type !== "video" && isDataImage(item.url)) {
+      bytes += String(item.url).length;
+    }
+    if (item.type === "video" && isDataImage(item.poster)) {
+      bytes += String(item.poster).length;
+    }
+    return bytes;
   }, 0);
+}
+
+export async function sha256Hex(file) {
+  if (!globalThis.crypto || !crypto.subtle) {
+    throw new Error("This browser cannot hash files for upload.");
+  }
+  const buffer = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export function extractVideoPoster(file, { maxWidth = 640 } = {}) {
+  return new Promise((resolve) => {
+    const objectUrl = URL.createObjectURL(file);
+    const video = document.createElement("video");
+    let settled = false;
+    let timer = 0;
+
+    function finish(value) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      video.removeAttribute("src");
+      try {
+        video.load();
+      } catch {
+        /* ignore */
+      }
+      URL.revokeObjectURL(objectUrl);
+      resolve(value || "");
+    }
+
+    function draw() {
+      try {
+        const width = Math.min(maxWidth, video.videoWidth || maxWidth);
+        const height = Math.round(
+          (video.videoHeight || (width * 9) / 16) *
+            (width / (video.videoWidth || width))
+        );
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = Math.max(1, height);
+        const context = canvas.getContext("2d");
+        if (!context) {
+          finish("");
+          return;
+        }
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        finish(canvas.toDataURL("image/jpeg", 0.72));
+      } catch {
+        finish("");
+      }
+    }
+
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    video.onerror = () => finish("");
+    video.onloadedmetadata = () => {
+      const duration = Number.isFinite(video.duration) ? video.duration : 0;
+      const target = duration > 0.3 ? Math.min(1.2, duration / 3) : 0;
+      if (target <= 0 && video.readyState >= 2) {
+        draw();
+        return;
+      }
+      const seek = () => {
+        try {
+          video.currentTime = target;
+        } catch {
+          finish("");
+        }
+      };
+      if (video.readyState >= 2) seek();
+      else video.onloadeddata = seek;
+    };
+    video.onseeked = draw;
+    timer = window.setTimeout(() => finish(""), 8000);
+    video.src = objectUrl;
+  });
+}
+
+export function dataUrlToFile(dataUrl, filename = "upload") {
+  const raw = String(dataUrl || "");
+  const match = /^data:([^;,]+)?(;base64)?,([\s\S]*)$/.exec(raw);
+  if (!match) throw new Error("Invalid data URL.");
+  const mime = match[1] || "application/octet-stream";
+  const binary = match[2] ? atob(match[3]) : decodeURIComponent(match[3]);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return new File([bytes], filename, { type: mime });
 }
 
 export function formatBytes(bytes) {

@@ -24,6 +24,9 @@ export const DEFAULT_RELAYS = [
 
 export const SITE_ORIGIN = "https://bitos.space";
 export const BNOS_BUSINESS_URL = "https://bnos.space/b";
+export const BLOSSOM_SERVER = "https://blossom.primal.net";
+export const BITOS_MEDIA_UPLOAD_URL =
+  "https://social.bitos.space/api/media/upload";
 
 export const PROFILE_TYPE_TAGS = {
   personal: "bitos-personal",
@@ -50,4 +53,5 @@ export const STORAGE = {
   auth: "bitos.auth.v2",
   draft: (pubkey) => `bitos.profile.draft.${pubkey}`,
   cache: (pubkey) => `bitos.profile.cache.${pubkey}`,
+  blossom: "bitos.blossom.server",
 };

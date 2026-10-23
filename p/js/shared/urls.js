@@ -14,6 +14,26 @@ export function httpUrl(value) {
   }
 }
 
+export function normalizeBlossomServer(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  let url;
+  try {
+    url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+  } catch {
+    return "";
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") return "";
+  if (
+    url.protocol === "http:" &&
+    url.hostname !== "localhost" &&
+    url.hostname !== "127.0.0.1"
+  ) {
+    return "";
+  }
+  return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
+}
+
 export function contactUrl(value) {
   const raw = String(value || "").trim();
   if (!raw) return "";

@@ -9,13 +9,21 @@ import {
   splitList,
   timeAgo,
 } from "../shared/format.js";
-import { httpUrl, parseRelayUrls } from "../shared/urls.js";
+import {
+  httpUrl,
+  normalizeBlossomServer,
+  parseRelayUrls,
+} from "../shared/urls.js";
 import {
   GALLERY_LIMIT,
   INLINE_IMAGE_BUDGET,
-  compressImageFile,
+  MAX_UPLOAD_BYTES,
+  MAX_VIDEO_UPLOAD_BYTES,
+  dataUrlToFile,
+  extractVideoPoster,
   formatBytes,
   inlineImageBytes,
+  isDataImage,
   isInlineMedia,
 } from "../shared/media.js";
 import { normalizeTheme } from "../data/themes.js";
@@ -26,14 +34,18 @@ import {
 } from "../data/profile-model.js";
 import {
   clearDraft,
+  loadBlossomServer,
   loadRelays,
   readDraft,
+  saveBlossomServer,
   saveRelays,
   writeDraft,
 } from "../data/storage.js";
 import { hexToNpub } from "../shared/bech32.js";
 import * as auth from "../services/auth.js";
 import { publishProfile } from "../services/publish.js";
+import { uploadFilesToBlossom } from "../services/blossom.js";
+import { uploadEntriesToMediaServer } from "../services/media-server.js";
 import { createNip05Wizard } from "./nip05-wizard.js";
 
 export function createEditorView({
@@ -83,17 +95,18 @@ export function createEditorView({
     credentials: $("#credentials-editor", root),
     gallery: $("#gallery-editor", root),
     galleryDrop: $("#gallery-drop", root),
-    galleryFile: $("#gallery-file", root),
-    galleryUpload: $("#gallery-upload", root),
     galleryAddVideo: $("#gallery-add-video", root),
     galleryAddImageUrl: $("#gallery-add-image-url", root),
+    galleryUploadMedia: $("#gallery-upload-media", root),
+    galleryMediaFile: $("#gallery-media-file", root),
+    fBlossom: $("#f-blossom", root),
     galleryBudget: $("#gallery-budget", root),
+    galleryUploadStatus: $("#gallery-upload-status", root),
     themeInputs: $$('input[name="portfolio-theme"]', root),
   };
 
   let current = null;
   let saveTimer = 0;
-  let replaceGalleryIndex = -1;
   let galleryBusy = false;
   let publishClock = 0;
   let expandedProjects = new Set();
@@ -122,7 +135,7 @@ export function createEditorView({
       : loadRelays();
   }
 
-  function open(profile, pubkey, { updatedAt = 0 } = {}) {
+  function open(profile, pubkey, { updatedAt = 0, tab = "profile" } = {}) {
     const draft = readDraft(pubkey);
     const publishedProfile = profile ? clone(profile) : null;
     current = {
@@ -132,10 +145,12 @@ export function createEditorView({
       updatedAt,
       dirty: false,
       restoredDraft: Boolean(draft),
-      tab: "profile",
+      tab,
     };
     expandedProjects = new Set();
+    if (els.fBlossom) els.fBlossom.value = loadBlossomServer();
     fill();
+    setTab(tab, false);
     nip05.reset();
     if (draft) toast("Local draft restored. Publish when ready.");
   }
@@ -611,7 +626,9 @@ export function createEditorView({
 
   function galleryPreview(item) {
     const video = item.type === "video";
-    const poster = httpUrl(item.poster);
+    const poster = isDataImage(item.poster)
+      ? item.poster
+      : httpUrl(item.poster);
     if (video) {
       return poster
         ? `<img src="${esc(poster)}" alt="">`
@@ -675,13 +692,26 @@ export function createEditorView({
                   ? `<label class="field span2"><span>Video URL <b class="req">*</b></span><input data-f="url" type="url" maxlength="500" value="${esc(
                       item.url
                     )}" placeholder="https://…/clip.mp4"></label>
-                     <label class="field span2"><span>Poster image URL (optional)</span><input data-f="poster" type="url" maxlength="500" value="${esc(
-                       item.poster
-                     )}" placeholder="https://…/poster.jpg"></label>`
+                     ${
+                       isDataImage(item.poster)
+                         ? `<div class="field span2 inline-media-note">
+                              <span>Poster generated from video · ${formatBytes(
+                                item.poster.length
+                              )}</span>
+                              <button class="btn btn-ghost btn-sm" type="button" data-poster-clear="${index}">Remove</button>
+                              <input type="hidden" data-f="poster" value="${esc(
+                                item.poster
+                              )}">
+                            </div>`
+                         : `<label class="field span2"><span>Poster image URL (optional)</span><input data-f="poster" type="url" maxlength="500" value="${esc(
+                             item.poster
+                           )}" placeholder="https://…/poster.jpg"></label>`
+                     }`
                   : inline
                   ? `<div class="inline-media-note">
-                       <span>Embedded image · ${formatBytes(item.url.length)}</span>
-                       <button class="btn btn-ghost btn-sm" type="button" data-gallery-replace="${index}">Replace</button>
+                       <span>Embedded image (legacy) · ${formatBytes(
+                         item.url.length
+                       )}</span>
                      </div>`
                   : `<label class="field span2"><span>Image URL</span><input data-f="url" type="url" maxlength="500" value="${esc(
                       item.url
@@ -708,112 +738,31 @@ export function createEditorView({
     if (!els.galleryBudget || !current) return;
     const items = current.profile.gallery || [];
     const used = inlineImageBytes(items);
+    const hasInline = items.some(
+      (item) => isInlineMedia(item.url) || isInlineMedia(item.poster)
+    );
+    if (!hasInline) {
+      els.galleryBudget.classList.remove("is-high");
+      els.galleryBudget.innerHTML = `<span class="budget-text">${items.length}/${GALLERY_LIMIT} media items · links only</span>`;
+      return;
+    }
     const percent = Math.min(100, Math.round((used / INLINE_IMAGE_BUDGET) * 100));
     els.galleryBudget.classList.toggle("is-high", percent >= 80);
     els.galleryBudget.innerHTML = `<div class="budget-bar"><span style="width:${percent}%"></span></div>
       <span class="budget-text">${formatBytes(used)} of ${formatBytes(
       INLINE_IMAGE_BUDGET
-    )} inline image budget · ${items.length}/${GALLERY_LIMIT} items</span>`;
-  }
-
-  async function addGalleryImages(files) {
-    if (!current || !files || !files.length || galleryBusy) return;
-    syncFromForm();
-    const list = current.profile.gallery;
-    let added = 0;
-
-    galleryBusy = true;
-    setGalleryBusy(true);
-    try {
-      for (const file of Array.from(files)) {
-        if (list.length >= GALLERY_LIMIT) {
-          toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
-          break;
-        }
-        if (!String(file.type || "").startsWith("image/")) {
-          toast("Video files need a public URL. Use “Add video link”.", true);
-          continue;
-        }
-        try {
-          const result = await compressImageFile(file);
-          if (inlineImageBytes(list) + result.bytes > INLINE_IMAGE_BUDGET) {
-            toast(
-              "That image would exceed the inline media budget. Remove an image or use a hosted URL.",
-              true
-            );
-            break;
-          }
-          list.push({
-            id: makeId("md"),
-            type: "image",
-            url: result.dataUrl,
-            poster: "",
-            caption: "",
-            alt: "",
-            public: true,
-          });
-          added += 1;
-        } catch (error) {
-          toast((error && error.message) || "Could not add that image.", true);
-        }
-      }
-    } finally {
-      galleryBusy = false;
-      setGalleryBusy(false);
-    }
-
-    if (added) {
-      markDirty();
-      renderGallery();
-      toast(
-        `${added} image${added === 1 ? "" : "s"} added and optimised in your browser.`
-      );
-    }
-  }
-
-  async function replaceGalleryImage(index, file) {
-    if (!current || !file) return;
-    syncFromForm();
-    const item = current.profile.gallery[index];
-    if (!item) return;
-    try {
-      if (galleryBusy) return;
-      galleryBusy = true;
-      setGalleryBusy(true);
-      const result = await compressImageFile(file);
-      const counted =
-        item.public !== false && isInlineMedia(item.url)
-          ? item.url.length
-          : 0;
-      const others = inlineImageBytes(current.profile.gallery) - counted;
-      if (others + result.bytes > INLINE_IMAGE_BUDGET) {
-        toast(
-          "That replacement would exceed the inline media budget. Remove an image or use a hosted URL.",
-          true
-        );
-        return;
-      }
-      item.type = "image";
-      item.url = result.dataUrl;
-      item.poster = "";
-      markDirty();
-      renderGallery();
-      toast("Image replaced.");
-    } catch (error) {
-      toast((error && error.message) || "Could not replace that image.", true);
-    } finally {
-      galleryBusy = false;
-      setGalleryBusy(false);
-    }
+    )} legacy inline budget · ${items.length}/${GALLERY_LIMIT} items</span>`;
   }
 
   function setGalleryBusy(busy) {
-    if (els.galleryUpload) {
-      els.galleryUpload.disabled = busy;
-      els.galleryUpload.textContent = busy ? "Optimising…" : "Upload images";
-    }
     if (els.galleryAddImageUrl) els.galleryAddImageUrl.disabled = busy;
     if (els.galleryAddVideo) els.galleryAddVideo.disabled = busy;
+    if (els.galleryUploadMedia) els.galleryUploadMedia.disabled = busy;
+    if (els.galleryMediaFile) els.galleryMediaFile.disabled = busy;
+    if (els.fBlossom) els.fBlossom.disabled = busy;
+    if (els.galleryDrop) {
+      els.galleryDrop.classList.toggle("is-busy", busy);
+    }
   }
 
   function addGalleryLink(type) {
@@ -1272,10 +1221,16 @@ export function createEditorView({
       }
       return;
     }
-    const replace = event.target.closest("[data-gallery-replace]");
-    if (replace && current) {
-      replaceGalleryIndex = Number(replace.getAttribute("data-gallery-replace"));
-      startGalleryUpload();
+    const clearPoster = event.target.closest("[data-poster-clear]");
+    if (clearPoster && current) {
+      syncFromForm();
+      const index = Number(clearPoster.getAttribute("data-poster-clear"));
+      const item = current.profile.gallery[index];
+      if (item) {
+        item.poster = "";
+        markDirty();
+        renderGallery();
+      }
     }
   });
 
@@ -1285,7 +1240,6 @@ export function createEditorView({
 
   body.addEventListener("input", (event) => {
     if (event.target && event.target.id === "f-relays") return;
-    if (event.target && event.target.id === "gallery-file") return;
     if (event.target && event.target.id === "f-nip05") nip05.reset();
     const projectRow = event.target.closest(".project-row");
     if (projectRow) updateProjectRow(projectRow);
@@ -1293,7 +1247,6 @@ export function createEditorView({
   });
   body.addEventListener("change", (event) => {
     if (event.target && event.target.id === "f-relays") return;
-    if (event.target && event.target.id === "gallery-file") return;
     if (event.target && event.target.name === "portfolio-type") {
       setHidden(els.typeMore, event.target.value !== "organization");
     }
@@ -1332,31 +1285,197 @@ export function createEditorView({
     markDirty();
   });
 
-  function startGalleryUpload() {
-    if (!els.galleryFile || !current) return;
-    if (replaceGalleryIndex < 0 && (current.profile.gallery || []).length >= GALLERY_LIMIT) {
+  function setUploadLabel(text) {
+    if (els.galleryUploadMedia) {
+      els.galleryUploadMedia.textContent = text || "Upload media";
+    }
+  }
+
+  function setUploadStatus(text) {
+    if (els.galleryUploadStatus) {
+      els.galleryUploadStatus.textContent = text || "";
+    }
+  }
+
+  function startMediaUpload() {
+    if (!els.galleryMediaFile) return;
+    els.galleryMediaFile.value = "";
+    els.galleryMediaFile.click();
+  }
+
+  async function uploadMediaFiles(files) {
+    if (!current || !files || !files.length || galleryBusy) return;
+    syncFromForm();
+    const list = current.profile.gallery;
+    if (list.length >= GALLERY_LIMIT) {
       toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
       return;
     }
-    els.galleryFile.multiple = replaceGalleryIndex < 0;
-    els.galleryFile.click();
+    const server =
+      normalizeBlossomServer(els.fBlossom ? els.fBlossom.value : "") ||
+      loadBlossomServer();
+    if (!server) {
+      toast("Enter a valid Blossom fallback server URL.", true);
+      return;
+    }
+    if (els.fBlossom) els.fBlossom.value = server;
+    saveBlossomServer(server);
+    setUploadStatus("Preparing upload…");
+
+    galleryBusy = true;
+    setGalleryBusy(true);
+    let added = 0;
+    let serverUnavailable = false;
+    let usedFallback = false;
+
+    const queue = Array.from(files);
+    try {
+      for (let position = 0; position < queue.length; position += 1) {
+        const file = queue[position];
+        if (list.length >= GALLERY_LIMIT) {
+          toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
+          break;
+        }
+        const type = String(file.type || "");
+        const video = type.startsWith("video/");
+        const image = type.startsWith("image/");
+        if (!video && !image) {
+          toast("Choose an image, MP4, or WebM file.", true);
+          continue;
+        }
+        if (video && !/^video\/(?:mp4|webm)$/i.test(type)) {
+          toast("Video must be MP4 or WebM.", true);
+          continue;
+        }
+        if (video && file.size > MAX_VIDEO_UPLOAD_BYTES) {
+          toast(
+            `Video must be smaller than ${formatBytes(
+              MAX_VIDEO_UPLOAD_BYTES
+            )}.`,
+            true
+          );
+          continue;
+        }
+        if (image && file.size > MAX_UPLOAD_BYTES) {
+          toast(
+            `Images must be smaller than ${formatBytes(MAX_UPLOAD_BYTES)}.`,
+            true
+          );
+          continue;
+        }
+
+        const posterData = video ? await extractVideoPoster(file) : "";
+        const entries = [{ file, label: video ? "video" : "image" }];
+        if (posterData) {
+          entries.push({
+            file: dataUrlToFile(posterData, "poster.jpg"),
+            label: "poster",
+          });
+        }
+
+        const counter =
+          queue.length > 1 ? ` ${position + 1}/${queue.length}` : "";
+        const kind = `${video ? "video" : "image"}${counter}`;
+        let provider = "bitos";
+        const progress = ({ index, ratio }) => {
+          const percent = Math.round(ratio * 100);
+          const which = index === 0 ? kind : `poster${counter}`;
+          const target = provider === "bitos" ? "BitOS" : "Blossom";
+          if (ratio >= 0.99) {
+            setUploadLabel("Processing…");
+            setUploadStatus(`Processing ${which} on ${target}…`);
+          } else {
+            setUploadLabel(`Uploading… ${percent}%`);
+            setUploadStatus(`Uploading ${which} to ${target} ${percent}%`);
+          }
+        };
+
+        let uploaded = null;
+        if (serverUnavailable) {
+          provider = "blossom";
+          setUploadLabel(`Uploading ${kind}…`);
+          setUploadStatus(`Uploading ${kind} to Blossom…`);
+        } else {
+          try {
+            setUploadLabel(`Uploading ${kind}…`);
+            setUploadStatus(`Uploading ${kind} to BitOS…`);
+            uploaded = await uploadEntriesToMediaServer(
+              entries,
+              current.pubkey,
+              { onProgress: progress }
+            );
+          } catch {
+            serverUnavailable = true;
+            provider = "blossom";
+            setUploadStatus("BitOS unavailable — switching to Blossom…");
+          }
+        }
+
+        if (!uploaded) {
+          provider = "blossom";
+          uploaded = await uploadFilesToBlossom(entries, server, {
+            onProgress: progress,
+          });
+        }
+        if (provider === "blossom") usedFallback = true;
+
+        list.push({
+          id: makeId("md"),
+          type: video ? "video" : "image",
+          url: uploaded[0].url,
+          poster: uploaded[1] ? uploaded[1].url : "",
+          caption: "",
+          alt: "",
+          public: true,
+        });
+        added += 1;
+        markDirty();
+        renderGallery();
+      }
+      if (added) {
+        const last = els.gallery && els.gallery.lastElementChild;
+        if (last) last.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        const message = `${added} ${
+          added === 1 ? "item" : "items"
+        } uploaded${usedFallback ? " via Blossom fallback" : " to BitOS"}.`;
+        setUploadStatus(message);
+        toast(message);
+      }
+    } catch (error) {
+      const message = (error && error.message) || "Media upload failed.";
+      setUploadStatus(message);
+      toast(message, true);
+    } finally {
+      galleryBusy = false;
+      setGalleryBusy(false);
+      setUploadLabel("");
+      if (els.galleryMediaFile) els.galleryMediaFile.value = "";
+    }
   }
 
-  els.galleryUpload.addEventListener("click", () => {
-    replaceGalleryIndex = -1;
-    startGalleryUpload();
-  });
+  if (els.galleryUploadMedia) {
+    els.galleryUploadMedia.addEventListener("click", startMediaUpload);
+  }
+  if (els.galleryMediaFile) {
+    els.galleryMediaFile.addEventListener("change", () => {
+      const files = els.galleryMediaFile.files;
+      if (files && files.length) uploadMediaFiles(files);
+    });
+  }
+  if (els.fBlossom) {
+    els.fBlossom.addEventListener("change", () => {
+      const normalized = normalizeBlossomServer(els.fBlossom.value);
+      if (!normalized) {
+        toast("Enter a valid https:// Blossom server URL.", true);
+        els.fBlossom.value = loadBlossomServer();
+        return;
+      }
+      els.fBlossom.value = normalized;
+      saveBlossomServer(normalized);
+    });
+  }
   els.galleryAddImageUrl.addEventListener("click", () => addGalleryLink("image"));
   els.galleryAddVideo.addEventListener("click", () => addGalleryLink("video"));
-  els.galleryFile.addEventListener("change", () => {
-    const files = Array.from(els.galleryFile.files || []);
-    const replaceIndex = replaceGalleryIndex;
-    replaceGalleryIndex = -1;
-    els.galleryFile.value = "";
-    if (!files.length) return;
-    if (replaceIndex >= 0) replaceGalleryImage(replaceIndex, files[0]);
-    else addGalleryImages(files);
-  });
 
   if (els.galleryDrop) {
     ["dragenter", "dragover"].forEach((type) => {
@@ -1371,9 +1490,12 @@ export function createEditorView({
         els.galleryDrop.classList.remove("is-drag");
       });
     });
-    els.galleryDrop.addEventListener("drop", (event) => {
-      const files = event.dataTransfer && event.dataTransfer.files;
-      if (files && files.length) addGalleryImages(files);
+    els.galleryDrop.addEventListener("drop", async (event) => {
+      const files = Array.from(
+        (event.dataTransfer && event.dataTransfer.files) || []
+      );
+      if (!files.length) return;
+      await uploadMediaFiles(files);
     });
   }
 

@@ -10,6 +10,7 @@ import {
   formatBytes,
   inferMediaType,
   inlineImageBytes,
+  isDataImage,
   isGalleryMediaUrl,
 } from "../shared/media.js";
 import { normalizeTheme } from "./themes.js";
@@ -143,7 +144,9 @@ export function normalizeProfile(raw) {
             id: text(media.id, 40) || `md_${index}`,
             type,
             url,
-            poster: text(media.poster, 500),
+            poster: isDataImage(media.poster)
+              ? String(media.poster).slice(0, 700000)
+              : text(media.poster, 500),
             caption: text(media.caption || media.title, 160),
             alt: text(media.alt, 160),
             public: media.public !== false,

@@ -612,8 +612,10 @@ export function renderProfile(container, model) {
       </div>`
     : "";
 
+  const markedIndex = gallery.findIndex((item) => item.reel === true);
   const videoIndex = gallery.findIndex((item) => item.type === "video");
-  const reelIndex = videoIndex >= 0 ? videoIndex : 0;
+  const reelIndex =
+    markedIndex >= 0 ? markedIndex : videoIndex >= 0 ? videoIndex : 0;
   const reelItem = gallery[reelIndex];
   const reelIsVideo = Boolean(reelItem && reelItem.type === "video");
   const reelPoster = reelItem

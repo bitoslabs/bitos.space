@@ -147,6 +147,7 @@ export function normalizeProfile(raw) {
             caption: text(media.caption || media.title, 160),
             alt: text(media.alt, 160),
             public: media.public !== false,
+            reel: media.reel === true,
           };
         })
         .filter((item) => item.url)
@@ -250,6 +251,7 @@ export function toPublicProfile(profile) {
     .map((item) => {
       const copy = { ...item };
       delete copy.public;
+      if (copy.reel !== true) delete copy.reel;
       return copy;
     });
   out.credentials = (out.credentials || [])

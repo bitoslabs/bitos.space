@@ -96,6 +96,7 @@ export function createEditorView({
   let replaceGalleryIndex = -1;
   let galleryBusy = false;
   let publishClock = 0;
+  let expandedProjects = new Set();
 
   const publishTargets = Array.from(
     new Set([els.publishBtn, ...publishButtons].filter(Boolean))
@@ -133,6 +134,7 @@ export function createEditorView({
       restoredDraft: Boolean(draft),
       tab: "profile",
     };
+    expandedProjects = new Set();
     fill();
     nip05.reset();
     if (draft) toast("Local draft restored. Publish when ready.");
@@ -260,19 +262,26 @@ export function createEditorView({
     }));
 
     const previousProjects = profile.projects || [];
-    profile.projects = readRows(els.projects).map((row, index) => ({
-      id: (previousProjects[index] && previousProjects[index].id) || makeId(),
-      title: rowValue(row, "title"),
-      summary: rowValue(row, "summary"),
-      description: rowValue(row, "description"),
-      role: rowValue(row, "role"),
-      contribution: rowValue(row, "contribution"),
-      year: rowValue(row, "year"),
-      tags: splitList(rowValue(row, "tags")),
-      link: rowValue(row, "link"),
-      media: rowValue(row, "media"),
-      public: rowChecked(row, "public"),
-    }));
+    profile.projects = readRows(els.projects).map((row, index) => {
+      const rowId = row.getAttribute("data-id");
+      const previous =
+        previousProjects.find((entry) => entry.id === rowId) ||
+        previousProjects[index] ||
+        {};
+      return {
+        id: previous.id || rowId || makeId(),
+        title: rowValue(row, "title"),
+        summary: rowValue(row, "summary"),
+        description: rowValue(row, "description"),
+        role: rowValue(row, "role"),
+        contribution: rowValue(row, "contribution"),
+        year: rowValue(row, "year"),
+        tags: splitList(rowValue(row, "tags")),
+        link: rowValue(row, "link"),
+        media: rowValue(row, "media"),
+        public: rowChecked(row, "public"),
+      };
+    });
 
     profile.skills = readRows(els.skills).map((row) => ({
       name: rowValue(row, "name"),
@@ -298,6 +307,7 @@ export function createEditorView({
           caption: rowValue(row, "caption"),
           alt: rowValue(row, "alt"),
           public: rowChecked(row, "public"),
+          reel: previous.reel === true,
         };
       });
 
@@ -340,53 +350,190 @@ export function createEditorView({
       .join("");
   }
 
+  function projectInitials(title) {
+    const value = String(title || "").trim();
+    return value ? value.charAt(0).toUpperCase() : "P";
+  }
+
+  function projectThumb(project, title) {
+    const media = httpUrl(project.media);
+    return media
+      ? `<img src="${esc(media)}" alt="">`
+      : `<span class="project-initials" aria-hidden="true">${esc(
+          projectInitials(title)
+        )}</span>`;
+  }
+
+  function chipMarkup(tags) {
+    return (tags || [])
+      .map(
+        (tag) =>
+          `<span class="chip" data-value="${esc(tag)}">${esc(
+            tag
+          )}<button class="chip-x" type="button" data-chip-remove aria-label="Remove tag ${esc(
+            tag
+          )}">×</button></span>`
+      )
+      .join("");
+  }
+
   function renderProjects() {
     if (!current) return;
     const projects = current.profile.projects || [];
     els.projects.innerHTML = projects
-      .map(
-        (project, index) => `<div class="repeat-row" data-index="${index}">
-          <div class="row-head">
-            <span class="row-title">Project ${index + 1} · ${
-              project.public === false ? "draft" : "public"
-            }</span>
-            <button class="row-remove" type="button" data-remove="project" data-index="${index}">Remove</button>
+      .map((project, index) => {
+        const expanded = expandedProjects.has(project.id);
+        const title = (project.title || "").trim() || "Untitled project";
+        const status = project.public === false ? "Draft" : "Public";
+        return `<div class="repeat-row project-row${
+          expanded ? "" : " is-collapsed"
+        }" data-index="${index}" data-id="${esc(project.id || "")}">
+          <div class="row-head project-head">
+            <div class="project-summary">
+              <span class="project-thumb">${projectThumb(project, title)}</span>
+              <span class="project-summary-text">
+                <span class="row-title" data-project-title>${esc(title)}</span>
+                <span class="project-meta"><span data-project-year>${esc(
+                  project.year || "No year"
+                )}</span><span aria-hidden="true">·</span><span data-project-status>${status}</span></span>
+              </span>
+            </div>
+            <div class="row-actions">
+              <button class="icon-btn row-icon" type="button" data-project-move="up" data-index="${index}" aria-label="Move project up" title="Move up" ${
+                index === 0 ? "disabled" : ""
+              }>↑</button>
+              <button class="icon-btn row-icon" type="button" data-project-move="down" data-index="${index}" aria-label="Move project down" title="Move down" ${
+                index === projects.length - 1 ? "disabled" : ""
+              }>↓</button>
+              <button class="btn btn-ghost btn-sm" type="button" data-project-toggle data-index="${index}" aria-expanded="${expanded}" aria-controls="project-body-${index}">${
+                expanded ? "Close" : "Edit"
+              }</button>
+              <button class="row-remove" type="button" data-remove="project" data-index="${index}">Remove</button>
+            </div>
           </div>
-          <div class="field-grid">
-            <label class="field span2"><span>Title <b class="req">*</b></span><input data-f="title" type="text" maxlength="120" value="${esc(
-              project.title
-            )}"></label>
-            <label class="field"><span>Year</span><input data-f="year" type="text" maxlength="40" value="${esc(
-              project.year
-            )}" placeholder="2025 — 2026"></label>
-            <label class="field"><span>Role</span><input data-f="role" type="text" maxlength="120" value="${esc(
-              project.role
-            )}" placeholder="UX architecture"></label>
-            <label class="field span2"><span>Summary</span><textarea data-f="summary" rows="2" maxlength="400">${esc(
-              project.summary
-            )}</textarea></label>
-            <label class="field span2"><span>Description</span><textarea data-f="description" rows="3" maxlength="4000">${esc(
-              project.description
-            )}</textarea></label>
-            <label class="field"><span>Contribution</span><input data-f="contribution" type="text" maxlength="200" value="${esc(
-              project.contribution
-            )}" placeholder="Design system &amp; front-end — 60%"></label>
-            <label class="field"><span>Tags (comma separated)</span><input data-f="tags" type="text" maxlength="200" value="${esc(
-              (project.tags || []).join(", ")
-            )}" placeholder="Healthcare, Nostr"></label>
-            <label class="field"><span>Project link</span><input data-f="link" type="url" maxlength="500" value="${esc(
-              project.link
-            )}" placeholder="https://…"></label>
-            <label class="field"><span>Cover image URL</span><input data-f="media" type="url" maxlength="500" value="${esc(
-              project.media
-            )}" placeholder="https://…"></label>
+          <div class="project-body" id="project-body-${index}"${
+            expanded ? "" : " hidden"
+          }>
+            <div class="field-grid">
+              <label class="field span2"><span>Title <b class="req">*</b></span><input data-f="title" type="text" maxlength="120" value="${esc(
+                project.title
+              )}"></label>
+              <label class="field"><span>Year</span><input data-f="year" type="text" maxlength="40" value="${esc(
+                project.year
+              )}" placeholder="2025 — 2026"></label>
+              <label class="field"><span>Role</span><input data-f="role" type="text" maxlength="120" value="${esc(
+                project.role
+              )}" placeholder="UX architecture"></label>
+              <label class="field span2"><span>Summary</span><textarea data-f="summary" rows="2" maxlength="400">${esc(
+                project.summary
+              )}</textarea></label>
+              <label class="field span2"><span>Description</span><textarea data-f="description" rows="3" maxlength="4000">${esc(
+                project.description
+              )}</textarea></label>
+              <label class="field"><span>Contribution</span><input data-f="contribution" type="text" maxlength="200" value="${esc(
+                project.contribution
+              )}" placeholder="Design system &amp; front-end — 60%"></label>
+              <label class="field"><span>Project link</span><input data-f="link" type="url" maxlength="500" value="${esc(
+                project.link
+              )}" placeholder="https://…"></label>
+              <label class="field span2"><span>Cover image URL</span><input data-f="media" type="url" maxlength="500" value="${esc(
+                project.media
+              )}" placeholder="https://…"></label>
+              <div class="field span2 tag-field">
+                <span>Tags</span>
+                <div class="chip-input" data-chips>
+                  ${chipMarkup(project.tags)}
+                  <input class="chip-entry" type="text" maxlength="24" placeholder="Type a tag and press Enter" aria-label="Add project tag">
+                </div>
+                <input type="hidden" data-f="tags" value="${esc(
+                  (project.tags || []).join(", ")
+                )}">
+                <span class="tag-hint">Up to 8 tags. Press Enter or comma to add.</span>
+              </div>
+            </div>
+            <label class="check-field"><input data-f="public" type="checkbox" ${
+              project.public !== false ? "checked" : ""
+            }> Include this project in the published portfolio</label>
           </div>
-          <label class="check-field"><input data-f="public" type="checkbox" ${
-            project.public !== false ? "checked" : ""
-          }> Include this project in the published portfolio</label>
-        </div>`
-      )
+        </div>`;
+      })
       .join("");
+  }
+
+  function chipTags(wrap) {
+    return Array.from(wrap.querySelectorAll(".chip"))
+      .map((chip) => chip.getAttribute("data-value"))
+      .filter(Boolean);
+  }
+
+  function syncChipHidden(wrap) {
+    const field = wrap.parentElement.querySelector('[data-f="tags"]');
+    if (field) field.value = chipTags(wrap).join(", ");
+  }
+
+  function addChips(wrap, raw) {
+    if (!wrap) return;
+    const entry = wrap.querySelector(".chip-entry");
+    const tags = chipTags(wrap);
+    const seen = new Set(tags.map((tag) => tag.toLowerCase()));
+    String(raw || "")
+      .split(",")
+      .forEach((part) => {
+        const tag = part.replace(/\s+/g, " ").trim().slice(0, 24);
+        const key = tag.toLowerCase();
+        if (!tag || seen.has(key) || tags.length >= 8) return;
+        seen.add(key);
+        tags.push(tag);
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.setAttribute("data-value", tag);
+        chip.append(document.createTextNode(tag));
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chip-x";
+        button.setAttribute("data-chip-remove", "");
+        button.setAttribute("aria-label", `Remove tag ${tag}`);
+        button.textContent = "×";
+        chip.append(button);
+        wrap.insertBefore(chip, entry);
+      });
+    if (entry) entry.value = "";
+    syncChipHidden(wrap);
+  }
+
+  function updateProjectRow(row) {
+    if (!row) return;
+    const titleField = row.querySelector('[data-f="title"]');
+    const yearField = row.querySelector('[data-f="year"]');
+    const mediaField = row.querySelector('[data-f="media"]');
+    const publicField = row.querySelector('[data-f="public"]');
+    const title = titleField ? titleField.value.trim() : "";
+    const titleEl = row.querySelector("[data-project-title]");
+    if (titleEl) titleEl.textContent = title || "Untitled project";
+    const yearEl = row.querySelector("[data-project-year]");
+    if (yearEl) {
+      yearEl.textContent = (yearField && yearField.value.trim()) || "No year";
+    }
+    const statusEl = row.querySelector("[data-project-status]");
+    if (statusEl) {
+      statusEl.textContent =
+        publicField && !publicField.checked ? "Draft" : "Public";
+    }
+    const thumb = row.querySelector(".project-thumb");
+    if (!thumb) return;
+    const media = httpUrl(mediaField ? mediaField.value.trim() : "");
+    const img = thumb.querySelector("img");
+    if (media) {
+      if (!img) thumb.innerHTML = `<img src="${esc(media)}" alt="">`;
+      else if (img.getAttribute("src") !== media) img.src = media;
+    } else if (img) {
+      thumb.innerHTML = `<span class="project-initials" aria-hidden="true">${esc(
+        projectInitials(title)
+      )}</span>`;
+    } else {
+      const initials = thumb.querySelector(".project-initials");
+      if (initials) initials.textContent = projectInitials(title);
+    }
   }
 
   function renderSkills() {
@@ -496,8 +643,27 @@ export function createEditorView({
           <div class="row-head">
             <span class="row-title">${video ? "Video" : "Image"} ${
               index + 1
-            } · ${inline ? "embedded" : "link"}</span>
-            <button class="row-remove" type="button" data-gallery-remove="${index}">Remove</button>
+            } · ${inline ? "embedded" : "link"}${
+              item.reel === true
+                ? ` <span class="reel-badge">Show reel</span>`
+                : ""
+            }</span>
+            <div class="row-actions">
+              <button class="row-star${
+                item.reel === true ? " is-active" : ""
+              }" type="button" data-gallery-reel="${index}" aria-pressed="${
+                item.reel === true
+              }" title="${
+                item.reel === true ? "Current show reel" : "Use as show reel"
+              }">${item.reel === true ? "★" : "☆"}<span>Showreel</span></button>
+              <button class="icon-btn row-icon" type="button" data-gallery-move="up" data-index="${index}" aria-label="Move gallery item up" title="Move up" ${
+                index === 0 ? "disabled" : ""
+              }>↑</button>
+              <button class="icon-btn row-icon" type="button" data-gallery-move="down" data-index="${index}" aria-label="Move gallery item down" title="Move down" ${
+                index === items.length - 1 ? "disabled" : ""
+              }>↓</button>
+              <button class="row-remove" type="button" data-gallery-remove="${index}">Remove</button>
+            </div>
           </div>
           <div class="gallery-row-body">
             <div class="gallery-thumb${video ? " is-video" : ""}">${galleryPreview(
@@ -699,7 +865,7 @@ export function createEditorView({
     if (!list) return;
     if (type === "link") list.push({ label: "", url: "" });
     else if (type === "project") {
-      list.push({
+      const project = {
         id: makeId(),
         title: "",
         summary: "",
@@ -711,7 +877,9 @@ export function createEditorView({
         link: "",
         media: "",
         public: true,
-      });
+      };
+      list.push(project);
+      expandedProjects.add(project.id);
     } else if (type === "skill") {
       list.push({ name: "", evidence: "self", issuer: "" });
     } else if (type === "credential") {
@@ -743,6 +911,9 @@ export function createEditorView({
     const list = listFor(type);
     if (!list || !Number.isInteger(index) || index < 0 || index >= list.length) {
       return;
+    }
+    if (type === "project" && list[index] && list[index].id) {
+      expandedProjects.delete(list[index].id);
     }
     list.splice(index, 1);
     markDirty();
@@ -971,7 +1142,117 @@ export function createEditorView({
     });
   });
 
+  root.addEventListener(
+    "error",
+    (event) => {
+      const img = event.target;
+      if (!img || img.tagName !== "IMG") return;
+      const thumb = img.closest(".project-thumb, .gallery-thumb");
+      if (!thumb) return;
+      event.preventDefault();
+      if (thumb.classList.contains("project-thumb")) {
+        const row = thumb.closest(".project-row");
+        const field = row && row.querySelector('[data-f="title"]');
+        thumb.innerHTML = `<span class="project-initials" aria-hidden="true">${esc(
+          projectInitials(field ? field.value : "")
+        )}</span>`;
+      } else {
+        const video = thumb.classList.contains("is-video");
+        thumb.innerHTML = `<span class="gallery-thumb-empty">${icon(
+          video ? "play" : "image"
+        )}</span>`;
+      }
+    },
+    true
+  );
+
   root.addEventListener("click", (event) => {
+    const summary = event.target.closest(".project-summary");
+    if (summary && !event.target.closest("button")) {
+      const toggle = summary
+        .closest(".project-row")
+        .querySelector("[data-project-toggle]");
+      if (toggle) {
+        toggle.click();
+        return;
+      }
+    }
+
+    const chipRemove = event.target.closest("[data-chip-remove]");
+    if (chipRemove) {
+      event.preventDefault();
+      const chip = chipRemove.closest(".chip");
+      const wrap = chip && chip.closest("[data-chips]");
+      if (chip && wrap) {
+        chip.remove();
+        syncChipHidden(wrap);
+        markDirty();
+      }
+      return;
+    }
+
+    const projectToggle = event.target.closest("[data-project-toggle]");
+    if (projectToggle && current) {
+      const row = projectToggle.closest(".project-row");
+      if (row) {
+        const id = row.getAttribute("data-id");
+        const collapsed = row.classList.toggle("is-collapsed");
+        const projectBody = row.querySelector(".project-body");
+        if (projectBody) projectBody.hidden = collapsed;
+        projectToggle.setAttribute("aria-expanded", String(!collapsed));
+        projectToggle.textContent = collapsed ? "Edit" : "Close";
+        if (id) {
+          if (collapsed) expandedProjects.delete(id);
+          else expandedProjects.add(id);
+        }
+      }
+      return;
+    }
+
+    const projectMove = event.target.closest("[data-project-move]");
+    if (projectMove && current) {
+      syncFromForm();
+      const index = Number(projectMove.getAttribute("data-index"));
+      const delta =
+        projectMove.getAttribute("data-project-move") === "up" ? -1 : 1;
+      const list = current.profile.projects || [];
+      const target = index + delta;
+      if (Number.isInteger(index) && target >= 0 && target < list.length) {
+        [list[index], list[target]] = [list[target], list[index]];
+        markDirty();
+        renderProjects();
+      }
+      return;
+    }
+
+    const galleryReel = event.target.closest("[data-gallery-reel]");
+    if (galleryReel && current) {
+      syncFromForm();
+      const index = Number(galleryReel.getAttribute("data-gallery-reel"));
+      (current.profile.gallery || []).forEach((item, itemIndex) => {
+        item.reel = itemIndex === index;
+      });
+      markDirty();
+      renderGallery();
+      return;
+    }
+
+    const galleryMove = event.target.closest("[data-gallery-move]");
+    if (galleryMove && current) {
+      syncFromForm();
+      const index = Number(galleryMove.getAttribute("data-index"));
+      const delta =
+        galleryMove.getAttribute("data-gallery-move") === "up" ? -1 : 1;
+      const list = current.profile.gallery || [];
+      const target = index + delta;
+      if (Number.isInteger(index) && target >= 0 && target < list.length) {
+        [list[index], list[target]] = [list[target], list[index]];
+        markDirty();
+        renderGallery();
+      }
+      return;
+    }
+
     const remove = event.target.closest("[data-remove]");
     if (remove && current) {
       removeItem(
@@ -1006,6 +1287,8 @@ export function createEditorView({
     if (event.target && event.target.id === "f-relays") return;
     if (event.target && event.target.id === "gallery-file") return;
     if (event.target && event.target.id === "f-nip05") nip05.reset();
+    const projectRow = event.target.closest(".project-row");
+    if (projectRow) updateProjectRow(projectRow);
     markDirty();
   });
   body.addEventListener("change", (event) => {
@@ -1014,10 +1297,38 @@ export function createEditorView({
     if (event.target && event.target.name === "portfolio-type") {
       setHidden(els.typeMore, event.target.value !== "organization");
     }
+    const projectRow = event.target && event.target.closest(".project-row");
+    if (projectRow) updateProjectRow(projectRow);
     if (event.target && event.target.closest(".gallery-row")) {
       syncFromForm();
       renderGalleryBudget();
     }
+    markDirty();
+  });
+
+  root.addEventListener("keydown", (event) => {
+    const entry = event.target.closest(".chip-entry");
+    if (!entry) return;
+    if (event.key === "Enter" || event.key === ",") {
+      event.preventDefault();
+      addChips(entry.closest("[data-chips]"), entry.value);
+      markDirty();
+    } else if (event.key === "Backspace" && !entry.value) {
+      const wrap = entry.closest("[data-chips]");
+      const chips = wrap ? wrap.querySelectorAll(".chip") : [];
+      if (chips.length) {
+        event.preventDefault();
+        chips[chips.length - 1].remove();
+        syncChipHidden(wrap);
+        markDirty();
+      }
+    }
+  });
+
+  root.addEventListener("focusout", (event) => {
+    const entry = event.target.closest(".chip-entry");
+    if (!entry || !entry.value.trim()) return;
+    addChips(entry.closest("[data-chips]"), entry.value);
     markDirty();
   });
 

@@ -8,7 +8,24 @@ const translations = {
         nav_about: "About",
         nav_faq: "FAQ",
         nav_community: "Community",
+        nav_profiles: "Profiles",
         nav_data: "Data Standard",
+        nav_dev: "Developers",
+        nav_open_app: "Open app",
+        nav_group_product: "Product",
+        nav_group_apps: "Apps",
+        nav_group_dev: "Developers",
+        nav_eco_overview: "Explore the ecosystem",
+        nav_app_bnos_desc: "Flagship workspace — POS, ERP, CRM, chat, AI agents",
+        nav_app_social_desc: "Local-first Nostr social client",
+        nav_app_pocket_desc: "Private journal that pays you sats",
+        nav_app_learn_desc: "Offline-first learning platform",
+        nav_app_vatta_desc: "2D story game about life and rebirth",
+        nav_app_vault_desc: "Local-first encrypted password vault",
+        nav_dev_data_desc: "63 open Nostr event conventions",
+        nav_dev_nostr_desc: "Protocol layer — relays and events",
+        nav_dev_app_desc: "ERP, CRM, chat, and AI workspace",
+        nav_dev_github_desc: "Source, issues, and discussions",
         btn_github: "GitHub",
         hero_badge: "Decentralized Enterprise",
         hero_protocol: "Built on Nostr",
@@ -152,7 +169,24 @@ const translations = {
         nav_about: "ກ່ຽວກັບ",
         nav_faq: "ຄຳຖາມທີ່ພົບເລື້ອຍ",
         nav_community: "ຊຸມຊົນ",
+        nav_profiles: "ໂປຣໄຟລ໌",
         nav_data: "ມາດຕະຖານຂໍ້ມູນ",
+        nav_dev: "ນັກພັດທະນາ",
+        nav_open_app: "ເປີດແອັບ",
+        nav_group_product: "ຜະລິດຕະພັນ",
+        nav_group_apps: "ແອັບ",
+        nav_group_dev: "ນັກພັດທະນາ",
+        nav_eco_overview: "ສຳຫຼວດລະບົບນິເວດ",
+        nav_app_bnos_desc: "ພື້ນທີ່ເຮັດວຽກຫຼັກ — POS, ERP, CRM, ແຊັດ, AI agents",
+        nav_app_social_desc: "ແອັບສັງຄົມ Nostr ແບບ local-first",
+        nav_app_pocket_desc: "ບັນທຶກສ່ວນຕົວທີ່ໄດ້ sats",
+        nav_app_learn_desc: "ແພລັດຟອມການຮຽນຮູ້ແບບ offline-first",
+        nav_app_vatta_desc: "ເກມເລື່ອງ 2D ກ່ຽວກັບຊີວິດ ແລະ ການເກີດໃໝ່",
+        nav_app_vault_desc: "ບ່ອນເກັບລະຫັດຜ່ານແບບເຂົ້າລະຫັດ local-first",
+        nav_dev_data_desc: "ຂໍ້ກຳນົດ Nostr event ເປີດ 63 ລາຍການ",
+        nav_dev_nostr_desc: "ຊັ້ນໂປຣໂຕຄໍ — relay ແລະ event",
+        nav_dev_app_desc: "ERP, CRM, ແຊັດ, ແລະພື້ນທີ່ເຮັດວຽກ AI",
+        nav_dev_github_desc: "ແຫຼ່ງລະຫັດ, issue, ແລະ ການສົນທະນາ",
         btn_github: "GitHub",
         hero_badge: "ວິສາຫະກິດແບບກະຈາຍສູນ",
         hero_protocol: "ສ້າງເທິງ Nostr",
@@ -398,6 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { label: t('aud_kicker'), icon: 'users', href: '#audience' },
             { label: t('nav_faq'), icon: 'circle-question-mark', href: '#faq' },
             { label: t('nav_community'), icon: 'message-circle', href: '#community' },
+            { label: t('nav_profiles'), icon: 'users', href: 'p/' },
             { label: t('nav_data'), icon: 'book', href: 'data-standard.html' },
             { label: t('cmdk_live'), icon: 'rocket', action: 'demo' },
             { label: t('cmdk_source'), icon: 'github', action: 'github' },
@@ -577,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function draw(time) {
             ctx.clearRect(0, 0, width, height);
-            const isLight = document.body.classList.contains('light-mode');
+            const isLight = document.documentElement.classList.contains('light-mode');
             for (let k = 0; k < dots.length; k++) {
                 const d = dots[k];
                 const ox = d.x + Math.sin(time * 0.0005 + d.y * 0.015) * 2.5;
@@ -643,6 +678,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Parallax for the hero honeycomb backplate
+    const heroHex = document.querySelector('.hero-hex');
+    const heroVisual = heroHex ? heroHex.parentElement : null;
+    if (heroVisual && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        let hexRaf = null;
+        let pointerX = 0;
+        let pointerY = 0;
+        const applyHexOffset = () => {
+            hexRaf = null;
+            const rect = heroVisual.getBoundingClientRect();
+            const offsetX = ((pointerX - rect.left) / rect.width - 0.5) * 14;
+            const offsetY = ((pointerY - rect.top) / rect.height - 0.5) * 14;
+            heroHex.style.transform =
+                'translate(calc(-50% + ' + offsetX.toFixed(2) + 'px), calc(-50% + ' + offsetY.toFixed(2) + 'px))';
+        };
+        heroVisual.addEventListener('pointermove', e => {
+            pointerX = e.clientX;
+            pointerY = e.clientY;
+            if (!hexRaf) hexRaf = window.requestAnimationFrame(applyHexOffset);
+        });
+        heroVisual.addEventListener('pointerleave', () => {
+            if (hexRaf) {
+                window.cancelAnimationFrame(hexRaf);
+                hexRaf = null;
+            }
+            heroHex.style.transform = 'translate(-50%, -50%)';
+        });
+    }
+
     // Illustrative relay stream console
     const streamLines = document.getElementById('stream-lines');
     if (streamLines) {
@@ -699,28 +763,56 @@ document.addEventListener('DOMContentLoaded', () => {
     // Theme Setup
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeIcon = themeToggleBtn.querySelector('use');
+    const themeColorMeta = document.getElementById('theme-color');
+    const themeMedia = window.matchMedia('(prefers-color-scheme: light)');
 
-    function setTheme(isLight) {
-        if (isLight) {
-            document.body.classList.add('light-mode');
-            themeIcon.setAttribute('href', ICON_SPRITE + '#sun');
-            localStorage.setItem('theme', 'light');
-        } else {
-            document.body.classList.remove('light-mode');
-            themeIcon.setAttribute('href', ICON_SPRITE + '#moon');
-            localStorage.setItem('theme', 'dark');
+    function storedTheme() {
+        try {
+            const saved = localStorage.getItem('theme');
+            return saved === 'light' || saved === 'dark' ? saved : null;
+        } catch {
+            return null;
         }
     }
 
-    // Check saved theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        setTheme(true);
+    function currentTheme() {
+        return document.documentElement.classList.contains('light-mode') ? 'light' : 'dark';
     }
 
+    function setTheme(theme, persist = true) {
+        const isLight = theme === 'light';
+        document.documentElement.classList.toggle('light-mode', isLight);
+        themeIcon.setAttribute('href', ICON_SPRITE + (isLight ? '#sun' : '#moon'));
+        themeToggleBtn.setAttribute(
+            'aria-label',
+            isLight ? 'Switch to dark theme' : 'Switch to light theme'
+        );
+        if (themeColorMeta) {
+            themeColorMeta.setAttribute('content', isLight ? '#f8f9fa' : '#0b0b0b');
+        }
+        if (persist) {
+            try {
+                localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            } catch {
+                /* storage unavailable */
+            }
+        }
+    }
+
+    setTheme(storedTheme() || (themeMedia.matches ? 'light' : 'dark'), false);
+
     themeToggleBtn.addEventListener('click', () => {
-        const isLight = document.body.classList.contains('light-mode');
-        setTheme(!isLight);
+        setTheme(currentTheme() === 'light' ? 'dark' : 'light');
+    });
+
+    themeMedia.addEventListener('change', (event) => {
+        if (!storedTheme()) setTheme(event.matches ? 'light' : 'dark', false);
+    });
+
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'theme') {
+            setTheme(storedTheme() || (themeMedia.matches ? 'light' : 'dark'), false);
+        }
     });
 
     // Feature Card Spotlight Effect

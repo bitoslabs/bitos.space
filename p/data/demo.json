@@ -1,0 +1,211 @@
+{
+  "pubkey": "4f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa",
+  "created_at": 1792454400,
+  "profile": {
+    "version": 1,
+    "name": "BitOS Labs",
+    "displayName": "BitOS",
+    "nip05": "",
+    "headline": "Sovereign business software on Nostr — identity, commerce and client delivery.",
+    "bio": "BitOS Labs builds local-first software for organizations in Laos and Southeast Asia. Three product lines share one open core: BitOS for identity, social and learning on Nostr; BNOS for point of sale, ERP and commerce; and Bitdigo for client delivery in logistics, pharmacy, retail and services.\n\nThe work is bilingual by default (Lao, Thai, English), keeps operating when the network does not, and leaves keys and records with the organization that owns them.",
+    "location": "Vientiane, Laos",
+    "timezone": "UTC+7",
+    "languages": [
+      "EN",
+      "ລາວ",
+      "TH"
+    ],
+    "theme": "obsidian",
+    "availability": {
+      "status": "available",
+      "note": "Open to selected projects and partnerships"
+    },
+    "avatar": "https://bitos.space/assets/bee-animated.svg",
+    "banner": "",
+    "contact": {
+      "label": "Request contact",
+      "url": "mailto:bitdigo.ltd@gmail.com"
+    },
+    "links": [
+      {
+        "label": "BitOS",
+        "url": "https://bitos.space"
+      },
+      {
+        "label": "Social",
+        "url": "https://social.bitos.space/"
+      },
+      {
+        "label": "BNOS",
+        "url": "https://bnos.space"
+      },
+      {
+        "label": "Bitdigo",
+        "url": "https://bitdigo.com"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/bitoslabs"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Nostr protocol & NIPs",
+        "evidence": "self",
+        "issuer": ""
+      },
+      {
+        "name": "Local-first architecture",
+        "evidence": "self",
+        "issuer": ""
+      },
+      {
+        "name": "POS & commerce systems",
+        "evidence": "self",
+        "issuer": ""
+      },
+      {
+        "name": "Identity & signed credentials",
+        "evidence": "self",
+        "issuer": ""
+      },
+      {
+        "name": "Bilingual UX (Lao · Thai · EN)",
+        "evidence": "self",
+        "issuer": ""
+      },
+      {
+        "name": "Design systems",
+        "evidence": "self",
+        "issuer": ""
+      },
+      {
+        "name": "Cross-border logistics",
+        "evidence": "self",
+        "issuer": ""
+      }
+    ],
+    "projects": [
+      {
+        "id": "pr_bitos",
+        "title": "BitOS — identity, social and learning on Nostr",
+        "summary": "A decentralized enterprise network: local-first social, NIP-07/NIP-46 identity, signed NIP-78 portfolios, offline learning, a password vault and a Lao/Thai/English story game.",
+        "description": "BitOS replaces the central account database with Nostr relays and user-held keys. Profiles and portfolios are signed replaceable events (kind 0 and NIP-78 kind 30078); the private key stays on the device in a browser signer or native keystore. The ecosystem ships as separate open apps — social.bitos.space, the /p/ portfolio app, learn.bitos.space, pocket.bitos.space, the BitOS Vault Chromium extension and the Vatta game — each usable offline or as a static site.",
+        "role": "Product & platform engineering",
+        "contribution": "Identity, portfolio data standard, local-first UX",
+        "year": "2025 — 2026",
+        "tags": [
+          "Nostr",
+          "Identity",
+          "Local-first",
+          "Social"
+        ],
+        "link": "https://bitos.space",
+        "media": "",
+        "public": true
+      },
+      {
+        "id": "pr_bnos",
+        "title": "BNOS — business OS for shops and branches",
+        "summary": "Local-first POS, catalog, inventory, orders and shifts with Lightning and bank-QR payments, built on the shared GLO/Nostr data layer in @bitos/bnos-core.",
+        "description": "BNOS covers point of sale, order queue, catalog, stock, staff shifts and customer records for single shops and multi-branch companies. Every record is a GLO object carrying its Nostr kind; writes land in local storage first and sync to relays when connectivity returns. The Svelte console, consumer marketplace and Nuxt/Vue clients share one core package, with Lao, Thai and English commerce and multi-currency pricing in mind.",
+        "role": "Commerce platform & design system",
+        "contribution": "GLO model, POS flows, multi-client sync",
+        "year": "2025 — 2026",
+        "tags": [
+          "POS",
+          "ERP",
+          "Lightning",
+          "Nostr"
+        ],
+        "link": "https://app.bnos.space",
+        "media": "",
+        "public": true
+      },
+      {
+        "id": "pr_vault",
+        "title": "BitOS Vault — local-first password vault",
+        "summary": "A Chromium extension that generates strong passwords and keeps an encrypted offline vault, with optional relay sync and no account or telemetry.",
+        "description": "The vault generates passwords locally, stores only ciphertext, and can sync between devices through a NIP-78 relay path without handing plaintext secrets to a server. It is a Manifest V3 extension with unit, integration and two-device relay end-to-end tests, packaged as an MIT-licensed release.",
+        "role": "Product engineering",
+        "contribution": "Vault model, encryption, relay sync",
+        "year": "2026",
+        "tags": [
+          "Security",
+          "Extension",
+          "NIP-78",
+          "Offline"
+        ],
+        "link": "https://github.com/bitoslabs/bitos-vault",
+        "media": "",
+        "public": true
+      },
+      {
+        "id": "pr_vatta",
+        "title": "Vatta — ປ່າສຽງເອີ້ນ (The Forest Call)",
+        "summary": "A contemplative 2D story game in Lao, Thai and English about life and rebirth — installable, offline-capable, and built as a static Vite release.",
+        "description": "Vatta opens in Lao and remembers a player's Thai or English choice on later visits. The game is a static build with a service worker for offline play, a seeded world for deterministic tests, and mobile controls tuned for low-end phones. It is the BitOS ecosystem's experiment in calm, non-extractive interactive storytelling.",
+        "role": "Game design & front-end",
+        "contribution": "Story system, localization, offline build",
+        "year": "2026",
+        "tags": [
+          "Game",
+          "Lao",
+          "Thai",
+          "Offline"
+        ],
+        "link": "https://vatta.bitos.space",
+        "media": "",
+        "public": true
+      }
+    ],
+    "gallery": [
+      {
+        "id": "md_mark",
+        "type": "image",
+        "url": "/assets/bee-animated.svg",
+        "poster": "",
+        "caption": "The BitOS mark, animated",
+        "alt": "Animated golden bee used as the BitOS identity mark",
+        "public": true
+      },
+      {
+        "id": "md_vatta",
+        "type": "image",
+        "url": "/assets/icons/vatta.svg",
+        "poster": "",
+        "caption": "Vatta — a story game in Lao, Thai and English",
+        "alt": "Vatta game icon",
+        "public": true
+      },
+      {
+        "id": "md_learn",
+        "type": "image",
+        "url": "/assets/icons/learn.svg",
+        "poster": "",
+        "caption": "Offline-first learning",
+        "alt": "BitOS Learn icon",
+        "public": true
+      },
+      {
+        "id": "md_vault",
+        "type": "image",
+        "url": "/assets/icons/vault.svg",
+        "poster": "",
+        "caption": "A local-first vault for keys and passwords",
+        "alt": "BitOS Vault icon",
+        "public": true
+      },
+      {
+        "id": "md_motion",
+        "type": "video",
+        "url": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        "poster": "",
+        "caption": "Sample motion clip",
+        "alt": "Short sample video showing gallery video playback",
+        "public": true
+      }
+    ],
+    "credentials": []
+  }
+}

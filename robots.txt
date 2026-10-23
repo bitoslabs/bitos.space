@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://locobit.space/sitemap.xml
+Sitemap: https://bitos.space/sitemap.xml

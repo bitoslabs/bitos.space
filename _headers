@@ -1,0 +1,4 @@
+# Keep portfolio JS modules revalidating so a deploy cannot leave clients on
+# an old editor/upload module for the CDN's default cache lifetime.
+/p/js/*
+  Cache-Control: public, max-age=0, must-revalidate

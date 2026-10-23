@@ -899,6 +899,10 @@ export function createEditorView({
 
   async function publish() {
     if (!current) return;
+    if (galleryBusy) {
+      toast("Wait for the upload to finish before publishing.", true);
+      return;
+    }
     syncFromForm();
     const validation = validateProfile(current.profile);
     if (validation) {
@@ -1306,8 +1310,8 @@ export function createEditorView({
   async function uploadMediaFiles(files) {
     if (!current || !files || !files.length || galleryBusy) return;
     syncFromForm();
-    const list = current.profile.gallery;
-    if (list.length >= GALLERY_LIMIT) {
+    const session = current;
+    if (current.profile.gallery.length >= GALLERY_LIMIT) {
       toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
       return;
     }
@@ -1331,8 +1335,9 @@ export function createEditorView({
     const queue = Array.from(files);
     try {
       for (let position = 0; position < queue.length; position += 1) {
+        if (current !== session) return;
         const file = queue[position];
-        if (list.length >= GALLERY_LIMIT) {
+        if (current.profile.gallery.length >= GALLERY_LIMIT) {
           toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
           break;
         }
@@ -1418,8 +1423,13 @@ export function createEditorView({
           });
         }
         if (provider === "blossom") usedFallback = true;
+        if (current !== session) return;
 
-        list.push({
+        // An autosave can run while a large file uploads, replacing
+        // current.profile.gallery with a new array. Sync and re-read it so the
+        // completed item is appended to the live list, not a stale array.
+        syncFromForm();
+        current.profile.gallery.push({
           id: makeId("md"),
           type: video ? "video" : "image",
           url: uploaded[0].url,
@@ -1534,6 +1544,10 @@ export function createEditorView({
 
   function close() {
     if (!current) return;
+    if (galleryBusy) {
+      toast("Wait for the upload to finish before leaving the editor.", true);
+      return;
+    }
     if (current.dirty) saveDraft(false);
     current = null;
     if (onClosed) onClosed();

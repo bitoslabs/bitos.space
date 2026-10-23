@@ -1,13 +1,14 @@
 /**
- * BitOS media API upload. Uses multipart/form-data so no custom headers are
- * required. Chrome still preflights XHR for this request, and the API may not
- * answer OPTIONS yet, so a failed XHR falls back to fetch (which sends the
- * same multipart POST without a preflight). The server route also accepts a
- * raw body with X-Upload-Filename/X-SHA-256 for native clients.
+ * BitOS media API upload. Uses the raw POST contract:
+ *   Content-Type, X-Upload-Filename, X-SHA-256
+ *
+ * Multipart is not used because SvelteKit's CSRF protection rejects cross-site
+ * form submissions ("Cross-site POST form submissions are forbidden"). The raw
+ * body is not a form, so it passes CSRF once the API answers the CORS preflight
+ * (the route exports OPTIONS with the required headers).
  */
 import { BITOS_MEDIA_UPLOAD_URL } from "../config.js";
-
-let preferFetch = false;
+import { sha256Hex } from "../shared/media.js";
 
 function endpoint(pubkey) {
   const url = new URL(BITOS_MEDIA_UPLOAD_URL);
@@ -15,15 +16,6 @@ function endpoint(pubkey) {
   if (/^[0-9a-f]{64}$/.test(clean)) url.searchParams.set("pubkey", clean);
   url.searchParams.set("purpose", "profile");
   return url.toString();
-}
-
-function buildForm(file, pubkey) {
-  const form = new FormData();
-  form.append("file", file, file.name || "upload");
-  form.append("purpose", "profile");
-  const clean = String(pubkey || "").toLowerCase();
-  if (/^[0-9a-f]{64}$/.test(clean)) form.append("pubkey", clean);
-  return form;
 }
 
 function errorMessage(xhr) {
@@ -35,15 +27,22 @@ function errorMessage(xhr) {
   }
 }
 
-function descriptorUrl(data) {
-  const url = data && typeof data.url === "string" ? data.url : "";
-  return /^https:\/\//i.test(url) ? url : "";
-}
+export async function uploadToMediaServer(file, pubkey, { onProgress } = {}) {
+  if (!file || !file.size) throw new Error("Choose a file to upload.");
+  const sha256 = await sha256Hex(file);
 
-function uploadWithXHR(file, pubkey, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", endpoint(pubkey), true);
+    xhr.setRequestHeader(
+      "Content-Type",
+      file.type || "application/octet-stream"
+    );
+    xhr.setRequestHeader(
+      "X-Upload-Filename",
+      encodeURIComponent(file.name || "upload")
+    );
+    xhr.setRequestHeader("X-SHA-256", sha256);
     xhr.timeout = 300000;
 
     xhr.upload.onprogress = (event) => {
@@ -60,84 +59,25 @@ function uploadWithXHR(file, pubkey, onProgress) {
         } catch {
           /* ignore */
         }
-        const url = descriptorUrl(data);
-        if (!url) {
+        const url = data && typeof data.url === "string" ? data.url : "";
+        if (!/^https:\/\//i.test(url)) {
           reject(new Error("The media server did not return an https URL."));
           return;
         }
-        resolve({ url, provider: "bitos" });
+        resolve({ url, sha256, provider: "bitos" });
         return;
       }
       const message = errorMessage(xhr);
       reject(new Error(message || `Media server upload failed (${xhr.status}).`));
     };
-    xhr.onerror = () => {
-      const error = new Error("Could not reach the BitOS media server.");
-      error.retryable = true;
-      reject(error);
-    };
+    xhr.onerror = () =>
+      reject(new Error("Could not reach the BitOS media server."));
     xhr.ontimeout = () =>
       reject(new Error("The BitOS media upload timed out."));
     xhr.onabort = () => reject(new Error("Upload cancelled."));
 
-    xhr.send(buildForm(file, pubkey));
+    xhr.send(file);
   });
-}
-
-async function uploadWithFetch(file, pubkey) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 300000);
-  try {
-    const response = await fetch(endpoint(pubkey), {
-      method: "POST",
-      body: buildForm(file, pubkey),
-      signal: controller.signal,
-    });
-    let data = null;
-    try {
-      data = await response.json();
-    } catch {
-      /* ignore */
-    }
-    if (!response.ok) {
-      throw new Error(
-        (data && (data.error || data.message)) ||
-          `Media server upload failed (${response.status}).`
-      );
-    }
-    const url = descriptorUrl(data);
-    if (!url) throw new Error("The media server did not return an https URL.");
-    return { url, provider: "bitos" };
-  } catch (error) {
-    if (error && error.name === "AbortError") {
-      throw new Error("The BitOS media upload timed out.");
-    }
-    throw error;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-export async function uploadToMediaServer(file, pubkey, { onProgress } = {}) {
-  if (preferFetch) {
-    if (onProgress) onProgress(0.01);
-    const result = await uploadWithFetch(file, pubkey);
-    if (onProgress) onProgress(1);
-    return result;
-  }
-
-  try {
-    return await uploadWithXHR(file, pubkey, onProgress);
-  } catch (error) {
-    if (!error || !error.retryable) throw error;
-    // XHR's preflight failed (for example OPTIONS 405). fetch sends the same
-    // multipart body without that preflight.
-    preferFetch = true;
-    if (onProgress) onProgress(0.01);
-    const result = await uploadWithFetch(file, pubkey);
-    if (onProgress) onProgress(1);
-    return result;
-  }
 }
 
 export async function uploadEntriesToMediaServer(

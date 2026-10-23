@@ -93,6 +93,7 @@ function setView(view) {
       view === "editor" || !auth.getState().pubkey
     );
   }
+  queueProfileNavSync();
 }
 
 function renderSession() {
@@ -109,6 +110,54 @@ function activeNavMenu() {
 
 function navMenuLabel(nav) {
   return nav === els.profileNav ? "profile sections" : "navigation";
+}
+
+let profileNavFrame = 0;
+
+function syncProfileNavActive() {
+  profileNavFrame = 0;
+  if (
+    !els.profileNav ||
+    els.profileNav.hidden ||
+    !els.profile ||
+    els.profile.hidden
+  ) {
+    return;
+  }
+  const links = Array.from(
+    els.profileNav.querySelectorAll('a[href^="#"]')
+  );
+  const sections = Array.from(
+    els.profile.querySelectorAll(".section[id]")
+  );
+  if (!links.length || !sections.length) return;
+
+  const anchor = window.scrollY + 140;
+  let current = sections[0].id;
+  sections.forEach((section) => {
+    if (section.getBoundingClientRect().top + window.scrollY <= anchor) {
+      current = section.id;
+    }
+  });
+  if (
+    window.innerHeight + window.scrollY >=
+    document.documentElement.scrollHeight - 40
+  ) {
+    current = sections[sections.length - 1].id;
+  }
+
+  links.forEach((link) => {
+    const active =
+      !link.hidden && link.getAttribute("href") === `#${current}`;
+    link.classList.toggle("is-active", active);
+    if (active) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  });
+}
+
+function queueProfileNavSync() {
+  if (profileNavFrame) return;
+  profileNavFrame = window.requestAnimationFrame(syncProfileNavActive);
 }
 
 function closeNavMenu(focusToggle = false) {
@@ -253,6 +302,7 @@ function renderProfile({ skipView = false } = {}) {
     isDemo: state.demo,
   });
   setHidden(els.navGallery, publicGallery(state.profile).length === 0);
+  queueProfileNavSync();
 
   updateCanonical();
   if (editor && editor.isOpen()) {
@@ -964,6 +1014,26 @@ function bindEvents() {
       if (event.target.closest("a")) closeNavMenu();
     });
   });
+  if (els.profileNav) {
+    els.profileNav.addEventListener("click", (event) => {
+      const link = event.target.closest('a[href^="#"]');
+      if (!link || !els.profile) return;
+      const id = link.getAttribute("href").slice(1);
+      const section = els.profile.querySelector(`#${id}`);
+      if (!section) return;
+      event.preventDefault();
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      section.scrollIntoView({
+        behavior: reduce ? "auto" : "smooth",
+        block: "start",
+      });
+      queueProfileNavSync();
+    });
+  }
+  window.addEventListener("scroll", queueProfileNavSync, { passive: true });
+  window.addEventListener("resize", queueProfileNavSync, { passive: true });
   document.addEventListener("click", (event) => {
     const open = navMenus().some((nav) => nav.classList.contains("is-open"));
     if (!open) return;

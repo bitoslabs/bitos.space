@@ -92,6 +92,12 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
+.navlinks a.is-active {
+  color: var(--text-primary);
+  background: var(--nostr-soft);
+  box-shadow: inset 0 0 0 1px var(--nostr-line);
+}
+
 html.light-mode .navlinks a:hover {
   background: rgba(11, 11, 11, 0.05);
 }

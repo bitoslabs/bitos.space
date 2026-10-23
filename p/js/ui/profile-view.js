@@ -547,6 +547,120 @@ export function renderProfile(container, model) {
     </div>
   </div>`;
 
+  const strengthChecks = [
+    {
+      label: "Photo and name",
+      done: Boolean((profile.name || profile.displayName) && avatar),
+    },
+    { label: "Headline", done: Boolean(profile.headline) },
+    { label: "Introduction", done: Boolean(profile.bio) },
+    { label: "First project", done: projects.length > 0 },
+    { label: "Gallery media", done: gallery.length > 0 },
+    {
+      label: "Skills or credentials",
+      done: skills.length > 0 || credentials.length > 0,
+    },
+  ];
+  const strengthDone = strengthChecks.filter((check) => check.done).length;
+  const strengthCard =
+    isOwner && strengthDone < strengthChecks.length
+      ? `<div class="strength">
+          <div class="strength-head">
+            <span>Profile strength</span>
+            <span class="mono">${strengthDone}/${strengthChecks.length}</span>
+          </div>
+          <div class="strength-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${
+            strengthChecks.length
+          }" aria-valuenow="${strengthDone}" aria-label="Profile completeness">
+            <i style="width:${Math.round(
+              (strengthDone / strengthChecks.length) * 100
+            )}%"></i>
+          </div>
+          <ul class="strength-list">
+            ${strengthChecks
+              .map(
+                (check) =>
+                  `<li class="${check.done ? "done" : ""}"><span class="strength-dot" aria-hidden="true"></span>${esc(
+                    check.label
+                  )}</li>`
+              )
+              .join("")}
+          </ul>
+          <button class="btn btn-primary btn-sm btn-block" type="button" data-action="edit">Finish your profile</button>
+        </div>`
+      : "";
+
+  const statItems = [
+    { value: projects.length, label: "Projects" },
+    { value: gallery.length, label: "Media" },
+    { value: skills.length, label: "Skills" },
+    { value: credentials.length, label: "Credentials" },
+  ].filter((item) => item.value > 0);
+
+  const heroStats = statItems.length
+    ? `<div class="hero-stats" role="group" aria-label="Portfolio at a glance">
+        ${statItems
+          .map(
+            (item) =>
+              `<div class="hero-stat"><span class="hero-stat-value">${
+                item.value
+              }</span><span class="hero-stat-label">${esc(
+                item.label
+              )}</span></div>`
+          )
+          .join("")}
+      </div>`
+    : "";
+
+  const videoIndex = gallery.findIndex((item) => item.type === "video");
+  const reelIndex = videoIndex >= 0 ? videoIndex : 0;
+  const reelItem = gallery[reelIndex];
+  const reelIsVideo = Boolean(reelItem && reelItem.type === "video");
+  const reelPoster = reelItem
+    ? reelIsVideo
+      ? reelItem.poster
+      : reelItem.url
+    : "";
+  const reelCaption =
+    reelItem && (reelItem.caption || reelItem.alt || "View gallery");
+
+  const reelCard = reelItem
+    ? `<button class="hero-reel" type="button" data-action="gallery-open" data-index="${reelIndex}" aria-label="${
+        reelIsVideo ? "Play show reel" : "Open featured media"
+      }: ${esc(reelCaption)}">
+        ${
+          reelPoster
+            ? `<img src="${esc(
+                reelPoster
+              )}" alt="" loading="eager" decoding="async">`
+            : `<span class="hero-reel-art" aria-hidden="true"></span>`
+        }
+        <span class="hero-reel-shade" aria-hidden="true"></span>
+        ${
+          reelIsVideo
+            ? `<span class="hero-reel-play" aria-hidden="true">${iconSvg(
+                "play"
+              )}</span>`
+            : ""
+        }
+        <span class="hero-reel-caption">
+          <span class="hero-reel-kicker">${
+            reelIsVideo ? "Show reel" : "Featured media"
+          }</span>
+          <span class="hero-reel-title">${esc(reelCaption)}</span>
+        </span>
+      </button>`
+    : isOwner
+    ? `<div class="hero-reel is-empty">
+        <span class="hero-reel-empty">
+          <span class="hero-reel-kicker">Show reel</span>
+          <span class="hero-reel-empty-title">Add a show reel</span>
+          <span class="hero-reel-empty-text">Upload a video or lead with your best image.</span>
+          <button class="btn btn-ghost btn-sm" type="button" data-action="edit">Add media</button>
+        </span>
+      </div>`
+    : "";
+
   container.innerHTML = `<header class="hero profile-hero" id="overview">
     ${
       banner
@@ -608,14 +722,19 @@ export function renderProfile(container, model) {
         </div>
 
         ${statusRow}
+        ${heroStats}
         <div class="hero-actions">${actions.join("")}</div>
       </div>
 
-      <aside class="meta-card" aria-label="Profile details">
-        <h3>Details <span class="mono" style="letter-spacing:0">v1</span></h3>
-        ${metaRows.join("")}
-        <div class="meta-links">${metaLinks.join("")}</div>
-      </aside>
+      <div class="hero-side">
+        ${reelCard}
+        <aside class="meta-card" aria-label="Profile details">
+          <h3>Details <span class="mono" style="letter-spacing:0">v1</span></h3>
+          ${metaRows.join("")}
+          <div class="meta-links">${metaLinks.join("")}</div>
+          ${strengthCard}
+        </aside>
+      </div>
     </div>
   </header>
   ${portfolioSection}

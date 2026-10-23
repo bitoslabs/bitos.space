@@ -1,8 +1,12 @@
 /**
  * Presentation-only formatting helpers.
  */
+import { t } from "./i18n.js";
+
 export function profileName(profile) {
-  return (profile && (profile.name || profile.displayName)) || "Unnamed profile";
+  return (
+    (profile && (profile.name || profile.displayName)) || t("Unnamed profile")
+  );
 }
 
 export function initials(name) {
@@ -29,14 +33,14 @@ export function timeAgo(seconds) {
   const then = Number(seconds);
   if (!Number.isFinite(then)) return "";
   const diff = Math.max(0, Math.floor(Date.now() / 1000 - then));
-  if (diff < 45) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 30 * 86400) return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 45) return t("just now");
+  if (diff < 3600) return t("{n}m ago", { n: Math.floor(diff / 60) });
+  if (diff < 86400) return t("{n}h ago", { n: Math.floor(diff / 3600) });
+  if (diff < 30 * 86400) return t("{n}d ago", { n: Math.floor(diff / 86400) });
   if (diff < 365 * 86400) {
-    return `${Math.floor(diff / (30 * 86400))}mo ago`;
+    return t("{n}mo ago", { n: Math.floor(diff / (30 * 86400)) });
   }
-  return `${Math.floor(diff / (365 * 86400))}y ago`;
+  return t("{n}y ago", { n: Math.floor(diff / (365 * 86400)) });
 }
 
 export function splitList(value) {

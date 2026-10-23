@@ -4,12 +4,13 @@
 import { fetchJson } from "../shared/fetch.js";
 import { isNip05 } from "../shared/urls.js";
 import { isHex64 } from "../shared/bech32.js";
+import { t } from "../shared/i18n.js";
 
 export async function resolveNip05(identifier) {
   const match = String(identifier || "")
     .trim()
     .match(/^([^@\s/#?]+)@([^@\s/#?]+)$/);
-  if (!match) throw new Error("NIP-05 must look like name@domain.com");
+  if (!match) throw new Error(t("NIP-05 must look like name@domain.com"));
   const [, name, domain] = match;
   const endpoint = `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(
     name
@@ -48,7 +49,7 @@ export async function verifyNip05(identifier, pubkey) {
   } catch (error) {
     return {
       status: "unverified",
-      error: (error && error.message) || "Could not verify this address.",
+      error: (error && error.message) || t("Could not verify this address."),
     };
   }
 }
@@ -56,7 +57,7 @@ export async function verifyNip05(identifier, pubkey) {
 export function buildNip05Setup(identifier, pubkey, relays) {
   const value = String(identifier || "").trim();
   if (!isNip05(value)) {
-    return { error: "Enter an address like name@yourdomain.com." };
+    return { error: t("Enter an address like name@yourdomain.com.") };
   }
   const [name, domain] = value.split("@");
   const json = {

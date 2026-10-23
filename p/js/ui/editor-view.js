@@ -42,6 +42,7 @@ import {
   writeDraft,
 } from "../data/storage.js?v=12";
 import { hexToNpub } from "../shared/bech32.js";
+import { t } from "../shared/i18n.js";
 import * as auth from "../services/auth.js";
 import { publishProfile } from "../services/publish.js?v=12";
 import { uploadFilesToBlossom } from "../services/blossom.js?v=12";
@@ -135,6 +136,16 @@ export function createEditorView({
       : loadRelays();
   }
 
+  function syncPublishLabels() {
+    publishLabels.forEach((entry, index) => {
+      const button = publishTargets[index];
+      entry.idle = t(
+        button && button.id === "publish-btn" ? "Publish to Nostr" : "Publish"
+      );
+      if (button && !button.disabled) entry.label.textContent = entry.idle;
+    });
+  }
+
   function open(profile, pubkey, { updatedAt = 0, tab = "profile" } = {}) {
     const draft = readDraft(pubkey);
     const publishedProfile = profile ? clone(profile) : null;
@@ -164,11 +175,12 @@ export function createEditorView({
     if (els.fBlossom) els.fBlossom.value = loadBlossomServer();
     fill();
     setTab(tab, false);
+    syncPublishLabels();
     nip05.reset();
     if (restoredDraft) {
-      toast("Local draft restored. Publish when ready.");
+      toast(t("Local draft restored. Publish when ready."));
     } else if (staleDraft) {
-      toast("Older local draft ignored. Showing the published version.");
+      toast(t("Older local draft ignored. Showing the published version."));
     }
   }
 
@@ -203,14 +215,16 @@ export function createEditorView({
     els.fRelays.value = loadRelays().join("\n");
     fillTheme(profile.theme);
 
-    els.owner.textContent = `Signed in as ${hexToNpub(current.pubkey)} — only this key can sign the update.`;
+    els.owner.textContent = t("Signed in as {name} — only this key can sign the update.", {
+      name: hexToNpub(current.pubkey),
+    });
     els.status.textContent = current.updatedAt
-      ? `Last published ${timeAgo(current.updatedAt)}.`
-      : "Not published yet.";
+      ? t("Last published {time}.", { time: timeAgo(current.updatedAt) })
+      : t("Not published yet.");
     els.url.textContent = `bitos.space/p/${hexToNpub(current.pubkey)}`;
     els.saveState.textContent = current.restoredDraft
-      ? "Local draft restored"
-      : "No changes yet";
+      ? t("Local draft restored")
+      : t("No changes yet");
     els.saveState.className =
       "save-state" + (current.restoredDraft ? " dirty" : "");
     setHidden(els.resultsWrap, true);
@@ -366,13 +380,13 @@ export function createEditorView({
       .map(
         (link, index) => `<div class="repeat-row" data-index="${index}">
           <div class="row-head">
-            <span class="row-title">Link ${index + 1}</span>
-            <button class="row-remove" type="button" data-remove="link" data-index="${index}">Remove</button>
+            <span class="row-title">${t("Link {n}", { n: index + 1 })}</span>
+            <button class="row-remove" type="button" data-remove="link" data-index="${index}">${t("Remove")}</button>
           </div>
           <div class="field-grid">
-            <label class="field"><span>Label</span><input data-f="label" type="text" maxlength="60" value="${esc(
+            <label class="field"><span>${t("Label")}</span><input data-f="label" type="text" maxlength="60" value="${esc(
               link.label
-            )}" placeholder="GitHub"></label>
+            )}" placeholder="${t("GitHub")}"></label>
             <label class="field"><span>URL</span><input data-f="url" type="url" maxlength="500" value="${esc(
               link.url
             )}" placeholder="https://…"></label>
@@ -415,8 +429,8 @@ export function createEditorView({
     els.projects.innerHTML = projects
       .map((project, index) => {
         const expanded = expandedProjects.has(project.id);
-        const title = (project.title || "").trim() || "Untitled project";
-        const status = project.public === false ? "Draft" : "Public";
+        const title = (project.title || "").trim() || t("Untitled project");
+        const status = t(project.public === false ? "Draft" : "Public");
         return `<div class="repeat-row project-row${
           expanded ? "" : " is-collapsed"
         }" data-index="${index}" data-id="${esc(project.id || "")}">
@@ -426,66 +440,66 @@ export function createEditorView({
               <span class="project-summary-text">
                 <span class="row-title" data-project-title>${esc(title)}</span>
                 <span class="project-meta"><span data-project-year>${esc(
-                  project.year || "No year"
+                  project.year || t("No year")
                 )}</span><span aria-hidden="true">·</span><span data-project-status>${status}</span></span>
               </span>
             </div>
             <div class="row-actions">
-              <button class="icon-btn row-icon" type="button" data-project-move="up" data-index="${index}" aria-label="Move project up" title="Move up" ${
+              <button class="icon-btn row-icon" type="button" data-project-move="up" data-index="${index}" aria-label="${t("Move project up")}" title="${t("Move up")}" ${
                 index === 0 ? "disabled" : ""
               }>↑</button>
-              <button class="icon-btn row-icon" type="button" data-project-move="down" data-index="${index}" aria-label="Move project down" title="Move down" ${
+              <button class="icon-btn row-icon" type="button" data-project-move="down" data-index="${index}" aria-label="${t("Move project down")}" title="${t("Move down")}" ${
                 index === projects.length - 1 ? "disabled" : ""
               }>↓</button>
               <button class="btn btn-ghost btn-sm" type="button" data-project-toggle data-index="${index}" aria-expanded="${expanded}" aria-controls="project-body-${index}">${
-                expanded ? "Close" : "Edit"
+                t(expanded ? "Close" : "Edit")
               }</button>
-              <button class="row-remove" type="button" data-remove="project" data-index="${index}">Remove</button>
+              <button class="row-remove" type="button" data-remove="project" data-index="${index}">${t("Remove")}</button>
             </div>
           </div>
           <div class="project-body" id="project-body-${index}"${
             expanded ? "" : " hidden"
           }>
             <div class="field-grid">
-              <label class="field span2"><span>Title <b class="req">*</b></span><input data-f="title" type="text" maxlength="120" value="${esc(
+              <label class="field span2"><span><span>${t("Title")}</span> <b class="req">*</b></span><input data-f="title" type="text" maxlength="120" value="${esc(
                 project.title
               )}"></label>
-              <label class="field"><span>Year</span><input data-f="year" type="text" maxlength="40" value="${esc(
+              <label class="field"><span>${t("Year")}</span><input data-f="year" type="text" maxlength="40" value="${esc(
                 project.year
               )}" placeholder="2025 — 2026"></label>
-              <label class="field"><span>Role</span><input data-f="role" type="text" maxlength="120" value="${esc(
+              <label class="field"><span>${t("Role")}</span><input data-f="role" type="text" maxlength="120" value="${esc(
                 project.role
-              )}" placeholder="UX architecture"></label>
-              <label class="field span2"><span>Summary</span><textarea data-f="summary" rows="2" maxlength="400">${esc(
+              )}" placeholder="${t("UX architecture")}"></label>
+              <label class="field span2"><span>${t("Summary")}</span><textarea data-f="summary" rows="2" maxlength="400">${esc(
                 project.summary
               )}</textarea></label>
-              <label class="field span2"><span>Description</span><textarea data-f="description" rows="3" maxlength="4000">${esc(
+              <label class="field span2"><span>${t("Description")}</span><textarea data-f="description" rows="3" maxlength="4000">${esc(
                 project.description
               )}</textarea></label>
-              <label class="field"><span>Contribution</span><input data-f="contribution" type="text" maxlength="200" value="${esc(
+              <label class="field"><span>${t("Contribution")}</span><input data-f="contribution" type="text" maxlength="200" value="${esc(
                 project.contribution
-              )}" placeholder="Design system &amp; front-end — 60%"></label>
-              <label class="field"><span>Project link</span><input data-f="link" type="url" maxlength="500" value="${esc(
+              )}" placeholder="${t("Design system & front-end — 60%")}"></label>
+              <label class="field"><span>${t("Project link")}</span><input data-f="link" type="url" maxlength="500" value="${esc(
                 project.link
               )}" placeholder="https://…"></label>
-              <label class="field span2"><span>Cover image URL</span><input data-f="media" type="url" maxlength="500" value="${esc(
+              <label class="field span2"><span>${t("Cover image URL")}</span><input data-f="media" type="url" maxlength="500" value="${esc(
                 project.media
               )}" placeholder="https://…"></label>
               <div class="field span2 tag-field">
-                <span>Tags</span>
+                <span>${t("Tags")}</span>
                 <div class="chip-input" data-chips>
                   ${chipMarkup(project.tags)}
-                  <input class="chip-entry" type="text" maxlength="24" placeholder="Type a tag and press Enter" aria-label="Add project tag">
+                  <input class="chip-entry" type="text" maxlength="24" placeholder="${t("Type a tag and press Enter")}" aria-label="${t("Add project tag")}">
                 </div>
                 <input type="hidden" data-f="tags" value="${esc(
                   (project.tags || []).join(", ")
                 )}">
-                <span class="tag-hint">Up to 8 tags. Press Enter or comma to add.</span>
+                <span class="tag-hint">${t("Up to 8 tags. Press Enter or comma to add.")}</span>
               </div>
             </div>
             <label class="check-field"><input data-f="public" type="checkbox" ${
               project.public !== false ? "checked" : ""
-            }> Include this project in the published portfolio</label>
+            }> ${t("Include this project in the published portfolio")}</label>
           </div>
         </div>`;
       })
@@ -524,7 +538,7 @@ export function createEditorView({
         button.type = "button";
         button.className = "chip-x";
         button.setAttribute("data-chip-remove", "");
-        button.setAttribute("aria-label", `Remove tag ${tag}`);
+        button.setAttribute("aria-label", t("Remove tag {tag}", { tag }));
         button.textContent = "×";
         chip.append(button);
         wrap.insertBefore(chip, entry);
@@ -541,15 +555,15 @@ export function createEditorView({
     const publicField = row.querySelector('[data-f="public"]');
     const title = titleField ? titleField.value.trim() : "";
     const titleEl = row.querySelector("[data-project-title]");
-    if (titleEl) titleEl.textContent = title || "Untitled project";
+    if (titleEl) titleEl.textContent = title || t("Untitled project");
     const yearEl = row.querySelector("[data-project-year]");
     if (yearEl) {
-      yearEl.textContent = (yearField && yearField.value.trim()) || "No year";
+      yearEl.textContent = (yearField && yearField.value.trim()) || t("No year");
     }
     const statusEl = row.querySelector("[data-project-status]");
     if (statusEl) {
       statusEl.textContent =
-        publicField && !publicField.checked ? "Draft" : "Public";
+        t(publicField && !publicField.checked ? "Draft" : "Public");
     }
     const thumb = row.querySelector(".project-thumb");
     if (!thumb) return;
@@ -575,22 +589,22 @@ export function createEditorView({
       .map(
         (skill, index) => `<div class="repeat-row" data-index="${index}">
           <div class="row-head">
-            <span class="row-title">Skill ${index + 1}</span>
-            <button class="row-remove" type="button" data-remove="skill" data-index="${index}">Remove</button>
+            <span class="row-title">${t("Skill {n}", { n: index + 1 })}</span>
+            <button class="row-remove" type="button" data-remove="skill" data-index="${index}">${t("Remove")}</button>
           </div>
           <div class="field-grid">
-            <label class="field"><span>Skill</span><input data-f="name" type="text" maxlength="60" value="${esc(
+            <label class="field"><span>${t("Skill")}</span><input data-f="name" type="text" maxlength="60" value="${esc(
               skill.name
-            )}" placeholder="Design systems"></label>
-            <label class="field"><span>Evidence</span><select data-f="evidence">
+            )}" placeholder="${t("Design systems")}"></label>
+            <label class="field"><span>${t("Evidence")}</span><select data-f="evidence">
               <option value="self" ${
                 skill.evidence !== "issuer" ? "selected" : ""
-              }>Self-described</option>
+              }>${t("Self-described")}</option>
               <option value="issuer" ${
                 skill.evidence === "issuer" ? "selected" : ""
-              }>Listed by an issuer</option>
+              }>${t("Listed by an issuer")}</option>
             </select></label>
-            <label class="field span2"><span>Issuer (optional)</span><input data-f="issuer" type="text" maxlength="120" value="${esc(
+            <label class="field span2"><span>${t("Issuer (optional)")}</span><input data-f="issuer" type="text" maxlength="120" value="${esc(
               skill.issuer
             )}" placeholder="Interaction Guild"></label>
           </div>
@@ -606,29 +620,29 @@ export function createEditorView({
       .map(
         (credential, index) => `<div class="repeat-row" data-index="${index}">
           <div class="row-head">
-            <span class="row-title">Credential ${index + 1}</span>
-            <button class="row-remove" type="button" data-remove="credential" data-index="${index}">Remove</button>
+            <span class="row-title">${t("Credential {n}", { n: index + 1 })}</span>
+            <button class="row-remove" type="button" data-remove="credential" data-index="${index}">${t("Remove")}</button>
           </div>
           <div class="field-grid">
-            <label class="field"><span>Title</span><input data-f="title" type="text" maxlength="120" value="${esc(
+            <label class="field"><span>${t("Title")}</span><input data-f="title" type="text" maxlength="120" value="${esc(
               credential.title
-            )}" placeholder="Advanced UX Systems"></label>
-            <label class="field"><span>Issuer</span><input data-f="issuer" type="text" maxlength="120" value="${esc(
+            )}" placeholder="${t("Advanced UX Systems")}"></label>
+            <label class="field"><span>${t("Issuer")}</span><input data-f="issuer" type="text" maxlength="120" value="${esc(
               credential.issuer
             )}" placeholder="Interaction Guild"></label>
-            <label class="field"><span>Year</span><input data-f="year" type="text" maxlength="40" value="${esc(
+            <label class="field"><span>${t("Year")}</span><input data-f="year" type="text" maxlength="40" value="${esc(
               credential.year
             )}" placeholder="2025"></label>
-            <label class="field"><span>Status</span><input data-f="status" type="text" maxlength="60" value="${esc(
+            <label class="field"><span>${t("Status")}</span><input data-f="status" type="text" maxlength="60" value="${esc(
               credential.status
-            )}" placeholder="Valid · expires 2027"></label>
-            <label class="field span2"><span>Note</span><input data-f="note" type="text" maxlength="200" value="${esc(
+            )}" placeholder="${t("Valid · expires 2027")}"></label>
+            <label class="field span2"><span>${t("Note")}</span><input data-f="note" type="text" maxlength="200" value="${esc(
               credential.note
-            )}" placeholder="Shared selectively"></label>
+            )}" placeholder="${t("Shared selectively")}"></label>
           </div>
           <label class="check-field"><input data-f="public" type="checkbox" ${
             credential.public !== false ? "checked" : ""
-          }> Include this credential in the published portfolio</label>
+          }> ${t("Include this credential in the published portfolio")}</label>
         </div>`
       )
       .join("");
@@ -675,11 +689,11 @@ export function createEditorView({
           item.id
         )}" data-media-type="${video ? "video" : "image"}">
           <div class="row-head">
-            <span class="row-title">${video ? "Video" : "Image"} ${
+            <span class="row-title">${t(video ? "Video" : "Image")} ${
               index + 1
-            } · ${inline ? "embedded" : "link"}${
+            } · ${t(inline ? "embedded" : "link")}${
               item.reel === true
-                ? ` <span class="reel-badge">Show reel</span>`
+                ? ` <span class="reel-badge">${t("Show reel")}</span>`
                 : ""
             }</span>
             <div class="row-actions">
@@ -688,15 +702,15 @@ export function createEditorView({
               }" type="button" data-gallery-reel="${index}" aria-pressed="${
                 item.reel === true
               }" title="${
-                item.reel === true ? "Current show reel" : "Use as show reel"
-              }">${item.reel === true ? "★" : "☆"}<span>Showreel</span></button>
-              <button class="icon-btn row-icon" type="button" data-gallery-move="up" data-index="${index}" aria-label="Move gallery item up" title="Move up" ${
+                t(item.reel === true ? "Current show reel" : "Use as show reel")
+              }">${item.reel === true ? "★" : "☆"}<span>${t("Showreel")}</span></button>
+              <button class="icon-btn row-icon" type="button" data-gallery-move="up" data-index="${index}" aria-label="${t("Move gallery item up")}" title="${t("Move up")}" ${
                 index === 0 ? "disabled" : ""
               }>↑</button>
-              <button class="icon-btn row-icon" type="button" data-gallery-move="down" data-index="${index}" aria-label="Move gallery item down" title="Move down" ${
+              <button class="icon-btn row-icon" type="button" data-gallery-move="down" data-index="${index}" aria-label="${t("Move gallery item down")}" title="${t("Move down")}" ${
                 index === items.length - 1 ? "disabled" : ""
               }>↓</button>
-              <button class="row-remove" type="button" data-gallery-remove="${index}">Remove</button>
+              <button class="row-remove" type="button" data-gallery-remove="${index}">${t("Remove")}</button>
             </div>
           </div>
           <div class="gallery-row-body">
@@ -706,43 +720,43 @@ export function createEditorView({
             <div class="gallery-fields">
               ${
                 video
-                  ? `<label class="field span2"><span>Video URL <b class="req">*</b></span><input data-f="url" type="url" maxlength="500" value="${esc(
+                  ? `<label class="field span2"><span><span>${t("Video URL")}</span> <b class="req">*</b></span><input data-f="url" type="url" maxlength="500" value="${esc(
                       item.url
                     )}" placeholder="https://…/clip.mp4"></label>
                      ${
                        isDataImage(item.poster)
                          ? `<div class="field span2 inline-media-note">
-                              <span>Poster generated from video · ${formatBytes(
+                              <span>${t("Poster generated from video")} · ${formatBytes(
                                 item.poster.length
                               )}</span>
-                              <button class="btn btn-ghost btn-sm" type="button" data-poster-clear="${index}">Remove</button>
+                              <button class="btn btn-ghost btn-sm" type="button" data-poster-clear="${index}">${t("Remove")}</button>
                               <input type="hidden" data-f="poster" value="${esc(
                                 item.poster
                               )}">
                             </div>`
-                         : `<label class="field span2"><span>Poster image URL (optional)</span><input data-f="poster" type="url" maxlength="500" value="${esc(
+                         : `<label class="field span2"><span>${t("Poster image URL (optional)")}</span><input data-f="poster" type="url" maxlength="500" value="${esc(
                              item.poster
                            )}" placeholder="https://…/poster.jpg"></label>`
                      }`
                   : inline
                   ? `<div class="inline-media-note">
-                       <span>Embedded image (legacy) · ${formatBytes(
+                       <span>${t("Embedded image (legacy)")} · ${formatBytes(
                          item.url.length
                        )}</span>
                      </div>`
-                  : `<label class="field span2"><span>Image URL</span><input data-f="url" type="url" maxlength="500" value="${esc(
+                  : `<label class="field span2"><span>${t("Image URL")}</span><input data-f="url" type="url" maxlength="500" value="${esc(
                       item.url
                     )}" placeholder="https://…/image.jpg"></label>`
               }
-              <label class="field span2"><span>Caption</span><input data-f="caption" type="text" maxlength="160" value="${esc(
+              <label class="field span2"><span>${t("Caption")}</span><input data-f="caption" type="text" maxlength="160" value="${esc(
                 item.caption
-              )}" placeholder="A short title for visitors"></label>
-              <label class="field span2"><span>Alt text</span><input data-f="alt" type="text" maxlength="160" value="${esc(
+              )}" placeholder="${t("A short title for visitors")}"></label>
+              <label class="field span2"><span>${t("Alt text")}</span><input data-f="alt" type="text" maxlength="160" value="${esc(
                 item.alt
-              )}" placeholder="Describe the image for screen readers"></label>
+              )}" placeholder="${t("Describe the image for screen readers")}"></label>
               <label class="check-field span2"><input data-f="public" type="checkbox" ${
                 item.public !== false ? "checked" : ""
-              }> Include this item in the published gallery</label>
+              }> ${t("Include this item in the published gallery")}</label>
             </div>
           </div>
         </div>`;
@@ -760,15 +774,21 @@ export function createEditorView({
     );
     if (!hasInline) {
       els.galleryBudget.classList.remove("is-high");
-      els.galleryBudget.innerHTML = `<span class="budget-text">${items.length}/${GALLERY_LIMIT} media items · links only</span>`;
+      els.galleryBudget.innerHTML = `<span class="budget-text">${t("{n}/{max} media items · links only", { n: items.length, max: GALLERY_LIMIT })}</span>`;
       return;
     }
     const percent = Math.min(100, Math.round((used / INLINE_IMAGE_BUDGET) * 100));
     els.galleryBudget.classList.toggle("is-high", percent >= 80);
     els.galleryBudget.innerHTML = `<div class="budget-bar"><span style="width:${percent}%"></span></div>
-      <span class="budget-text">${formatBytes(used)} of ${formatBytes(
-      INLINE_IMAGE_BUDGET
-    )} legacy inline budget · ${items.length}/${GALLERY_LIMIT} items</span>`;
+      <span class="budget-text">${t(
+        "{used} of {budget} legacy inline budget · {n}/{max} items",
+        {
+          used: formatBytes(used),
+          budget: formatBytes(INLINE_IMAGE_BUDGET),
+          n: items.length,
+          max: GALLERY_LIMIT,
+        }
+      )}</span>`;
   }
 
   function setGalleryBusy(busy) {
@@ -787,7 +807,7 @@ export function createEditorView({
     syncFromForm();
     const list = current.profile.gallery;
     if (list.length >= GALLERY_LIMIT) {
-      toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
+      toast(t("The gallery holds up to {max} items.", { max: GALLERY_LIMIT }), true);
       return;
     }
     list.push({
@@ -889,7 +909,7 @@ export function createEditorView({
   function markDirty() {
     if (!current) return;
     current.dirty = true;
-    els.saveState.textContent = "Unsaved changes";
+    els.saveState.textContent = t("Unsaved changes");
     els.saveState.className = "save-state dirty";
     clearTimeout(saveTimer);
     saveTimer = window.setTimeout(() => saveDraft(false), 1000);
@@ -900,24 +920,24 @@ export function createEditorView({
     syncFromForm();
     current.profile.draftUpdatedAt = Date.now();
     if (!writeDraft(current.pubkey, current.profile)) {
-      toast("Could not save the draft in this browser (storage full?).", true);
+      toast(t("Could not save the draft in this browser (storage full?)."), true);
       return;
     }
     current.dirty = false;
     els.saveState.textContent = manual
-      ? "Draft saved locally"
-      : "Saved locally just now";
+      ? t("Draft saved locally")
+      : t("Saved locally just now");
     els.saveState.className = "save-state saved";
     clearTimeout(saveTimer);
     if (manual) {
-      toast("Draft saved in this browser. Publish to make it public.");
+      toast(t("Draft saved in this browser. Publish to make it public."));
     }
   }
 
   async function publish() {
     if (!current) return;
     if (galleryBusy) {
-      toast("Wait for the upload to finish before publishing.", true);
+      toast(t("Wait for the upload to finish before publishing."), true);
       return;
     }
     syncFromForm();
@@ -928,16 +948,16 @@ export function createEditorView({
       return;
     }
     if (!auth.getState().pubkey) {
-      toast("Connect a signer before publishing.", true);
+      toast(t("Connect a signer before publishing."), true);
       return;
     }
 
-    setBusy(true, "Waiting for signer…");
+    setBusy(true, t("Waiting for signer…"));
     const startedAt = Date.now();
     clearInterval(publishClock);
     publishClock = window.setInterval(() => {
       const seconds = Math.round((Date.now() - startedAt) / 1000);
-      if (seconds >= 3) setPublishLabel(`Waiting for signer… ${seconds}s`);
+      if (seconds >= 3) setPublishLabel(t("Waiting for signer… {seconds}s", { seconds }));
     }, 1000);
 
     try {
@@ -945,25 +965,25 @@ export function createEditorView({
       const result = await publishProfile(current.profile, currentRelays(), {
         onPhase: (phase, info) => {
           if (phase === "signing") {
-            setBusy(true, "Waiting for signer…");
+            setBusy(true, t("Waiting for signer…"));
             return;
           }
           if (phase === "publishing") {
             clearInterval(publishClock);
             publishClock = 0;
-            setPublishLabel(`Publishing ${info.done}/${info.total}…`);
+            setPublishLabel(t("Publishing {done}/{total}…", { done: info.done, total: info.total }));
           }
         },
       });
       renderResults(result.results);
       if (!result.accepted) {
-        toast("No relay accepted the event. Check the relay list and retry.", true);
+        toast(t("No relay accepted the event. Check the relay list and retry."), true);
         return;
       }
       onPublished(result);
       if (!current) {
         toast(
-          `Published to ${result.accepted} of ${result.results.length} relays.`
+          t("Published to {accepted} of {total} relays.", { accepted: result.accepted, total: result.results.length })
         );
         return;
       }
@@ -971,12 +991,12 @@ export function createEditorView({
       current.publishedProfile = normalizeProfile(result.publicProfile);
       clearDraft(current.pubkey);
       current.restoredDraft = false;
-      els.status.textContent = `Last published ${timeAgo(current.updatedAt)}.`;
+      els.status.textContent = t("Last published {time}.", { time: timeAgo(current.updatedAt) });
       toast(
-        `Published to ${result.accepted} of ${result.results.length} relays.`
+        t("Published to {accepted} of {total} relays.", { accepted: result.accepted, total: result.results.length })
       );
     } catch (error) {
-      toast((error && error.message) || "Publishing failed.", true);
+      toast((error && error.message) || t("Publishing failed."), true);
     } finally {
       setBusy(false);
     }
@@ -1041,7 +1061,7 @@ export function createEditorView({
     anchor.click();
     anchor.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast("Exported JSON. Private drafts are included in the file.");
+    toast(t("Exported JSON. Private drafts are included in the file."));
   }
 
   async function importJson(file) {
@@ -1050,15 +1070,15 @@ export function createEditorView({
       const data = JSON.parse(await file.text());
       const source = data && data.profile ? data.profile : data;
       if (!source || typeof source !== "object") {
-        throw new Error("No profile object found.");
+        throw new Error(t("No profile object found."));
       }
       current.profile = normalizeProfile(source);
       fill();
       markDirty();
-      toast("Imported as a local draft. Publish when ready.");
+      toast(t("Imported as a local draft. Publish when ready."));
     } catch (error) {
       toast(
-        `Could not import: ${(error && error.message) || "invalid JSON"}`,
+        t("Could not import: {error}", { error: (error && error.message) || t("invalid JSON") }),
         true
       );
     }
@@ -1067,12 +1087,12 @@ export function createEditorView({
   async function discard() {
     if (!current) return;
     const question = {
-      kicker: "Local draft",
-      title: "Discard this draft?",
+      kicker: t("Local draft"),
+      title: t("Discard this draft?"),
       message:
-        "This removes the local draft for this key and restores the last published version, or a blank portfolio if nothing was published. This cannot be undone.",
-      confirmLabel: "Discard draft",
-      cancelLabel: "Keep editing",
+        t("This removes the local draft for this key and restores the last published version, or a blank portfolio if nothing was published. This cannot be undone."),
+      confirmLabel: t("Discard draft"),
+      cancelLabel: t("Keep editing"),
       tone: "danger",
     };
     const confirmed = confirm
@@ -1085,19 +1105,19 @@ export function createEditorView({
     );
     current.restoredDraft = false;
     fill();
-    toast("Local draft discarded.");
+    toast(t("Local draft discarded."));
   }
 
   function saveRelayList() {
     const list = parseRelayUrls(els.fRelays.value);
     if (!list.length) {
-      toast("Add at least one wss:// relay URL.", true);
+      toast(t("Add at least one wss:// relay URL."), true);
       return;
     }
     const saved = saveRelays(list);
     els.fRelays.value = saved.join("\n");
     if (onRelaysChanged) onRelaysChanged(saved);
-    toast(`Relay list saved (${saved.length}).`);
+    toast(t("Relay list saved ({n}).", { n: saved.length }));
   }
 
   /* ---------------- events ---------------- */
@@ -1172,7 +1192,7 @@ export function createEditorView({
         const projectBody = row.querySelector(".project-body");
         if (projectBody) projectBody.hidden = collapsed;
         projectToggle.setAttribute("aria-expanded", String(!collapsed));
-        projectToggle.textContent = collapsed ? "Edit" : "Close";
+        projectToggle.textContent = t(collapsed ? "Edit" : "Close");
         if (id) {
           if (collapsed) expandedProjects.delete(id);
           else expandedProjects.add(id);
@@ -1310,7 +1330,7 @@ export function createEditorView({
 
   function setUploadLabel(text) {
     if (els.galleryUploadMedia) {
-      els.galleryUploadMedia.textContent = text || "Upload media";
+      els.galleryUploadMedia.textContent = text || t("Upload media");
     }
   }
 
@@ -1331,19 +1351,19 @@ export function createEditorView({
     syncFromForm();
     const session = current;
     if (current.profile.gallery.length >= GALLERY_LIMIT) {
-      toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
+      toast(t("The gallery holds up to {max} items.", { max: GALLERY_LIMIT }), true);
       return;
     }
     const server =
       normalizeBlossomServer(els.fBlossom ? els.fBlossom.value : "") ||
       loadBlossomServer();
     if (!server) {
-      toast("Enter a valid Blossom fallback server URL.", true);
+      toast(t("Enter a valid Blossom fallback server URL."), true);
       return;
     }
     if (els.fBlossom) els.fBlossom.value = server;
     saveBlossomServer(server);
-    setUploadStatus("Preparing upload…");
+    setUploadStatus(t("Preparing upload…"));
 
     galleryBusy = true;
     setGalleryBusy(true);
@@ -1357,18 +1377,18 @@ export function createEditorView({
         if (current !== session) return;
         const file = queue[position];
         if (current.profile.gallery.length >= GALLERY_LIMIT) {
-          toast(`The gallery holds up to ${GALLERY_LIMIT} items.`, true);
+          toast(t("The gallery holds up to {max} items.", { max: GALLERY_LIMIT }), true);
           break;
         }
         const type = String(file.type || "");
         const video = type.startsWith("video/");
         const image = type.startsWith("image/");
         if (!video && !image) {
-          toast("Choose an image, MP4, or WebM file.", true);
+          toast(t("Choose an image, MP4, or WebM file."), true);
           continue;
         }
         if (video && !/^video\/(?:mp4|webm)$/i.test(type)) {
-          toast("Video must be MP4 or WebM.", true);
+          toast(t("Video must be MP4 or WebM."), true);
           continue;
         }
         if (video && file.size > MAX_VIDEO_UPLOAD_BYTES) {
@@ -1382,7 +1402,7 @@ export function createEditorView({
         }
         if (image && file.size > MAX_UPLOAD_BYTES) {
           toast(
-            `Images must be smaller than ${formatBytes(MAX_UPLOAD_BYTES)}.`,
+            t("Images must be smaller than {size}.", { size: formatBytes(MAX_UPLOAD_BYTES) }),
             true
           );
           continue;
@@ -1406,23 +1426,23 @@ export function createEditorView({
           const which = index === 0 ? kind : `poster${counter}`;
           const target = provider === "bitos" ? "BitOS" : "Blossom";
           if (ratio >= 0.99) {
-            setUploadLabel("Processing…");
-            setUploadStatus(`Processing ${which} on ${target}…`);
+            setUploadLabel(t("Processing…"));
+            setUploadStatus(t("Processing {which} on {target}…", { which, target }));
           } else {
-            setUploadLabel(`Uploading… ${percent}%`);
-            setUploadStatus(`Uploading ${which} to ${target} ${percent}%`);
+            setUploadLabel(t("Uploading… {percent}%", { percent }));
+            setUploadStatus(t("Uploading {which} to {target} {percent}%", { which, target, percent }));
           }
         };
 
         let uploaded = null;
         if (serverUnavailable) {
           provider = "blossom";
-          setUploadLabel(`Uploading ${kind}…`);
-          setUploadStatus(`Uploading ${kind} to Blossom…`);
+          setUploadLabel(t("Uploading {kind}…", { kind }));
+          setUploadStatus(t("Uploading {kind} to Blossom…", { kind }));
         } else {
           try {
-            setUploadLabel(`Uploading ${kind}…`);
-            setUploadStatus(`Uploading ${kind} to BitOS…`);
+            setUploadLabel(t("Uploading {kind}…", { kind }));
+            setUploadStatus(t("Uploading {kind} to BitOS…", { kind }));
             uploaded = await uploadEntriesToMediaServer(
               entries,
               current.pubkey,
@@ -1431,7 +1451,7 @@ export function createEditorView({
           } catch {
             serverUnavailable = true;
             provider = "blossom";
-            setUploadStatus("BitOS unavailable — switching to Blossom…");
+            setUploadStatus(t("BitOS unavailable — switching to Blossom…"));
           }
         }
 
@@ -1471,7 +1491,7 @@ export function createEditorView({
         toast(message);
       }
     } catch (error) {
-      const message = (error && error.message) || "Media upload failed.";
+      const message = (error && error.message) || t("Media upload failed.");
       setUploadStatus(message);
       toast(message, true);
     } finally {
@@ -1564,7 +1584,7 @@ export function createEditorView({
   function close() {
     if (!current) return;
     if (galleryBusy) {
-      toast("Wait for the upload to finish before leaving the editor.", true);
+      toast(t("Wait for the upload to finish before leaving the editor."), true);
       return;
     }
     if (current.dirty) saveDraft(false);
@@ -1572,5 +1592,26 @@ export function createEditorView({
     if (onClosed) onClosed();
   }
 
-  return { open, isOpen, close };
+  function refreshLanguage() {
+    if (!current) return;
+    els.owner.textContent = t(
+      "Signed in as {name} — only this key can sign the update.",
+      { name: hexToNpub(current.pubkey) }
+    );
+    els.status.textContent = current.updatedAt
+      ? t("Last published {time}.", { time: timeAgo(current.updatedAt) })
+      : t("Not published yet.");
+    els.saveState.textContent = current.restoredDraft
+      ? t("Local draft restored")
+      : t("No changes yet");
+    syncPublishLabels();
+    renderLinks();
+    renderProjects();
+    renderSkills();
+    renderCredentials();
+    renderGallery();
+    nip05.reset();
+  }
+
+  return { open, isOpen, close, refreshLanguage };
 }

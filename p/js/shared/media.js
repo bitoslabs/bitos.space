@@ -4,6 +4,7 @@
  * stays a URL because encoded video does not fit inside a relay event.
  */
 import { httpUrl } from "./urls.js";
+import { t } from "./i18n.js";
 
 export const GALLERY_LIMIT = 12;
 export const INLINE_IMAGE_BUDGET = 600 * 1024;
@@ -59,7 +60,7 @@ export function inlineImageBytes(gallery) {
 
 export async function sha256Hex(file) {
   if (!globalThis.crypto || !crypto.subtle) {
-    throw new Error("This browser cannot hash files for upload.");
+    throw new Error(t("This browser cannot hash files for upload."));
   }
   const buffer = await file.arrayBuffer();
   const digest = await crypto.subtle.digest("SHA-256", buffer);
@@ -141,7 +142,7 @@ export function extractVideoPoster(file, { maxWidth = 640 } = {}) {
 export function dataUrlToFile(dataUrl, filename = "upload") {
   const raw = String(dataUrl || "");
   const match = /^data:([^;,]+)?(;base64)?,([\s\S]*)$/.exec(raw);
-  if (!match) throw new Error("Invalid data URL.");
+  if (!match) throw new Error(t("Invalid data URL."));
   const mime = match[1] || "application/octet-stream";
   const binary = match[2] ? atob(match[3]) : decodeURIComponent(match[3]);
   const bytes = new Uint8Array(binary.length);
@@ -177,7 +178,7 @@ function decodeWithElement(file) {
     };
     image.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      reject(new Error("That image could not be decoded."));
+      reject(new Error(t("That image could not be decoded.")));
     };
     image.src = objectUrl;
   });
@@ -193,7 +194,7 @@ function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("Could not read the image."));
+    reader.onerror = () => reject(new Error(t("Could not read the image.")));
     reader.readAsDataURL(blob);
   });
 }
@@ -218,7 +219,7 @@ export async function compressImageFile(
   { maxEdge = MAX_IMAGE_EDGE, targetBytes = INLINE_IMAGE_TARGET } = {}
 ) {
   if (!file || !String(file.type || "").startsWith("image/")) {
-    throw new Error("Choose an image file (JPEG, PNG, WebP, GIF or AVIF).");
+    throw new Error(t("Choose an image file (JPEG, PNG, WebP, GIF or AVIF)."));
   }
   if (file.size > MAX_UPLOAD_BYTES) {
     throw new Error(
@@ -230,7 +231,7 @@ export async function compressImageFile(
   const sourceWidth = source.width;
   const sourceHeight = source.height;
   if (!sourceWidth || !sourceHeight) {
-    throw new Error("That image has no readable dimensions.");
+    throw new Error(t("That image has no readable dimensions."));
   }
 
   const type = supportsWebp() ? "image/webp" : "image/jpeg";
@@ -263,7 +264,7 @@ export async function compressImageFile(
   }
 
   if (source.close) source.close();
-  if (!chosen) throw new Error("The browser could not process that image.");
+  if (!chosen) throw new Error(t("The browser could not process that image."));
 
   const dataUrl = await blobToDataUrl(chosen.blob);
   return {

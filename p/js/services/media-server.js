@@ -9,6 +9,7 @@
  */
 import { BITOS_MEDIA_UPLOAD_URL } from "../config.js?v=12";
 import { sha256Hex } from "../shared/media.js?v=12";
+import { t } from "../shared/i18n.js";
 
 function endpoint(pubkey) {
   const url = new URL(BITOS_MEDIA_UPLOAD_URL);
@@ -28,7 +29,7 @@ function errorMessage(xhr) {
 }
 
 export async function uploadToMediaServer(file, pubkey, { onProgress } = {}) {
-  if (!file || !file.size) throw new Error("Choose a file to upload.");
+  if (!file || !file.size) throw new Error(t("Choose a file to upload."));
   const sha256 = await sha256Hex(file);
 
   return new Promise((resolve, reject) => {
@@ -68,13 +69,13 @@ export async function uploadToMediaServer(file, pubkey, { onProgress } = {}) {
         return;
       }
       const message = errorMessage(xhr);
-      reject(new Error(message || `Media server upload failed (${xhr.status}).`));
+      reject(new Error(message || t("Media server upload failed ({status}).", { status: xhr.status })));
     };
     xhr.onerror = () =>
-      reject(new Error("Could not reach the BitOS media server."));
+      reject(new Error(t("Could not reach the BitOS media server.")));
     xhr.ontimeout = () =>
-      reject(new Error("The BitOS media upload timed out."));
-    xhr.onabort = () => reject(new Error("Upload cancelled."));
+      reject(new Error(t("The BitOS media upload timed out.")));
+    xhr.onabort = () => reject(new Error(t("Upload cancelled.")));
 
     xhr.send(file);
   });

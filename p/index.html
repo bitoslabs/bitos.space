@@ -67,12 +67,17 @@
     <div class="brand-honeycomb" aria-hidden="true">
       <span class="brand-honeycomb__pattern"></span>
     </div>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main" data-i18n="Skip to content">Skip to content</a>
     <div class="noise-overlay" aria-hidden="true"></div>
 
     <header class="topnav">
       <div class="topnav-in">
-        <a class="brand" href="../index.html" aria-label="BitOS home">
+        <a
+          class="brand"
+          href="../index.html"
+          aria-label="BitOS home"
+          data-i18n-aria-label="BitOS home"
+        >
           <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
             <path
               d="M16 2.5 27.5 9v14L16 29.5 4.5 23V9L16 2.5Z"
@@ -108,17 +113,31 @@
           ><span class="path" id="url-chip-path">/p/</span>
         </span>
 
-        <nav class="navlinks" id="landing-nav" aria-label="Portfolio app sections" hidden>
-          <a href="#how">How it works</a>
-          <a href="?demo=1">Sample</a>
-          <a href="../data-standard.html">Data standard</a>
+        <nav
+          class="navlinks"
+          id="landing-nav"
+          aria-label="Portfolio app sections"
+          data-i18n-aria-label="Portfolio app sections"
+          hidden
+        >
+          <a href="#how" data-i18n="How it works">How it works</a>
+          <a href="?demo=1" data-i18n="Sample">Sample</a>
+          <a href="../data-standard.html" data-i18n="Data standard"
+            >Data standard</a
+          >
         </nav>
 
-        <nav class="navlinks" id="profile-nav" aria-label="Profile sections" hidden>
-          <a href="#portfolio">Portfolio</a>
-          <a href="#gallery" id="nav-gallery" hidden>Gallery</a>
-          <a href="#skills">Skills</a>
-          <a href="#about">About</a>
+        <nav
+          class="navlinks"
+          id="profile-nav"
+          aria-label="Profile sections"
+          data-i18n-aria-label="Profile sections"
+          hidden
+        >
+          <a href="#portfolio" data-i18n="Portfolio">Portfolio</a>
+          <a href="#gallery" id="nav-gallery" data-i18n="Gallery" hidden>Gallery</a>
+          <a href="#skills" data-i18n="Skills">Skills</a>
+          <a href="#about" data-i18n="About">About</a>
         </nav>
 
         <div class="nav-cta">
@@ -127,6 +146,7 @@
             id="nav-toggle"
             type="button"
             aria-label="Open profile sections"
+            data-i18n-aria-label="Open profile sections"
             aria-expanded="false"
             aria-controls="profile-nav"
             hidden
@@ -157,11 +177,24 @@
             </svg>
           </button>
           <button
+            class="icon-btn lang-btn"
+            id="lang-btn"
+            type="button"
+            aria-label="Switch language"
+            title="Switch language"
+            data-i18n-aria-label="Switch language"
+            data-i18n-title="Switch language"
+          >
+            <span id="current-lang">EN</span>
+          </button>
+          <button
             class="icon-btn"
             id="theme-btn"
             type="button"
             aria-label="Switch to light theme"
             title="Toggle theme"
+            data-i18n-aria-label="Switch to light theme"
+            data-i18n-title="Toggle theme"
           >
             <svg
               class="theme-icon theme-icon--moon"
@@ -209,7 +242,7 @@
               <circle cx="18" cy="19" r="3" />
               <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" />
             </svg>
-            Share
+            <span data-i18n="Share">Share</span>
           </button>
           <a
             class="btn btn-ghost btn-sm nav-my-portfolio"
@@ -217,6 +250,8 @@
             href="/p/"
             aria-label="My portfolio"
             title="My portfolio"
+            data-i18n-aria-label="My portfolio"
+            data-i18n-title="My portfolio"
             hidden
           >
             <svg
@@ -232,10 +267,12 @@
               <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
               <path d="M3 12h18" />
             </svg>
-            <span class="my-portfolio-label">My portfolio</span>
+            <span class="my-portfolio-label" data-i18n="My portfolio"
+              >My portfolio</span
+            >
           </a>
           <button class="btn btn-primary btn-sm" id="auth-btn" type="button">
-            Sign in
+            <span data-i18n="Sign in">Sign in</span>
           </button>
         </div>
       </div>
@@ -255,6 +292,7 @@
         <path d="M12 8v5m0 3h.01" />
       </svg>
       <span
+        data-i18n="Preview with sample data — not a published profile. Nothing here is signed or stored on a relay."
         >Preview with sample data — not a published profile. Nothing here is
         signed or stored on a relay.</span
       >
@@ -264,9 +302,16 @@
       <!-- ==================== LOOKUP / LANDING ==================== -->
       <section id="landing-view" class="landing wrap" aria-labelledby="landing-title" hidden>
         <div class="landing-copy">
-          <div class="kicker">Personal portfolio · Nostr native</div>
-          <h1 id="landing-title">Your work, signed by your key.</h1>
-          <p class="landing-lead">
+          <div class="kicker" data-i18n="Personal portfolio · Nostr native">
+            Personal portfolio · Nostr native
+          </div>
+          <h1 id="landing-title" data-i18n="Your work, signed by your key.">
+            Your work, signed by your key.
+          </h1>
+          <p
+            class="landing-lead"
+            data-i18n-html="Publish a portfolio at <span class=&quot;mono&quot;>bitos.space/p/{profileRef}</span> using an <span class=&quot;mono&quot;>npub</span> or a <span class=&quot;mono&quot;>NIP-05</span> address. No platform account: the page follows your key, and only that key can edit it."
+          >
             Publish a portfolio at
             <span class="mono">bitos.space/p/{profileRef}</span> using an
             <span class="mono">npub</span> or a
@@ -275,16 +320,22 @@
           </p>
 
           <form class="lookup" id="lookup-form" novalidate>
-            <label class="sr-only" for="lookup-input">Profile reference</label>
+            <label
+              class="sr-only"
+              for="lookup-input"
+              data-i18n="Profile reference"
+              >Profile reference</label
+            >
             <input
               id="lookup-input"
               type="text"
               autocomplete="off"
               spellcheck="false"
               placeholder="npub1…, NIP-05, or alias"
+              data-i18n-placeholder="npub1…, NIP-05, or alias"
             />
             <button class="btn btn-primary" type="submit">
-              Open profile
+              <span data-i18n="Open profile">Open profile</span>
               <svg
                 width="15"
                 height="15"
@@ -313,10 +364,14 @@
                 <circle cx="8" cy="15" r="4.5" />
                 <path d="m11.2 11.8 8-8M17 4l2.5 2.5M14 7l2 2" />
               </svg>
-              <span id="landing-signin-label">Sign in to manage</span>
+              <span id="landing-signin-label" data-i18n="Sign in to manage"
+                >Sign in to manage</span
+              >
             </button>
             <a class="head-link" href="?demo=1"
-              >View a sample portfolio
+              ><span data-i18n="View a sample portfolio"
+                >View a sample portfolio</span
+              >
               <svg
                 width="14"
                 height="14"
@@ -336,9 +391,11 @@
 
         <div class="landing-grid" id="how">
           <article class="tile landing-card">
-            <div class="tile-title">01 — Address</div>
-            <h3>npub or NIP-05</h3>
-            <p>
+            <div class="tile-title" data-i18n="01 — Address">01 — Address</div>
+            <h3 data-i18n="npub or NIP-05">npub or NIP-05</h3>
+            <p
+              data-i18n-html="<span class=&quot;mono&quot;>npub</span> is the portable public key. <span class=&quot;mono&quot;>NIP-05</span> is a human-readable alias like <span class=&quot;mono&quot;>you@yourdomain.com</span> that resolves to the same key."
+            >
               <span class="mono">npub</span> is the portable public key.
               <span class="mono">NIP-05</span> is a human-readable alias like
               <span class="mono">you@yourdomain.com</span> that resolves to the
@@ -346,18 +403,28 @@
             </p>
           </article>
           <article class="tile landing-card">
-            <div class="tile-title">02 — Ownership</div>
-            <h3>Only the key can edit</h3>
-            <p>
+            <div class="tile-title" data-i18n="02 — Ownership">
+              02 — Ownership
+            </div>
+            <h3 data-i18n="Only the key can edit">Only the key can edit</h3>
+            <p
+              data-i18n="Edits are signed with a Nostr signer (NIP-07 or NIP-46). A visitor can read every field but cannot change one; relays reject a write signed by another key."
+            >
               Edits are signed with a Nostr signer (NIP-07 or NIP-46). A visitor can read
               every field but cannot change one; relays reject a write signed by
               another key.
             </p>
           </article>
           <article class="tile landing-card">
-            <div class="tile-title">03 — Portability</div>
-            <h3>Your data leaves with you</h3>
-            <p>
+            <div class="tile-title" data-i18n="03 — Portability">
+              03 — Portability
+            </div>
+            <h3 data-i18n="Your data leaves with you">
+              Your data leaves with you
+            </h3>
+            <p
+              data-i18n="The portfolio is a NIP-78 app-data event (kind 30078) on relays you choose. Export the JSON at any time; no private drafts are published."
+            >
               The portfolio is a NIP-78 app-data event (kind 30078) on relays you
               choose. Export the JSON at any time; no private drafts are
               published.
@@ -368,22 +435,29 @@
         <section class="recent-section" id="recent-section" hidden aria-labelledby="recent-title">
           <div class="recent-head">
             <div>
-              <div class="kicker">Recently published</div>
-              <h2 id="recent-title">Portfolios from your relays</h2>
-              <p class="recent-lead">
+              <div class="kicker" data-i18n="Recently published">
+                Recently published
+              </div>
+              <h2 id="recent-title" data-i18n="Portfolios from your relays">
+                Portfolios from your relays
+              </h2>
+              <p
+                class="recent-lead"
+                data-i18n="Public portfolio events from the relays configured in this browser — not a global directory."
+              >
                 Public portfolio events from the relays configured in this
                 browser — not a global directory.
               </p>
             </div>
             <button class="btn btn-ghost btn-sm" id="recent-refresh" type="button">
-              Refresh
+              <span data-i18n="Refresh">Refresh</span>
             </button>
           </div>
           <div class="recent-grid" id="recent-grid"></div>
           <p class="recent-status" id="recent-status" aria-live="polite"></p>
           <div class="recent-more-wrap">
             <button class="btn btn-ghost btn-sm" id="recent-more" type="button" hidden>
-              Load more
+              <span data-i18n="Load more">Load more</span>
             </button>
           </div>
         </section>
@@ -394,7 +468,9 @@
           <span class="mono">NIP-05</span>
           <span class="mono">NIP-78</span>
           <span class="mono">kind 30078</span>
-          <span class="landing-foot-note"
+          <span
+            class="landing-foot-note"
+            data-i18n="Public pages only. Private drafts stay in this browser."
             >Public pages only. Private drafts stay in this browser.</span
           >
         </div>
@@ -419,17 +495,17 @@
       <div class="wrap">
         <header class="editor-page-head">
           <div class="editor-page-title">
-            <div class="kicker">Owner mode</div>
-            <h1 id="editor-title">Edit portfolio</h1>
+            <div class="kicker" data-i18n="Owner mode">Owner mode</div>
+            <h1 id="editor-title" data-i18n="Edit portfolio">Edit portfolio</h1>
             <p class="editor-owner" id="editor-owner"></p>
-            <p class="editor-status" id="editor-status">Not published yet.</p>
+            <p class="editor-status" id="editor-status" data-i18n="Not published yet.">Not published yet.</p>
           </div>
           <div class="editor-page-actions">
             <button class="btn btn-ghost" type="button" data-editor-close>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M19 12H5m6 6-6-6 6-6" />
               </svg>
-              View public page
+              <span data-i18n="View public page">View public page</span>
             </button>
             <button class="btn btn-primary" type="button" data-editor-publish>
               <span class="btn-spinner" aria-hidden="true"></span>
@@ -442,13 +518,19 @@
           </div>
         </header>
 
-        <div class="editor-tabs editor-page-tabs" role="tablist" aria-label="Editor sections">
+        <div
+          class="editor-tabs editor-page-tabs"
+          role="tablist"
+          aria-label="Editor sections"
+          data-i18n-aria-label="Editor sections"
+        >
           <button
             class="editor-tab is-active"
             type="button"
             role="tab"
             aria-selected="true"
             data-tab="profile"
+            data-i18n="Profile"
           >
             Profile
           </button>
@@ -458,6 +540,7 @@
             role="tab"
             aria-selected="false"
             data-tab="projects"
+            data-i18n="Projects"
           >
             Projects
           </button>
@@ -467,6 +550,7 @@
             role="tab"
             aria-selected="false"
             data-tab="gallery"
+            data-i18n="Gallery"
           >
             Gallery
           </button>
@@ -476,6 +560,7 @@
             role="tab"
             aria-selected="false"
             data-tab="skills"
+            data-i18n="Skills"
           >
             Skills
           </button>
@@ -485,6 +570,7 @@
             role="tab"
             aria-selected="false"
             data-tab="publish"
+            data-i18n="Publish"
           >
             Publish
           </button>
@@ -495,21 +581,33 @@
           <section class="editor-panel" data-panel="profile">
             <div class="editor-section">
               <div class="editor-section-head">
-                <h3>Identity</h3>
-                <span class="fine">Public fields. No address or phone is required.</span>
+                <h3 data-i18n="Identity">Identity</h3>
+                <span
+                  class="fine"
+                  data-i18n="Public fields. No address or phone is required."
+                  >Public fields. No address or phone is required.</span
+                >
               </div>
               <div class="field-grid">
                 <label class="field">
-                  <span>Name <b class="req">*</b></span>
+                  <span
+                    ><span data-i18n="Name">Name</span>
+                    <b class="req">*</b></span
+                  >
                   <input id="f-name" type="text" maxlength="80" autocomplete="name" />
                 </label>
                 <label class="field">
-                  <span>Short name</span>
+                  <span data-i18n="Short name">Short name</span>
                   <input id="f-displayName" type="text" maxlength="40" />
                 </label>
                 <div class="field span2">
-                  <span>Portfolio type</span>
-                  <div class="type-picker" role="radiogroup" aria-label="Portfolio type">
+                  <span data-i18n="Portfolio type">Portfolio type</span>
+                  <div
+                    class="type-picker"
+                    role="radiogroup"
+                    aria-label="Portfolio type"
+                    data-i18n-aria-label="Portfolio type"
+                  >
                     <label class="type-option">
                       <input type="radio" name="portfolio-type" value="personal" />
                       <span class="type-icon" aria-hidden="true">
@@ -519,8 +617,14 @@
                         </svg>
                       </span>
                       <span class="type-copy">
-                        <span class="type-name">Personal portfolio</span>
-                        <span class="type-desc">One person's work, skills and evidence.</span>
+                        <span class="type-name" data-i18n="Personal portfolio"
+                          >Personal portfolio</span
+                        >
+                        <span
+                          class="type-desc"
+                          data-i18n="One person's work, skills and evidence."
+                          >One person's work, skills and evidence.</span
+                        >
                       </span>
                     </label>
                     <label class="type-option">
@@ -532,8 +636,14 @@
                         </svg>
                       </span>
                       <span class="type-copy">
-                        <span class="type-name">Organization / business</span>
-                        <span class="type-desc">Team page with a business presence link on BNOS.</span>
+                        <span class="type-name" data-i18n="Organization / business"
+                          >Organization / business</span
+                        >
+                        <span
+                          class="type-desc"
+                          data-i18n="Team page with a business presence link on BNOS."
+                          >Team page with a business presence link on BNOS.</span
+                        >
                       </span>
                     </label>
                   </div>
@@ -544,54 +654,56 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     hidden
+                    data-i18n="Open BNOS business presence ↗"
                     >Open BNOS business presence ↗</a
                   >
                 </div>
                 <label class="field span2">
-                  <span>Headline</span>
+                  <span data-i18n="Headline">Headline</span>
                   <input id="f-headline" type="text" maxlength="160" />
                 </label>
                 <label class="field span2">
-                  <span>Introduction</span>
+                  <span data-i18n="Introduction">Introduction</span>
                   <textarea id="f-bio" rows="5" maxlength="2000"></textarea>
                 </label>
                 <label class="field">
-                  <span>Location</span>
+                  <span data-i18n="Location">Location</span>
                   <input id="f-location" type="text" maxlength="80" />
                 </label>
                 <label class="field">
-                  <span>Time zone</span>
+                  <span data-i18n="Time zone">Time zone</span>
                   <input id="f-timezone" type="text" maxlength="40" placeholder="UTC+7" />
                 </label>
                 <label class="field">
-                  <span>Languages</span>
+                  <span data-i18n="Languages">Languages</span>
                   <input id="f-languages" type="text" maxlength="120" placeholder="EN, ລາວ" />
                 </label>
                 <label class="field">
-                  <span>Availability</span>
+                  <span data-i18n="Availability">Availability</span>
                   <select id="f-availability">
-                    <option value="">Not stated</option>
-                    <option value="available">Available</option>
-                    <option value="open">Open to work</option>
-                    <option value="select">Select projects only</option>
-                    <option value="unavailable">Unavailable</option>
+                    <option value="" data-i18n="Not stated">Not stated</option>
+                    <option value="available" data-i18n="Available">Available</option>
+                    <option value="open" data-i18n="Open to work">Open to work</option>
+                    <option value="select" data-i18n="Select projects only">Select projects only</option>
+                    <option value="unavailable" data-i18n="Unavailable">Unavailable</option>
                   </select>
                 </label>
                 <label class="field span2">
-                  <span>Availability note</span>
+                  <span data-i18n="Availability note">Availability note</span>
                   <input
                     id="f-availabilityNote"
                     type="text"
                     maxlength="120"
                     placeholder="Available for select projects"
+                    data-i18n-placeholder="Available for select projects"
                   />
                 </label>
                 <label class="field">
-                  <span>Avatar URL</span>
+                  <span data-i18n="Avatar URL">Avatar URL</span>
                   <input id="f-avatar" type="url" placeholder="https://…" />
                 </label>
                 <label class="field">
-                  <span>Banner URL</span>
+                  <span data-i18n="Banner URL">Banner URL</span>
                   <input id="f-banner" type="url" placeholder="https://…" />
                 </label>
               </div>
@@ -600,23 +712,38 @@
             <div class="editor-section">
               <div class="editor-section-head">
                 <div>
-                  <h3>Portfolio style</h3>
-                  <span class="fine"
+                  <h3 data-i18n="Portfolio style">Portfolio style</h3>
+                  <span
+                    class="fine"
+                    data-i18n="Each style changes the layout and palette of your public page. The choice is published with your portfolio and also drives the browser theme-color."
                     >Each style changes the layout and palette of your public
                     page. The choice is published with your portfolio and also
                     drives the browser theme-color.</span
                   >
                 </div>
               </div>
-              <div class="theme-picker" role="radiogroup" aria-label="Portfolio theme">
+              <div
+                class="theme-picker"
+                role="radiogroup"
+                aria-label="Portfolio theme"
+                data-i18n-aria-label="Portfolio theme"
+              >
                 <label class="theme-card">
                   <input type="radio" name="portfolio-theme" value="obsidian" />
                   <span class="theme-swatch theme-swatch--obsidian" aria-hidden="true">
                     <i></i><i></i><i></i><i></i><i></i><i></i>
                   </span>
                   <span class="theme-card-text">
-                    <span class="theme-name">Spotlight <b>Obsidian</b></span>
-                    <span class="theme-desc">Featured bento, sticky details, dark violet glass.</span>
+                    <span
+                      class="theme-name"
+                      data-i18n-html="Spotlight <b>Obsidian</b>"
+                      >Spotlight <b>Obsidian</b></span
+                    >
+                    <span
+                      class="theme-desc"
+                      data-i18n="Featured bento, sticky details, dark violet glass."
+                      >Featured bento, sticky details, dark violet glass.</span
+                    >
                   </span>
                 </label>
                 <label class="theme-card">
@@ -625,8 +752,16 @@
                     <i></i><i></i><i></i><i></i><i></i><i></i>
                   </span>
                   <span class="theme-card-text">
-                    <span class="theme-name">Editorial <b>Parchment</b></span>
-                    <span class="theme-desc">Single-column paper, alternating work rows.</span>
+                    <span
+                      class="theme-name"
+                      data-i18n-html="Editorial <b>Parchment</b>"
+                      >Editorial <b>Parchment</b></span
+                    >
+                    <span
+                      class="theme-desc"
+                      data-i18n="Single-column paper, alternating work rows."
+                      >Single-column paper, alternating work rows.</span
+                    >
                   </span>
                 </label>
                 <label class="theme-card">
@@ -635,12 +770,23 @@
                     <i></i><i></i><i></i><i></i><i></i><i></i>
                   </span>
                   <span class="theme-card-text">
-                    <span class="theme-name">Dossier <b>Signal</b></span>
-                    <span class="theme-desc">Compact terminal grid, dense media wall.</span>
+                    <span
+                      class="theme-name"
+                      data-i18n-html="Dossier <b>Signal</b>"
+                      >Dossier <b>Signal</b></span
+                    >
+                    <span
+                      class="theme-desc"
+                      data-i18n="Compact terminal grid, dense media wall."
+                      >Compact terminal grid, dense media wall.</span
+                    >
                   </span>
                 </label>
               </div>
-              <p class="fine">
+              <p
+                class="fine"
+                data-i18n="The style changes layout and palette only — your content, media and signed data stay the same. It sets the default mode; visitors can switch dark or light on your public page."
+              >
                 The style changes layout and palette only — your content,
                 media and signed data stay the same. It sets the default
                 mode; visitors can switch dark or light on your public page.
@@ -649,8 +795,12 @@
 
             <div class="editor-section">
               <div class="editor-section-head">
-                <h3>Identity links</h3>
-                <span class="fine">Optional. NIP-05 is verified against DNS when present.</span>
+                <h3 data-i18n="Identity links">Identity links</h3>
+                <span
+                  class="fine"
+                  data-i18n="Optional. NIP-05 is verified against DNS when present."
+                  >Optional. NIP-05 is verified against DNS when present.</span
+                >
               </div>
               <div class="field-grid">
                 <label class="field">
@@ -658,45 +808,61 @@
                   <input id="f-nip05" type="text" placeholder="you@yourdomain.com" />
                 </label>
                 <label class="field">
-                  <span>Contact label</span>
-                  <input id="f-contactLabel" type="text" maxlength="60" placeholder="Request contact" />
+                  <span data-i18n="Contact label">Contact label</span>
+                  <input
+                    id="f-contactLabel"
+                    type="text"
+                    maxlength="60"
+                    placeholder="Request contact"
+                    data-i18n-placeholder="Request contact"
+                  />
                 </label>
                 <label class="field span2">
-                  <span>Contact link</span>
+                  <span data-i18n="Contact link">Contact link</span>
                   <input
                     id="f-contactUrl"
                     type="text"
                     placeholder="mailto:you@example.com or https://…"
+                    data-i18n-placeholder="mailto:you@example.com or https://…"
                   />
                 </label>
               </div>
-              <p class="fine">
+              <p
+                class="fine"
+                data-i18n="The contact button opens your chosen link. bitos.space does not store messages or inquiries."
+              >
                 The contact button opens your chosen link. bitos.space does not
                 store messages or inquiries.
               </p>
 
               <div class="nip05-wizard">
                 <button class="btn btn-ghost btn-sm" id="nip05-build" type="button">
-                  Set up NIP-05
+                  <span data-i18n="Set up NIP-05">Set up NIP-05</span>
                 </button>
-                <p class="fine">
+                <p
+                  class="fine"
+                  data-i18n="You need a domain you control. The wizard generates the file that maps your name to your key, then verifies it live."
+                >
                   You need a domain you control. The wizard generates the file
                   that maps your name to your key, then verifies it live.
                 </p>
                 <div class="nip05-panel" id="nip05-panel" hidden>
                   <p class="fine">
-                    Host this file at
+                    <span data-i18n="Host this file at">Host this file at</span>
                     <code id="nip05-file-url" class="mono"></code>
-                    with <code class="mono">Access-Control-Allow-Origin: *</code>
-                    and a JSON content type.
+                    <span data-i18n="with">with</span>
+                    <code class="mono">Access-Control-Allow-Origin: *</code>
+                    <span data-i18n="and a JSON content type."
+                      >and a JSON content type.</span
+                    >
                   </p>
                   <pre class="nip05-json"><code id="nip05-json" class="mono"></code></pre>
                   <div class="hero-actions">
                     <button class="btn btn-ghost btn-sm" id="nip05-copy" type="button">
-                      Copy JSON
+                      <span data-i18n="Copy JSON">Copy JSON</span>
                     </button>
                     <button class="btn btn-primary btn-sm" id="nip05-verify" type="button">
-                      Verify now
+                      <span data-i18n="Verify now">Verify now</span>
                     </button>
                   </div>
                   <p class="status-line nip05-status" id="nip05-status" aria-live="polite"></p>
@@ -706,9 +872,9 @@
 
             <div class="editor-section">
               <div class="editor-section-head">
-                <h3>Links</h3>
+                <h3 data-i18n="Links">Links</h3>
                 <button class="btn btn-ghost btn-sm" type="button" data-add="link">
-                  Add link
+                  <span data-i18n="Add link">Add link</span>
                 </button>
               </div>
               <div id="links-editor" class="repeat-list"></div>
@@ -720,14 +886,16 @@
             <div class="editor-section">
               <div class="editor-section-head">
                 <div>
-                  <h3>Portfolio projects</h3>
-                  <span class="fine"
+                  <h3 data-i18n="Portfolio projects">Portfolio projects</h3>
+                  <span
+                    class="fine"
+                    data-i18n="Only checked projects are included in the signed public event. Unchecked projects stay in this browser as drafts."
                     >Only checked projects are included in the signed public
                     event. Unchecked projects stay in this browser as drafts.</span
                   >
                 </div>
                 <button class="btn btn-ghost btn-sm" type="button" data-add="project">
-                  Add project
+                  <span data-i18n="Add project">Add project</span>
                 </button>
               </div>
               <div id="projects-editor" class="repeat-list"></div>
@@ -739,8 +907,10 @@
             <div class="editor-section">
               <div class="editor-section-head">
                 <div>
-                  <h3>Gallery</h3>
-                  <span class="fine"
+                  <h3 data-i18n="Gallery">Gallery</h3>
+                  <span
+                    class="fine"
+                    data-i18n="Uploads go to BitOS media storage first; if that service is unavailable, the Blossom server below is used as a fallback. Your event stores only the returned links, so media stays out of the signed data."
                     >Uploads go to BitOS media storage first; if that service is
                     unavailable, the Blossom server below is used as a fallback.
                     Your event stores only the returned links, so media stays
@@ -751,10 +921,15 @@
 
               <div class="gallery-drop" id="gallery-drop">
                 <div class="gallery-drop-text">
-                  <strong>Drop images or video here</strong>
-                  <span>Files upload to BitOS with your Blossom server as
-                  fallback; only the returned links are stored in your event.
-                  Images up to 20 MB, MP4/WebM up to 100 MB.</span>
+                  <strong data-i18n="Drop images or video here"
+                    >Drop images or video here</strong
+                  >
+                  <span
+                    data-i18n="Files upload to BitOS with your Blossom server as fallback; only the returned links are stored in your event. Images up to 20 MB, MP4/WebM up to 100 MB."
+                    >Files upload to BitOS with your Blossom server as
+                    fallback; only the returned links are stored in your event.
+                    Images up to 20 MB, MP4/WebM up to 100 MB.</span
+                  >
                 </div>
                 <div class="hero-actions">
                   <button
@@ -762,14 +937,15 @@
                     id="gallery-upload-media"
                     type="button"
                     title="Upload images or video to your Blossom server"
+                    data-i18n-title="Upload images or video to your Blossom server"
                   >
-                    Upload media
+                    <span data-i18n="Upload media">Upload media</span>
                   </button>
                   <button class="btn btn-ghost btn-sm" id="gallery-add-image-url" type="button">
-                    Add image URL
+                    <span data-i18n="Add image URL">Add image URL</span>
                   </button>
                   <button class="btn btn-ghost btn-sm" id="gallery-add-video" type="button">
-                    Add video link
+                    <span data-i18n="Add video link">Add video link</span>
                   </button>
                 </div>
                 <input
@@ -789,7 +965,9 @@
               ></p>
 
               <label class="field blossom-field">
-                <span>Blossom fallback server</span>
+                <span data-i18n="Blossom fallback server"
+                  >Blossom fallback server</span
+                >
                 <input
                   id="f-blossom"
                   type="url"
@@ -797,13 +975,17 @@
                   placeholder="https://blossom.primal.net"
                 />
                 <span class="tag-hint"
-                  >Used only if the BitOS media service is unavailable. Files
-                  stay on that server and are linked into your event — the event
-                  never contains the media bytes. Saved in this browser.
+                  ><span
+                    data-i18n="Used only if the BitOS media service is unavailable. Files stay on that server and are linked into your event — the event never contains the media bytes. Saved in this browser."
+                    >Used only if the BitOS media service is unavailable. Files
+                    stay on that server and are linked into your event — the event
+                    never contains the media bytes. Saved in this browser.</span
+                  >
                   <a
                     href="https://github.com/hzrd149/blossom"
                     target="_blank"
                     rel="noopener noreferrer"
+                    data-i18n="Blossom spec"
                     >Blossom spec</a
                   >.</span
                 >
@@ -815,36 +997,48 @@
 
             <div class="editor-section">
               <div class="editor-section-head">
-                <h3>How media is stored</h3>
+                <h3 data-i18n="How media is stored">How media is stored</h3>
               </div>
               <ul class="media-notes">
-                <li>
+                <li
+                  data-i18n-html="<strong>Upload media</strong> sends images or video to the BitOS media service first. If it is unavailable, the Blossom server above is used with a signed upload request. Only the returned https:// links are stored in your event, so keep the files available at those hosts."
+                >
                   <strong>Upload media</strong> sends images or video to the
                   BitOS media service first. If it is unavailable, the Blossom
                   server above is used with a signed upload request. Only the
                   returned https:// links are stored in your event, so keep the
                   files available at those hosts.
                 </li>
-                <li>
+                <li
+                  data-i18n-html="<strong>Images and video</strong> can also be added as hosted URLs. Images are never embedded into the event anymore; older profiles with embedded images remain readable and are shown with the legacy budget above."
+                >
                   <strong>Images and video</strong> can also be added as hosted
                   URLs. Images are never embedded into the event anymore; older
                   profiles with embedded images remain readable and are shown
                   with the legacy budget above.
                 </li>
-                <li>
+                <li
+                  data-i18n-html="<strong>Video previews</strong> use a generated poster frame, uploaded alongside the video and stored as a link."
+                >
                   <strong>Video previews</strong> use a generated poster frame,
                   uploaded alongside the video and stored as a link.
                 </li>
-                <li>
+                <li
+                  data-i18n-html="<strong>Alt text and captions</strong> make the gallery usable for screen readers and give visitors context before they open an item."
+                >
                   <strong>Alt text and captions</strong> make the gallery
                   usable for screen readers and give visitors context before
                   they open an item.
                 </li>
-                <li>
+                <li
+                  data-i18n="Relays enforce different event size limits. Media links keep the signed event small; publishing only sends the links."
+                >
                   Relays enforce different event size limits. Media links keep
                   the signed event small; publishing only sends the links.
                 </li>
-                <li>
+                <li
+                  data-i18n="Unchecked items stay in this browser as drafts and are never included in the signed public event."
+                >
                   Unchecked items stay in this browser as drafts and are never
                   included in the signed public event.
                 </li>
@@ -857,14 +1051,16 @@
             <div class="editor-section">
               <div class="editor-section-head">
                 <div>
-                  <h3>Skills</h3>
-                  <span class="fine"
+                  <h3 data-i18n="Skills">Skills</h3>
+                  <span
+                    class="fine"
+                    data-i18n="Two grades only: your own claim, or evidence listed by an issuer. No global rating."
                     >Two grades only: your own claim, or evidence listed by an
                     issuer. No global rating.</span
                   >
                 </div>
                 <button class="btn btn-ghost btn-sm" type="button" data-add="skill">
-                  Add skill
+                  <span data-i18n="Add skill">Add skill</span>
                 </button>
               </div>
               <div id="skills-editor" class="repeat-list"></div>
@@ -873,14 +1069,16 @@
             <div class="editor-section">
               <div class="editor-section-head">
                 <div>
-                  <h3>Credentials</h3>
-                  <span class="fine"
+                  <h3 data-i18n="Credentials">Credentials</h3>
+                  <span
+                    class="fine"
+                    data-i18n="Optional. The issuer is shown with each record; bitos.space does not independently verify it."
                     >Optional. The issuer is shown with each record; bitos.space
                     does not independently verify it.</span
                   >
                 </div>
                 <button class="btn btn-ghost btn-sm" type="button" data-add="credential">
-                  Add credential
+                  <span data-i18n="Add credential">Add credential</span>
                 </button>
               </div>
               <div id="credentials-editor" class="repeat-list"></div>
@@ -891,32 +1089,42 @@
           <section class="editor-panel" data-panel="publish" hidden>
             <div class="editor-section">
               <div class="editor-section-head">
-                <h3>Publish</h3>
+                <h3 data-i18n="Publish">Publish</h3>
               </div>
               <div class="publish-card">
                 <div class="publish-row">
-                  <span class="publish-k">Event</span>
+                  <span class="publish-k" data-i18n="Event">Event</span>
                   <span class="mono">kind 30078 · NIP-78 app data</span>
                 </div>
                 <div class="publish-row">
-                  <span class="publish-k">Replaceable key</span>
+                  <span class="publish-k" data-i18n="Replaceable key"
+                    >Replaceable key</span
+                  >
                   <span class="mono">d = bitos.space:portfolio:v1</span>
                 </div>
                 <div class="publish-row">
-                  <span class="publish-k">Public URL</span>
+                  <span class="publish-k" data-i18n="Public URL">Public URL</span>
                   <span class="mono" id="editor-url">…</span>
                 </div>
                 <div class="publish-row">
-                  <span class="publish-k">Drafts</span>
-                  <span>Kept in this browser only</span>
+                  <span class="publish-k" data-i18n="Drafts">Drafts</span>
+                  <span data-i18n="Kept in this browser only"
+                    >Kept in this browser only</span
+                  >
                 </div>
               </div>
-              <p class="fine">
+              <p
+                class="fine"
+                data-i18n="Publishing replaces the previous portfolio event for the same key. Readers always see the newest signed version. Your signer will ask for approval before anything is sent."
+              >
                 Publishing replaces the previous portfolio event for the same
                 key. Readers always see the newest signed version. Your signer
                 will ask for approval before anything is sent.
               </p>
-              <p class="fine">
+              <p
+                class="fine"
+                data-i18n-html="<strong>Kind 0 is separate.</strong> This editor does not overwrite your Nostr profile metadata (name, about, avatar and NIP-05 used by other clients). Those fields are only used as a fallback when the portfolio leaves them empty."
+              >
                 <strong>Kind 0 is separate.</strong> This editor does not
                 overwrite your Nostr profile metadata (name, about, avatar and
                 NIP-05 used by other clients). Those fields are only used as a
@@ -926,13 +1134,16 @@
 
             <div class="editor-section">
               <div class="editor-section-head">
-                <h3>Relays</h3>
+                <h3 data-i18n="Relays">Relays</h3>
                 <button class="btn btn-ghost btn-sm" type="button" id="save-relays">
-                  Save relays
+                  <span data-i18n="Save relays">Save relays</span>
                 </button>
               </div>
               <textarea id="f-relays" rows="5" spellcheck="false"></textarea>
-              <p class="fine">
+              <p
+                class="fine"
+                data-i18n="One WebSocket URL per line. Choose relays you trust to keep your public portfolio available. Defaults are public relays."
+              >
                 One WebSocket URL per line. Choose relays you trust to keep your
                 public portfolio available. Defaults are public relays.
               </p>
@@ -940,7 +1151,7 @@
 
             <div class="editor-section">
               <div class="editor-section-head">
-                <h3>Portability</h3>
+                <h3 data-i18n="Portability">Portability</h3>
               </div>
               <div class="hero-actions">
                 <button class="btn btn-ghost" type="button" id="export-btn">
@@ -956,7 +1167,7 @@
                     <path d="M12 3v12m0 0 4-4m-4 4-4-4" />
                     <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
                   </svg>
-                  Export JSON
+                  <span data-i18n="Export JSON">Export JSON</span>
                 </button>
                 <button class="btn btn-ghost" type="button" id="import-btn">
                   <svg
@@ -971,11 +1182,14 @@
                     <path d="M12 15V3m0 0 4 4m-4-4L8 7" />
                     <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
                   </svg>
-                  Import JSON
+                  <span data-i18n="Import JSON">Import JSON</span>
                 </button>
                 <input id="import-file" type="file" accept="application/json,.json" hidden />
               </div>
-              <p class="fine">
+              <p
+                class="fine"
+                data-i18n="Export includes local drafts. Import accepts a previously exported file and keeps it as a local draft until you publish."
+              >
                 Export includes local drafts. Import accepts a previously
                 exported file and keeps it as a local draft until you publish.
               </p>
@@ -983,7 +1197,7 @@
 
             <div class="editor-section" id="publish-results-wrap" hidden>
               <div class="editor-section-head">
-                <h3>Relay results</h3>
+                <h3 data-i18n="Relay results">Relay results</h3>
               </div>
               <ul class="relay-results" id="publish-results"></ul>
             </div>
@@ -996,16 +1210,18 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M19 12H5m6 6-6-6 6-6" />
               </svg>
-              View public page
+              <span data-i18n="View public page">View public page</span>
             </button>
-            <span class="save-state" id="save-state">No changes yet</span>
+            <span class="save-state" id="save-state" data-i18n="No changes yet"
+              >No changes yet</span
+            >
           </div>
           <div class="editor-actions">
             <button class="btn btn-ghost btn-sm" type="button" id="discard-draft">
-              Discard draft
+              <span data-i18n="Discard draft">Discard draft</span>
             </button>
             <button class="btn btn-ghost btn-sm" type="button" id="save-draft">
-              Save draft
+              <span data-i18n="Save draft">Save draft</span>
             </button>
             <button class="btn btn-primary btn-sm" type="button" id="publish-btn">
               <span class="btn-spinner" aria-hidden="true"></span>
@@ -1034,7 +1250,7 @@
     <footer class="footer">
       <div class="footer-in">
         <div>
-          <h4>Canonical address</h4>
+          <h4 data-i18n="Canonical address">Canonical address</h4>
           <div class="big-url" id="footer-url">
             <svg
               class="lock"
@@ -1051,13 +1267,15 @@
             </svg>
             <span>bitos.space/p/</span>
           </div>
-          <p>
+          <p
+            data-i18n="One key, one canonical page. The public key is the stable reference; NIP-05 is a human-readable alias that points to it."
+          >
             One key, one canonical page. The public key is the stable reference;
             NIP-05 is a human-readable alias that points to it.
           </p>
         </div>
         <div>
-          <h4>Protocol</h4>
+          <h4 data-i18n="Protocol">Protocol</h4>
           <div class="f-links">
             <a
               href="https://github.com/nostr-protocol/nips/blob/master/07.md"
@@ -1088,10 +1306,14 @@
         <div>
           <h4>bitos.space</h4>
           <div class="f-links">
-            <a href="../index.html">Home</a>
-            <a href="?demo=1">Sample portfolio</a>
-            <a href="/p/verify/">Credential verification · Demo</a>
-            <a href="../data-standard.html">Data Standard</a>
+            <a href="../index.html" data-i18n="Home">Home</a>
+            <a href="?demo=1" data-i18n="Sample portfolio">Sample portfolio</a>
+            <a href="/p/verify/" data-i18n="Credential verification · Demo"
+              >Credential verification · Demo</a
+            >
+            <a href="../data-standard.html" data-i18n="Data Standard"
+              >Data Standard</a
+            >
           </div>
         </div>
       </div>
@@ -1107,14 +1329,17 @@
       <div class="dialog-card">
         <div class="dialog-head">
           <div>
-            <div class="kicker" id="confirm-kicker">Confirm</div>
-            <h2 id="confirm-title">Are you sure?</h2>
+            <div class="kicker" id="confirm-kicker" data-i18n="Confirm">
+              Confirm
+            </div>
+            <h2 id="confirm-title" data-i18n="Are you sure?">Are you sure?</h2>
           </div>
           <button
             class="dialog-close"
             type="button"
             data-close="confirm-dialog"
             aria-label="Close"
+            data-i18n-aria-label="Close"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M18 6 6 18M6 6l12 12" />
@@ -1125,10 +1350,10 @@
           <p class="confirm-message" id="confirm-message"></p>
           <div class="confirm-actions">
             <button class="btn btn-ghost" id="confirm-cancel" type="button">
-              Cancel
+              <span data-i18n="Cancel">Cancel</span>
             </button>
             <button class="btn btn-danger" id="confirm-accept" type="button">
-              Confirm
+              <span data-i18n="Confirm">Confirm</span>
             </button>
           </div>
         </div>
@@ -1140,14 +1365,17 @@
       <div class="dialog-card">
         <div class="dialog-head">
           <div>
-            <div class="kicker">Owner mode</div>
-            <h2 id="signin-title">Sign in with a Nostr signer</h2>
+            <div class="kicker" data-i18n="Owner mode">Owner mode</div>
+            <h2 id="signin-title" data-i18n="Sign in with a Nostr signer">
+              Sign in with a Nostr signer
+            </h2>
           </div>
           <button
             class="dialog-close"
             type="button"
             data-close="signin-dialog"
             aria-label="Close"
+            data-i18n-aria-label="Close"
           >
             <svg
               width="18"
@@ -1167,7 +1395,9 @@
           <div class="signer-box" id="signer-box">
             <div class="signer-box-head">
               <span class="signer-dot" id="signer-dot" aria-hidden="true"></span>
-              <span id="signer-label">Not signed in</span>
+              <span id="signer-label" data-i18n="Not signed in"
+                >Not signed in</span
+              >
             </div>
             <div class="signer-id" id="signer-id" hidden></div>
           </div>
@@ -1175,26 +1405,54 @@
           <div class="my-portfolio-card" id="my-portfolio-card" hidden>
             <div class="my-portfolio-head">
               <div>
-                <div class="my-portfolio-kicker">Your portfolio</div>
-                <div class="my-portfolio-name" id="my-portfolio-name">Your portfolio</div>
+                <div class="my-portfolio-kicker" data-i18n="Your portfolio">
+                  Your portfolio
+                </div>
+                <div class="my-portfolio-name" id="my-portfolio-name" data-i18n="Your portfolio">
+                  Your portfolio
+                </div>
               </div>
-              <span class="my-portfolio-status" id="my-portfolio-status">Checking…</span>
+              <span
+                class="my-portfolio-status"
+                id="my-portfolio-status"
+                data-i18n="Checking…"
+                >Checking…</span
+              >
             </div>
             <div class="my-portfolio-url mono" id="my-portfolio-url"></div>
             <div class="hero-actions">
-              <a class="btn btn-ghost btn-sm" id="my-portfolio-view" href="/p/">View public page</a>
-              <a class="btn btn-primary btn-sm" id="my-portfolio-edit" href="/p/?edit=1">Edit portfolio</a>
+              <a
+                class="btn btn-ghost btn-sm"
+                id="my-portfolio-view"
+                href="/p/"
+                data-i18n="View public page"
+                >View public page</a
+              >
+              <a
+                class="btn btn-primary btn-sm"
+                id="my-portfolio-edit"
+                href="/p/?edit=1"
+                data-i18n="Edit portfolio"
+                >Edit portfolio</a
+              >
             </div>
           </div>
 
-          <div class="auth-tabs" role="tablist" aria-label="Signer type">
+          <div
+            class="auth-tabs"
+            role="tablist"
+            aria-label="Signer type"
+            data-i18n-aria-label="Signer type"
+          >
             <button
               class="auth-tab is-active"
               type="button"
               role="tab"
               aria-selected="true"
               aria-label="Browser extension"
+              data-i18n-aria-label="Browser extension"
               data-auth-tab="nip07"
+              data-i18n="Extension"
             >
               Extension
             </button>
@@ -1204,7 +1462,9 @@
               role="tab"
               aria-selected="false"
               aria-label="Remote signer"
+              data-i18n-aria-label="Remote signer"
               data-auth-tab="nip46"
+              data-i18n="Remote"
             >
               Remote
             </button>
@@ -1214,6 +1474,7 @@
               role="tab"
               aria-selected="false"
               data-auth-tab="nsec"
+              data-i18n="Local key"
             >
               Local key
             </button>
@@ -1223,13 +1484,14 @@
               role="tab"
               aria-selected="false"
               data-auth-tab="create"
+              data-i18n="Create account"
             >
               Create account
             </button>
           </div>
 
           <section class="auth-panel" data-auth-panel="nip07">
-            <p class="fine" id="nip07-note">
+            <p class="fine" id="nip07-note" data-i18n="A NIP-07 extension keeps your key inside the extension. This page only asks it to sign.">
               A NIP-07 extension keeps your key inside the extension. This page
               only asks it to sign.
             </p>
@@ -1246,19 +1508,22 @@
                 <circle cx="8" cy="15" r="4.5" />
                 <path d="m11.2 11.8 8-8M17 4l2.5 2.5M14 7l2 2" />
               </svg>
-              <span id="connect-signer-label">Connect NIP-07 signer</span>
+              <span id="connect-signer-label" data-i18n="Connect NIP-07 signer">Connect NIP-07 signer</span>
             </button>
           </section>
 
 
           <section class="auth-panel" data-auth-panel="nsec" hidden>
-            <p class="fine">
+            <p
+              class="fine"
+              data-i18n="Sign in with a private key stored in this browser. Prefer a NIP-07 extension or remote signer when you can keep the key out of this page."
+            >
               Sign in with a private key stored in this browser. Prefer a
               NIP-07 extension or remote signer when you can keep the key out
               of this page.
             </p>
             <div class="field">
-              <label for="nsec-key">Private key</label>
+              <label for="nsec-key" data-i18n="Private key">Private key</label>
               <span class="secret-field">
                 <input
                   id="nsec-key"
@@ -1266,6 +1531,7 @@
                   autocomplete="off"
                   spellcheck="false"
                   placeholder="nsec1… or 64-character secret key"
+                  data-i18n-placeholder="nsec1… or 64-character secret key"
                 />
                 <button
                   class="secret-toggle"
@@ -1273,6 +1539,8 @@
                   type="button"
                   aria-label="Show private key"
                   title="Show private key"
+                  data-i18n-aria-label="Show private key"
+                  data-i18n-title="Show private key"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z" />
@@ -1283,21 +1551,28 @@
             </div>
             <label class="check-field">
               <input id="nsec-remember" type="checkbox" />
-              Remember this device (stores the key in localStorage)
+              <span data-i18n="Remember this device (stores the key in localStorage)"
+                >Remember this device (stores the key in localStorage)</span
+              >
             </label>
-            <p class="fine">
+            <p
+              class="fine"
+              data-i18n="Without this, the key is kept in sessionStorage and is cleared when this tab closes. Only use a local key on a device you trust."
+            >
               Without this, the key is kept in sessionStorage and is cleared
               when this tab closes. Only use a local key on a device you trust.
             </p>
             <button class="btn btn-primary btn-block" id="connect-nsec" type="button">
-              Sign in with private key
+              <span data-i18n="Sign in with private key"
+                >Sign in with private key</span
+              >
             </button>
             <p class="status-line" id="nsec-status" aria-live="polite"></p>
           </section>
 
           <section class="auth-panel" data-auth-panel="nip46" hidden>
             <label class="field">
-              <span>Bunker URL</span>
+              <span data-i18n="Bunker URL">Bunker URL</span>
               <input
                 id="bunker-url"
                 type="text"
@@ -1307,16 +1582,23 @@
               />
             </label>
             <button class="btn btn-primary btn-block" id="connect-bunker" type="button">
-              Connect with bunker URL
+              <span data-i18n="Connect with bunker URL"
+                >Connect with bunker URL</span
+              >
             </button>
 
-            <div class="auth-or"><span>or</span></div>
+            <div class="auth-or"><span data-i18n="or">or</span></div>
 
             <button class="btn btn-ghost btn-block" id="start-nostrconnect" type="button">
-              Connect with a signer app
+              <span data-i18n="Connect with a signer app"
+                >Connect with a signer app</span
+              >
             </button>
             <div class="nip46-box" id="nostrconnect-box" hidden>
-              <p class="fine">
+              <p
+                class="fine"
+                data-i18n="Open or copy this link in Amber, nsec.app, or another NIP-46 signer. Keep this dialog open while you approve."
+              >
                 Open or copy this link in Amber, nsec.app, or another NIP-46
                 signer. Keep this dialog open while you approve.
               </p>
@@ -1329,7 +1611,7 @@
               ></textarea>
               <div class="hero-actions">
                 <button class="btn btn-ghost btn-sm" id="copy-nostrconnect" type="button">
-                  Copy link
+                  <span data-i18n="Copy link">Copy link</span>
                 </button>
                 <a
                   class="btn btn-ghost btn-sm"
@@ -1337,10 +1619,11 @@
                   href="#"
                   rel="noopener noreferrer"
                   hidden
+                  data-i18n="Open signer app"
                   >Open signer app</a
                 >
                 <button class="btn btn-ghost btn-sm" id="cancel-nostrconnect" type="button">
-                  Cancel
+                  <span data-i18n="Cancel">Cancel</span>
                 </button>
               </div>
             </div>
@@ -1348,45 +1631,63 @@
           </section>
 
           <section class="auth-panel" data-auth-panel="create" hidden>
-            <p class="fine">
+            <p
+              class="fine"
+              data-i18n="Create a new Nostr account for this portfolio. Your nsec is the only way to edit it, so back it up before continuing."
+            >
               Create a new Nostr account for this portfolio. Your nsec is the
               only way to edit it, so back it up before continuing.
             </p>
             <button class="btn btn-primary btn-block" id="create-start" type="button">
-              Create a new account
+              <span data-i18n="Create a new account">Create a new account</span>
             </button>
             <div class="create-result" id="create-result" hidden>
               <div class="key-card">
                 <div class="key-card-head">
-                  <span>Public key</span>
-                  <button id="copy-create-npub" type="button">Copy</button>
+                  <span data-i18n="Public key">Public key</span>
+                  <button id="copy-create-npub" type="button" data-i18n="Copy">
+                    Copy
+                  </button>
                 </div>
                 <code id="create-npub"></code>
               </div>
               <div class="key-card key-card--secret">
                 <div class="key-card-head">
-                  <span>Private key (nsec)</span>
-                  <button id="copy-create-nsec" type="button">Copy</button>
+                  <span data-i18n="Private key (nsec)">Private key (nsec)</span>
+                  <button id="copy-create-nsec" type="button" data-i18n="Copy">
+                    Copy
+                  </button>
                 </div>
                 <code id="create-nsec"></code>
               </div>
-              <p class="fine">
+              <p
+                class="fine"
+                data-i18n="Anyone with this nsec can sign as you. Store it in a password manager or offline backup. It cannot be recovered."
+              >
                 Anyone with this nsec can sign as you. Store it in a password
                 manager or offline backup. It cannot be recovered.
               </p>
               <label class="check-field">
                 <input id="create-saved" type="checkbox" />
-                I saved my nsec somewhere safe
+                <span data-i18n="I saved my nsec somewhere safe"
+                  >I saved my nsec somewhere safe</span
+                >
               </label>
               <label class="check-field">
                 <input id="create-remember" type="checkbox" />
-                Remember this device (stores the key in localStorage)
+                <span data-i18n="Remember this device (stores the key in localStorage)"
+                  >Remember this device (stores the key in localStorage)</span
+                >
               </label>
               <button class="btn btn-primary btn-block" id="create-continue" type="button" disabled>
-                Continue with this account
+                <span data-i18n="Continue with this account"
+                  >Continue with this account</span
+                >
               </button>
               <button class="btn btn-ghost btn-block" id="create-again" type="button">
-                Generate a different key
+                <span data-i18n="Generate a different key"
+                  >Generate a different key</span
+                >
               </button>
             </div>
             <p class="status-line" id="create-status" aria-live="polite"></p>
@@ -1395,10 +1696,13 @@
           <p class="status-line" id="auth-status" aria-live="polite"></p>
 
           <button class="btn btn-ghost btn-block" id="signout-btn" type="button" hidden>
-            Sign out
+            <span data-i18n="Sign out">Sign out</span>
           </button>
 
-          <div class="readonly-note">
+          <div
+            class="readonly-note"
+            data-i18n-html="<strong>npub is read-only on its own.</strong> It is a public key, not a password. Editing requires a signer that holds the private key — a NIP-07 extension, a NIP-46 remote signer, or a local nsec you keep on this device. A NIP-05 address (<span class=&quot;mono&quot;>you@domain.com</span>) is only a human-readable pointer to a key, not a login method. Never share your nsec with anyone."
+          >
             <strong>npub is read-only on its own.</strong> It is a public key,
             not a password. Editing requires a signer that holds the private
             key — a NIP-07 extension, a NIP-46 remote signer, or a local nsec
@@ -1409,13 +1713,16 @@
           </div>
 
           <details class="relay-settings">
-            <summary>Relay settings</summary>
-            <p class="fine">
+            <summary data-i18n="Relay settings">Relay settings</summary>
+            <p
+              class="fine"
+              data-i18n="Used to read and publish your portfolio. One URL per line."
+            >
               Used to read and publish your portfolio. One URL per line.
             </p>
             <textarea id="signin-relays" rows="4" spellcheck="false"></textarea>
             <button class="btn btn-ghost btn-sm" id="save-signin-relays" type="button">
-              Save relays
+              <span data-i18n="Save relays">Save relays</span>
             </button>
           </details>
         </div>
@@ -1428,14 +1735,15 @@
       <div class="dialog-card">
         <div class="dialog-head">
           <div>
-            <div class="kicker">Share</div>
-            <h2 id="qr-title">Scan to open</h2>
+            <div class="kicker" data-i18n="Share">Share</div>
+            <h2 id="qr-title" data-i18n="Scan to open">Scan to open</h2>
           </div>
           <button
             class="dialog-close"
             type="button"
             data-close="qr-dialog"
             aria-label="Close"
+            data-i18n-aria-label="Close"
           >
             <svg
               width="18"
@@ -1455,10 +1763,10 @@
           <p class="qr-url mono" id="profile-qr-url"></p>
           <div class="hero-actions">
             <button class="btn btn-primary" id="copy-profile-qr" type="button">
-              Copy link
+              <span data-i18n="Copy link">Copy link</span>
             </button>
             <button class="btn btn-ghost" type="button" data-close="qr-dialog">
-              Close
+              <span data-i18n="Close">Close</span>
             </button>
           </div>
         </div>
@@ -1471,13 +1779,14 @@
         <div class="lightbox-top">
           <div class="lightbox-heading">
             <span class="lightbox-count" id="lightbox-count" aria-live="polite"></span>
-            <h2 id="lightbox-title">Gallery</h2>
+            <h2 id="lightbox-title" data-i18n="Gallery">Gallery</h2>
           </div>
           <button
             class="dialog-close"
             type="button"
             data-close="lightbox-dialog"
             aria-label="Close gallery"
+            data-i18n-aria-label="Close gallery"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M18 6 6 18M6 6l12 12" />
@@ -1486,13 +1795,25 @@
         </div>
         <div class="lightbox-stage" id="lightbox-stage"></div>
         <div class="lightbox-foot">
-          <button class="lightbox-nav" id="lightbox-prev" type="button" aria-label="Previous item">
+          <button
+            class="lightbox-nav"
+            id="lightbox-prev"
+            type="button"
+            aria-label="Previous item"
+            data-i18n-aria-label="Previous item"
+          >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="m15 18-6-6 6-6" />
             </svg>
           </button>
           <p class="lightbox-caption" id="lightbox-caption"></p>
-          <button class="lightbox-nav" id="lightbox-next" type="button" aria-label="Next item">
+          <button
+            class="lightbox-nav"
+            id="lightbox-next"
+            type="button"
+            aria-label="Next item"
+            data-i18n-aria-label="Next item"
+          >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="m9 18 6-6-6-6" />
             </svg>
@@ -1504,7 +1825,10 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <noscript>
-      <div class="noscript">
+      <div
+        class="noscript"
+        data-i18n="This portfolio page needs JavaScript to resolve a Nostr key and render the profile."
+      >
         This portfolio page needs JavaScript to resolve a Nostr key and render
         the profile.
       </div>

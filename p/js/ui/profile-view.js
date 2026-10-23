@@ -4,6 +4,7 @@
  */
 import { AVAILABILITY, BNOS_BUSINESS_URL } from "../config.js";
 import { esc } from "../shared/dom.js";
+import { t } from "../shared/i18n.js";
 import {
   initials,
   paragraphs,
@@ -70,7 +71,7 @@ function availabilityInfo(profile) {
   const base = AVAILABILITY[status];
   if (!base) return null;
   return {
-    label: (profile.availability.note || "").trim() || base.label,
+    label: (profile.availability.note || "").trim() || t(base.label),
     dot: base.dot,
   };
 }
@@ -79,7 +80,7 @@ function nip05Markup(profile) {
   if (!profile.nip05) return "";
   return `<span class="verified-line js-nip05 is-pending" data-nip05="${esc(
     profile.nip05
-  )}">${iconSvg("shield")} NIP-05 checking…</span>`;
+  )}">${iconSvg("shield")} ${t("NIP-05 checking…")}</span>`;
 }
 
 function renderProjectCard(project, index, span2, isDemo) {
@@ -94,7 +95,7 @@ function renderProjectCard(project, index, span2, isDemo) {
   const link = httpUrl(project.link);
   const summary = project.summary || project.description;
   const contributionValue = project.contribution || project.role;
-  const contributionLabel = project.contribution ? "Contribution" : "Role";
+  const contributionLabel = t(project.contribution ? "Contribution" : "Role");
   const tags = (project.tags || [])
     .map((tag) => `<span class="tag">${esc(tag)}</span>`)
     .join("");
@@ -103,16 +104,16 @@ function renderProjectCard(project, index, span2, isDemo) {
     <div class="case-media">
       ${art}
       <span class="case-badge">${iconSvg("shield")} ${
-        isDemo ? "Sample record" : "Signed record"
+        t(isDemo ? "Sample record" : "Signed record")
       }</span>
       ${project.year ? `<span class="case-year">${esc(project.year)}</span>` : ""}
     </div>
     <div class="case-body">
-      <h3>${esc(project.title || "Untitled project")}</h3>
+      <h3>${esc(project.title || t("Untitled project"))}</h3>
       ${summary ? `<p class="desc">${esc(summary)}</p>` : ""}
       ${
         project.description && project.description !== project.summary
-          ? `<details class="case-more"><summary>Read the case</summary><div class="desc">${paragraphs(
+          ? `<details class="case-more"><summary>${t("Read the case")}</summary><div class="desc">${paragraphs(
               project.description
             )}</div></details>`
           : ""
@@ -129,7 +130,7 @@ function renderProjectCard(project, index, span2, isDemo) {
         link
           ? `<a class="case-link" href="${esc(
               link
-            )}" target="_blank" rel="noopener noreferrer">Open project ${iconSvg(
+            )}" target="_blank" rel="noopener noreferrer">${t("Open project")} ${iconSvg(
               "external"
             )}</a>`
           : ""
@@ -140,7 +141,7 @@ function renderProjectCard(project, index, span2, isDemo) {
 
 function renderGalleryItem(item, index) {
   const video = item.type === "video";
-  const labeled = item.caption || item.alt || (video ? "Video" : "Image");
+  const labeled = item.caption || item.alt || t(video ? "Video" : "Image");
   const poster = isDataImage(item.poster)
     ? item.poster
     : httpUrl(item.poster);
@@ -154,13 +155,13 @@ function renderGalleryItem(item, index) {
 
   return `<button class="gallery-tile${video ? " is-video" : ""}" type="button"
     data-action="gallery-open" data-index="${index}"
-    aria-label="${video ? "Play video" : "Open image"}: ${esc(labeled)}">
+    aria-label="${t(video ? "Play video" : "Open image")}: ${esc(labeled)}">
     <span class="gallery-media">${media}
       ${
         video
           ? `<span class="gallery-play" aria-hidden="true">${iconSvg(
               "play"
-            )}</span><span class="gallery-kind">Video</span>`
+            )}</span><span class="gallery-kind">${t("Video")}</span>`
           : ""
       }
     </span>
@@ -243,11 +244,11 @@ export function renderProfile(container, model) {
         BNOS_BUSINESS_URL
       )}" target="_blank" rel="noopener noreferrer">${iconSvg(
         "layers"
-      )} Organization on BNOS ${iconSvg("external")}</a>`
+      )} ${t("Organization on BNOS")} ${iconSvg("external")}</a>`
     );
   } else {
     badges.push(
-      `<span class="type-chip">${iconSvg("focus")} Personal portfolio</span>`
+      `<span class="type-chip">${iconSvg("focus")} ${t("Personal portfolio")}</span>`
     );
   }
   if (profile.nip05) badges.push(nip05Markup(profile));
@@ -255,7 +256,7 @@ export function renderProfile(container, model) {
     badges.push(
       `<span class="owner-chip">${iconSvg(
         "edit"
-      )} You can edit this page</span>`
+      )} ${t("You can edit this page")}</span>`
     );
   }
 
@@ -264,7 +265,7 @@ export function renderProfile(container, model) {
     actions.push(
       `<button class="btn btn-primary" type="button" data-action="contact" data-url="${esc(
         contact
-      )}">${esc(profile.contact.label || "Contact")} ${iconSvg(
+      )}">${esc(profile.contact.label || t("Contact"))} ${iconSvg(
         "arrow"
       )}</button>`
     );
@@ -275,18 +276,18 @@ export function renderProfile(container, model) {
         contact ? "btn-ghost" : "btn-primary"
       }" type="button" data-action="edit">${iconSvg(
         "edit"
-      )} Edit profile</button>`
+      )} ${t("Edit profile")}</button>`
     );
   }
   actions.push(
     `<button class="btn btn-ghost" type="button" data-action="share">${iconSvg(
       "share"
-    )} Share</button>`
+    )} ${t("Share")}</button>`
   );
   actions.push(
     `<button class="btn btn-ghost" type="button" data-action="share-qr">${iconSvg(
       "qr"
-    )} QR</button>`
+    )} ${t("QR")}</button>`
   );
 
   const focus = skills
@@ -299,20 +300,21 @@ export function renderProfile(container, model) {
   ).length;
   const evidenceText =
     issuerSkills || credentials.length
-      ? `${issuerSkills} issuer-listed skill${
-          issuerSkills === 1 ? "" : "s"
-        } · ${credentials.length} credential${credentials.length === 1 ? "" : "s"}`
-      : "Self-described only";
+      ? t("{skills} issuer-listed skills · {credentials} credentials", {
+          skills: issuerSkills,
+          credentials: credentials.length,
+        })
+      : t("Self-described only");
 
   const metaRows = [];
-  if (focus) metaRows.push(metaRow("focus", "Focus", esc(focus)));
-  metaRows.push(metaRow("layers", "Evidence", esc(evidenceText)));
+  if (focus) metaRows.push(metaRow("focus", t("Focus"), esc(focus)));
+  metaRows.push(metaRow("layers", t("Evidence"), esc(evidenceText)));
   if (profile.location || profile.timezone) {
     metaRows.push(
       metaRow(
         "pin",
-        "Location",
-        `${esc(profile.location || "Not stated")}${
+        t("Location"),
+        `${esc(profile.location || t("Not stated"))}${
           profile.timezone
             ? ` <span class="dim">· ${esc(profile.timezone)}</span>`
             : ""
@@ -322,11 +324,11 @@ export function renderProfile(container, model) {
   }
   if (profile.languages.length) {
     metaRows.push(
-      metaRow("globe", "Languages", esc(profile.languages.join(" · ")))
+      metaRow("globe", t("Languages"), esc(profile.languages.join(" · ")))
     );
   }
   if (updatedAt) {
-    metaRows.push(metaRow("clock", "Updated", esc(timeAgo(updatedAt))));
+    metaRows.push(metaRow("clock", t("Updated"), esc(timeAgo(updatedAt))));
   }
   if (profile.nip05) {
     metaRows.push(
@@ -341,14 +343,14 @@ export function renderProfile(container, model) {
   const metaLinks = [
     `<button class="meta-link" type="button" data-action="copy-link">${iconSvg(
       "copy"
-    )} Copy public link</button>`,
+    )} ${t("Copy public link")}</button>`,
   ];
   if (contact) {
     metaLinks.push(
       `<button class="meta-link" type="button" data-action="contact" data-url="${esc(
         contact
       )}">${iconSvg("link")} ${esc(
-        profile.contact.label || "Contact"
+        profile.contact.label || t("Contact")
       )}</button>`
     );
   }
@@ -369,8 +371,8 @@ export function renderProfile(container, model) {
       <div class="section-head">
         <div class="head-flex">
           <div>
-            <div class="kicker">01 — Selected portfolio</div>
-            <h2>Work that can be checked, not just claimed</h2>
+            <div class="kicker">${t("01 — Selected portfolio")}</div>
+            <h2>${t("Work that can be checked, not just claimed")}</h2>
           </div>
         </div>
       </div>
@@ -379,9 +381,9 @@ export function renderProfile(container, model) {
           ? `<div class="bento${
               projects.length === 1 ? " single" : ""
             }">${projectCards}</div>`
-          : `<div class="section-empty">No projects are published yet.${
+          : `<div class="section-empty">${t("No projects are published yet.")}${
               isOwner
-                ? `<br><button class="btn btn-ghost btn-sm" type="button" data-action="edit">Add your first project</button>`
+                ? `<br><button class="btn btn-ghost btn-sm" type="button" data-action="edit">${t("Add your first project")}</button>`
                 : ""
             }</div>`
       }
@@ -394,10 +396,10 @@ export function renderProfile(container, model) {
         skill.evidence === "issuer"
           ? `<span class="ev-chip ev-verified" title="${esc(
               skill.issuer
-                ? `Listed by ${skill.issuer}`
-                : "Listed by an issuer"
-            )}">${iconSvg("check")} Issuer-listed</span>`
-          : `<span class="ev-chip ev-self">Self-described</span>`;
+                ? t("Listed by {issuer}", { issuer: skill.issuer })
+                : t("Listed by an issuer")
+            )}">${iconSvg("check")} ${t("Issuer-listed")}</span>`
+          : `<span class="ev-chip ev-self">${t("Self-described")}</span>`;
       return `<div class="skill-li"><span class="nm">${esc(
         skill.name
       )}</span>${chip}</div>`;
@@ -407,28 +409,28 @@ export function renderProfile(container, model) {
   const credentialCards = credentials
     .map(
       (credential) => `<article class="tile tile-pad">
-        <div class="tile-title">Credential · Owner-provided</div>
+        <div class="tile-title">${t("Credential · Owner-provided")}</div>
         <div class="evid-issuer">
           <span class="mini-hex" aria-hidden="true">${esc(
             initials(credential.issuer || credential.title)
           )}</span>
           <span>
             <span class="nm">${esc(credential.title)}</span><br>
-            <span class="by">Owner-provided${
+            <span class="by">${t("Owner-provided")}${
               credential.issuer ? ` by ${esc(credential.issuer)}` : ""
             }${credential.year ? ` · ${esc(credential.year)}` : ""}</span>
           </span>
         </div>
         ${
           credential.status
-            ? `<span class="evid-status">Owner-reported: ${esc(
+            ? `<span class="evid-status">${t("Owner-reported")}: ${esc(
                 credential.status
               )}</span>`
             : ""
         }
         <div class="evid-meta">${
           credential.id ? `<span>ID: ${esc(credential.id)}</span>` : ""
-        }<span>Not independently verified</span></div>
+        }<span>${t("Not independently verified")}</span></div>
         ${
           credential.note
             ? `<p class="legend-note">${esc(credential.note)}</p>`
@@ -444,14 +446,14 @@ export function renderProfile(container, model) {
           <div class="section-head">
             <div class="head-flex">
               <div>
-                <div class="kicker">02 — Gallery</div>
-                <h2>Images and motion, chosen by the owner</h2>
+                <div class="kicker">${t("02 — Gallery")}</div>
+                <h2>${t("Images and motion, chosen by the owner")}</h2>
               </div>
               ${
                 gallery.length
                   ? `<button class="btn btn-ghost btn-sm" type="button" data-action="gallery-open" data-index="0">${iconSvg(
                       "image"
-                    )} View all ${gallery.length}</button>`
+                    )} ${t("View all")} ${gallery.length}</button>`
                   : ""
               }
             </div>
@@ -467,9 +469,9 @@ export function renderProfile(container, model) {
                 }">${gallery
                   .map((item, index) => renderGalleryItem(item, index))
                   .join("")}</div>`
-              : `<div class="section-empty">No gallery media yet.${
+              : `<div class="section-empty">${t("No gallery media yet.")}${
                   isOwner
-                    ? `<br><button class="btn btn-ghost btn-sm" type="button" data-action="edit">Add images or video</button>`
+                    ? `<br><button class="btn btn-ghost btn-sm" type="button" data-action="edit">${t("Add images or video")}</button>`
                     : ""
                 }</div>`
           }
@@ -481,8 +483,8 @@ export function renderProfile(container, model) {
   const skillsSection = `<div class="section section--skills" id="skills">
     <div class="wrap">
       <div class="section-head">
-        <div class="kicker">03 — Skills &amp; evidence</div>
-        <h2>Two grades, no global score</h2>
+        <div class="kicker">${t("03 — Skills &amp; evidence")}</div>
+        <h2>${t("Two grades, no global score")}</h2>
       </div>
       ${
         hasSkills
@@ -492,17 +494,17 @@ export function renderProfile(container, model) {
               ${
                 skills.length
                   ? `<article class="tile tile-pad">
-                      <div class="tile-title">Skills <span class="mono">${skills.length}</span></div>
+                      <div class="tile-title">${t("Skills")} <span class="mono">${skills.length}</span></div>
                       ${skillRows}
-                      <p class="legend-note"><b>Violet</b> means listed by an issuer. <b>Outline</b> means my own claim. bitos.space does not independently verify either grade, and there is no global reputation score.</p>
+                      <p class="legend-note">${t("Violet means listed by an issuer. Outline means my own claim. bitos.space does not independently verify either grade, and there is no global reputation score.")}</p>
                     </article>`
                   : ""
               }
               ${credentialCards}
             </div>`
-          : `<div class="section-empty">No skills or credentials are listed yet.${
+          : `<div class="section-empty">${t("No skills or credentials are listed yet.")}${
               isOwner
-                ? `<br><button class="btn btn-ghost btn-sm" type="button" data-action="edit">Add skills</button>`
+                ? `<br><button class="btn btn-ghost btn-sm" type="button" data-action="edit">${t("Add skills")}</button>`
                 : ""
             }</div>`
       }
@@ -524,25 +526,25 @@ export function renderProfile(container, model) {
   const aboutSection = `<div class="section section--about" id="about">
     <div class="wrap">
       <div class="section-head">
-        <div class="kicker">04 — About</div>
-        <h2>The person behind the key</h2>
+        <div class="kicker">${t("04 — About")}</div>
+        <h2>${t("The person behind the key")}</h2>
       </div>
       <div class="about-grid${linkItems ? "" : " single"}">
         <article class="tile about-card">
-          <h3>About</h3>
+          <h3>${t("About")}</h3>
           ${
             profile.bio
               ? `<div class="about-bio">${paragraphs(profile.bio)}</div>`
-              : `<p class="fine">No introduction published yet.${
+              : `<p class="fine">${t("No introduction published yet.")}${
                   isOwner
-                    ? ' <button class="head-link" type="button" data-action="edit">Add one →</button>'
+                    ? ' <button class="head-link" type="button" data-action="edit">${t("Add one →")}</button>'
                     : ""
                 }</p>`
           }
         </article>
         ${
           linkItems
-            ? `<article class="tile about-card"><h3>Links</h3><div class="link-list">${linkItems}</div></article>`
+            ? `<article class="tile about-card"><h3>${t("Links")}</h3><div class="link-list">${linkItems}</div></article>`
             : ""
         }
       </div>
@@ -551,15 +553,15 @@ export function renderProfile(container, model) {
 
   const strengthChecks = [
     {
-      label: "Photo and name",
+      label: t("Photo and name"),
       done: Boolean((profile.name || profile.displayName) && avatar),
     },
-    { label: "Headline", done: Boolean(profile.headline) },
-    { label: "Introduction", done: Boolean(profile.bio) },
-    { label: "First project", done: projects.length > 0 },
-    { label: "Gallery media", done: gallery.length > 0 },
+    { label: t("Headline"), done: Boolean(profile.headline) },
+    { label: t("Introduction"), done: Boolean(profile.bio) },
+    { label: t("First project"), done: projects.length > 0 },
+    { label: t("Gallery media"), done: gallery.length > 0 },
     {
-      label: "Skills or credentials",
+      label: t("Skills or credentials"),
       done: skills.length > 0 || credentials.length > 0,
     },
   ];
@@ -568,12 +570,12 @@ export function renderProfile(container, model) {
     isOwner && strengthDone < strengthChecks.length
       ? `<div class="strength">
           <div class="strength-head">
-            <span>Profile strength</span>
+            <span>${t("Profile strength")}</span>
             <span class="mono">${strengthDone}/${strengthChecks.length}</span>
           </div>
           <div class="strength-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${
             strengthChecks.length
-          }" aria-valuenow="${strengthDone}" aria-label="Profile completeness">
+          }" aria-valuenow="${strengthDone}" aria-label="${t("Profile completeness")}">
             <i style="width:${Math.round(
               (strengthDone / strengthChecks.length) * 100
             )}%"></i>
@@ -588,19 +590,19 @@ export function renderProfile(container, model) {
               )
               .join("")}
           </ul>
-          <button class="btn btn-primary btn-sm btn-block" type="button" data-action="edit">Finish your profile</button>
+          <button class="btn btn-primary btn-sm btn-block" type="button" data-action="edit">${t("Finish your profile")}</button>
         </div>`
       : "";
 
   const statItems = [
-    { value: projects.length, label: "Projects" },
-    { value: gallery.length, label: "Media" },
-    { value: skills.length, label: "Skills" },
-    { value: credentials.length, label: "Credentials" },
+    { value: projects.length, label: t("Projects") },
+    { value: gallery.length, label: t("Media") },
+    { value: skills.length, label: t("Skills") },
+    { value: credentials.length, label: t("Credentials") },
   ].filter((item) => item.value > 0);
 
   const heroStats = statItems.length
-    ? `<div class="hero-stats" role="group" aria-label="Portfolio at a glance">
+    ? `<div class="hero-stats" role="group" aria-label="${t("Portfolio at a glance")}">
         ${statItems
           .map(
             (item) =>
@@ -626,11 +628,11 @@ export function renderProfile(container, model) {
       : reelItem.url
     : "";
   const reelCaption =
-    reelItem && (reelItem.caption || reelItem.alt || "View gallery");
+    reelItem && (reelItem.caption || reelItem.alt || t("View gallery"));
 
   const reelCard = reelItem
     ? `<button class="hero-reel" type="button" data-action="gallery-open" data-index="${reelIndex}" aria-label="${
-        reelIsVideo ? "Play show reel" : "Open featured media"
+        t(reelIsVideo ? "Play show reel" : "Open featured media")
       }: ${esc(reelCaption)}">
         ${
           reelPoster
@@ -649,7 +651,7 @@ export function renderProfile(container, model) {
         }
         <span class="hero-reel-caption">
           <span class="hero-reel-kicker">${
-            reelIsVideo ? "Show reel" : "Featured media"
+            t(reelIsVideo ? "Show reel" : "Featured media")
           }</span>
           <span class="hero-reel-title">${esc(reelCaption)}</span>
         </span>
@@ -658,9 +660,9 @@ export function renderProfile(container, model) {
     ? `<div class="hero-reel is-empty">
         <span class="hero-reel-empty">
           <span class="hero-reel-kicker">Show reel</span>
-          <span class="hero-reel-empty-title">Add a show reel</span>
-          <span class="hero-reel-empty-text">Upload a video or lead with your best image.</span>
-          <button class="btn btn-ghost btn-sm" type="button" data-action="edit-media">Add media</button>
+          <span class="hero-reel-empty-title">${t("Add a show reel")}</span>
+          <span class="hero-reel-empty-text">${t("Upload a video or lead with your best image.")}</span>
+          <button class="btn btn-ghost btn-sm" type="button" data-action="edit-media">${t("Add media")}</button>
         </span>
       </div>`
     : "";
@@ -705,23 +707,23 @@ export function renderProfile(container, model) {
           </div>
         </div>
 
-        <div class="trust-strip" role="group" aria-label="Identity and key">
-          <span class="trust-label">${iconSvg("key")} Identity key</span>
+        <div class="trust-strip" role="group" aria-label="${t("Identity and key")}">
+          <span class="trust-label">${iconSvg("key")} ${t("Identity key")}</span>
           <span class="npub-chip">
             <code title="${esc(npub)}">${esc(
               npub.length > 24 ? `${npub.slice(0, 12)}…${npub.slice(-6)}` : npub
             )}</code>
             <button class="copy-btn" type="button" data-action="copy" data-copy="${esc(
               npub
-            )}" title="Copy full npub" aria-label="Copy full npub">${iconSvg(
+            )}" title="${t("Copy full npub")}" aria-label="${t("Copy full npub")}">${iconSvg(
               "copy"
             )}</button>
           </span>
-          <span class="npub-chip" title="Public key in hex">
+          <span class="npub-chip" title="${t("Public key in hex")}">
             <code>${esc(pubkey.slice(0, 8))}…${esc(pubkey.slice(-6))}</code>
           </span>
-          <span class="trust-note">Self-owned key — this page follows the key holder. bitos.space cannot edit it.${
-            isOwner ? " You are signed in as the owner." : ""
+          <span class="trust-note">${t("Self-owned key — this page follows the key holder. bitos.space cannot edit it.")}${
+            isOwner ? ` ${t("You are signed in as the owner.")}` : ""
           }</span>
         </div>
 
@@ -732,8 +734,8 @@ export function renderProfile(container, model) {
 
       <div class="hero-side">
         ${reelCard}
-        <aside class="meta-card" aria-label="Profile details">
-          <h3>Details <span class="mono" style="letter-spacing:0">v1</span></h3>
+        <aside class="meta-card" aria-label="${t("Profile details")}">
+          <h3>${t("Details")} <span class="mono" style="letter-spacing:0">v1</span></h3>
           ${metaRows.join("")}
           <div class="meta-links">${metaLinks.join("")}</div>
           ${strengthCard}
@@ -756,15 +758,15 @@ export function updateNip05Badges(container, status) {
     if (status === "verified") {
       node.innerHTML = `${iconSvg(
         "shield"
-      )} NIP-05 verified · <span class="mono">${esc(id)}</span>`;
+      )} ${t("NIP-05 verified")} · <span class="mono">${esc(id)}</span>`;
     } else if (status === "unverified" || status === "mismatch") {
       node.classList.add("is-unverified");
       node.innerHTML = `${iconSvg("shield")} NIP-05 ${
-        status === "mismatch" ? "does not match this key" : "unverified"
+        t(status === "mismatch" ? "does not match this key" : "unverified")
       } · <span class="mono">${esc(id)}</span>`;
     } else {
       node.classList.add("is-pending");
-      node.innerHTML = `${iconSvg("shield")} NIP-05 checking…`;
+      node.innerHTML = `${iconSvg("shield")} ${t("NIP-05 checking…")}`;
     }
   });
 }

@@ -22,6 +22,7 @@ import {
   parseSecretKey,
   signWithSecretKey,
 } from "../nostr/local-signer.js";
+import { t } from "../shared/i18n.js";
 
 const listeners = new Set();
 let current = emptyAuth();
@@ -72,12 +73,12 @@ function persist(state) {
     };
     if (state.remember) {
       if (!writeAuth(record)) {
-        throw new Error("Could not store the key on this device.");
+        throw new Error(t("Could not store the key on this device."));
       }
       clearSessionAuth();
     } else {
       if (!writeSessionAuth(record)) {
-        throw new Error("Could not keep the key in this tab.");
+        throw new Error(t("Could not keep the key in this tab."));
       }
       clearLocalAuth();
     }
@@ -104,7 +105,7 @@ export async function initAuth() {
     try {
       const account = parseSecretKey(stored.secret);
       if (stored.pubkey && stored.pubkey !== account.pubkey) {
-        throw new Error("Stored key does not match its public key.");
+        throw new Error(t("Stored key does not match its public key."));
       }
       current = {
         type: "nsec",
@@ -236,7 +237,7 @@ export async function signEvent(unsigned) {
   if (current.type === "nip46" && current.session) {
     return current.session.signEvent(unsigned);
   }
-  throw new Error("Connect a signer before publishing.");
+  throw new Error(t("Connect a signer before publishing."));
 }
 
 export async function disconnect() {

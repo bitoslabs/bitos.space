@@ -10,6 +10,7 @@ import {
   validateProfile,
 } from "../data/profile-model.js?v=12";
 import * as auth from "./auth.js";
+import { t } from "../shared/i18n.js";
 
 export function buildPortfolioEvent(publicProfile, createdAt) {
   const name =
@@ -42,7 +43,7 @@ export async function publishProfile(
   if (validationError) throw new Error(validationError);
 
   const pubkey = auth.getState().pubkey;
-  if (!pubkey) throw new Error("Connect a signer before publishing.");
+  if (!pubkey) throw new Error(t("Connect a signer before publishing."));
 
   const publicProfile = toPublicProfile(profile);
   const unsigned = buildPortfolioEvent(publicProfile);
@@ -50,20 +51,20 @@ export async function publishProfile(
   const signed = await auth.signEvent(unsigned);
 
   if (!signed || !signed.id || !signed.sig) {
-    throw new Error("The signer did not return a signed event.");
+    throw new Error(t("The signer did not return a signed event."));
   }
   if (String(signed.pubkey || "").toLowerCase() !== pubkey) {
-    throw new Error("The signer returned a different public key.");
+    throw new Error(t("The signer returned a different public key."));
   }
   if (!verifyEvent(signed)) {
-    throw new Error("The signer returned an invalid signature.");
+    throw new Error(t("The signer returned an invalid signature."));
   }
   if (
     signed.kind !== KIND ||
     !Array.isArray(signed.tags) ||
     !signed.tags.some((tag) => Array.isArray(tag) && tag[0] === "d" && tag[1] === D_TAG)
   ) {
-    throw new Error("The signer returned an unexpected event.");
+    throw new Error(t("The signer returned an unexpected event."));
   }
 
   onPhase("publishing", { done: 0, total: relays.length });

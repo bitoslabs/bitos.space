@@ -9,6 +9,7 @@ import {
   isHex64,
   nsecToHex,
 } from "../shared/bech32.js";
+import { t } from "../shared/i18n.js";
 
 function bytesToHex(bytes) {
   return Array.from(bytes)
@@ -17,7 +18,7 @@ function bytesToHex(bytes) {
 }
 
 function hexToBytes(hex) {
-  if (!isHex64(hex)) throw new Error("Invalid secret key.");
+  if (!isHex64(hex)) throw new Error(t("Invalid secret key."));
   const out = new Uint8Array(32);
   for (let i = 0; i < 32; i += 1) {
     out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
@@ -28,7 +29,7 @@ function hexToBytes(hex) {
 export function parseSecretKey(input) {
   const raw = String(input || "").trim();
   if (!raw) {
-    throw new Error("Enter your nsec or a 64-character secret key.");
+    throw new Error(t("Enter your nsec or a 64-character secret key."));
   }
   let secretHex;
   if (/^nsec1/i.test(raw)) {
@@ -36,11 +37,11 @@ export function parseSecretKey(input) {
   } else if (isHex64(raw)) {
     secretHex = raw.toLowerCase();
   } else {
-    throw new Error("Enter a valid nsec or 64-character secret key.");
+    throw new Error(t("Enter a valid nsec or 64-character secret key."));
   }
   const secretBytes = hexToBytes(secretHex);
   const pubkey = String(getPublicKey(secretBytes)).toLowerCase();
-  if (!isHex64(pubkey)) throw new Error("Could not derive the public key.");
+  if (!isHex64(pubkey)) throw new Error(t("Could not derive the public key."));
   return {
     secretHex,
     pubkey,

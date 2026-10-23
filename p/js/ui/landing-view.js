@@ -5,6 +5,7 @@ import { esc, setHidden } from "../shared/dom.js";
 import { hexToNpub } from "../shared/bech32.js";
 import { profileName, shortKey } from "../shared/format.js";
 import { profilePageUrl } from "../shared/urls.js";
+import { t } from "../shared/i18n.js";
 
 export function renderLandingSession(element, authState, myPortfolio) {
   if (!element) return;
@@ -25,19 +26,19 @@ export function renderLandingSession(element, authState, myPortfolio) {
   let detail;
   if (status === "published" && mine.profile) {
     const name = profileName(mine.profile);
-    const label = name === "Unnamed profile" ? "My portfolio" : name;
+    const label = name === t("Unnamed profile") ? t("My portfolio") : name;
     detail = `<a class="head-link" href="${viewUrl}">${esc(
       label
-    )}</a> · <a class="head-link" href="${editUrl}">Edit</a>`;
+    )}</a> · <a class="head-link" href="${editUrl}">${t("Edit")}</a>`;
   } else if (status === "empty") {
-    detail = `No portfolio yet · <a class="head-link" href="${editUrl}">Create</a> · <a class="head-link" href="${viewUrl}">Open</a>`;
+    detail = `${t("No portfolio yet")} · <a class="head-link" href="${editUrl}">${t("Create")}</a> · <a class="head-link" href="${viewUrl}">${t("Open")}</a>`;
   } else if (status === "error") {
-    detail = `<a class="head-link" href="${viewUrl}">Open my portfolio</a> · <a class="head-link" href="${editUrl}">Edit</a>`;
+    detail = `<a class="head-link" href="${viewUrl}">${t("Open my portfolio")}</a> · <a class="head-link" href="${editUrl}">${t("Edit")}</a>`;
   } else {
-    detail = `<a class="head-link" href="${viewUrl}">Open my portfolio</a> · <a class="head-link" href="${editUrl}">Edit</a>`;
+    detail = `<a class="head-link" href="${viewUrl}">${t("Open my portfolio")}</a> · <a class="head-link" href="${editUrl}">${t("Edit")}</a>`;
   }
 
-  element.innerHTML = `Signed in as <span class="mono">${esc(
+  element.innerHTML = `${t("Signed in as")} <span class="mono">${esc(
     shortKey(npub)
   )}</span> · ${detail}`;
   setHidden(element, false);

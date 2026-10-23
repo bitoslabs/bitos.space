@@ -14,6 +14,7 @@ import {
   isGalleryMediaUrl,
 } from "../shared/media.js";
 import { normalizeTheme } from "./themes.js";
+import { t } from "../shared/i18n.js";
 
 export function emptyProfile() {
   return {
@@ -220,7 +221,7 @@ export function parseKind0(event) {
       bio: data.about,
       avatar: data.picture,
       banner: data.banner,
-      links: data.website ? [{ label: "Website", url: data.website }] : [],
+      links: data.website ? [{ label: t("Website"), url: data.website }] : [],
     });
   } catch {
     return null;
@@ -273,10 +274,10 @@ export function toPublicProfile(profile) {
 
 export function validateProfile(profile) {
   if (!profile.name.trim() && !profile.displayName.trim()) {
-    return "Add a name before publishing.";
+    return t("Add a name before publishing.");
   }
   if (profile.nip05 && !isNip05(profile.nip05)) {
-    return "NIP-05 must look like name@domain.com.";
+    return t("NIP-05 must look like name@domain.com.");
   }
   if (profile.avatar && !httpUrl(profile.avatar)) {
     return "Avatar URL must start with http:// or https://.";
@@ -298,18 +299,18 @@ export function validateProfile(profile) {
       project.title || project.summary || project.description;
     if (!isPublic || !hasContent) continue;
     if (!project.title.trim()) {
-      return "Every published project needs a title.";
+      return t("Every published project needs a title.");
     }
     if (project.link && !httpUrl(project.link)) {
-      return `Project "${project.title}" has an invalid link.`;
+      return t("Project \"{title}\" has an invalid link.", { title: project.title });
     }
     if (project.media && !httpUrl(project.media)) {
-      return `Project "${project.title}" has an invalid cover image URL.`;
+      return t("Project \"{title}\" has an invalid cover image URL.", { title: project.title });
     }
   }
   for (const item of profile.gallery || []) {
     if (item.public === false) continue;
-    const label = item.caption || item.alt || "Gallery item";
+    const label = item.caption || item.alt || t("Gallery item");
     if (!item.url) {
       return `${label} needs an image or video URL.`;
     }
@@ -341,7 +342,7 @@ export function validateProfile(profile) {
       (credential.title || credential.issuer) &&
       !credential.title.trim()
     ) {
-      return "Every published credential needs a title.";
+      return t("Every published credential needs a title.");
     }
   }
   return "";

@@ -8,6 +8,13 @@ import { profileName, shortKey } from "./shared/format.js";
 import { contactUrl, profilePageUrl } from "./shared/urls.js";
 import { copyToClipboard } from "./shared/clipboard.js";
 import { fetchJson } from "./shared/fetch.js";
+import {
+  applyTranslations,
+  getLang,
+  initI18n,
+  t,
+  toggleLang,
+} from "./shared/i18n.js";
 import { cleanRef, refFromPath, resolveRef } from "./nostr/identity.js";
 import { loadRelays } from "./data/storage.js";
 import { normalizeProfile } from "./data/profile-model.js";
@@ -168,7 +175,7 @@ function closeNavMenu(focusToggle = false) {
     els.navToggle.setAttribute("aria-expanded", "false");
     els.navToggle.setAttribute(
       "aria-label",
-      `Open ${navMenuLabel(activeNavMenu())}`
+      `${t("Open")} ${t(navMenuLabel(activeNavMenu()))}`
     );
     if (open && focusToggle) els.navToggle.focus();
   }
@@ -184,7 +191,7 @@ function setNavMenu(open, focusFirst = false) {
   els.navToggle.setAttribute("aria-expanded", "true");
   els.navToggle.setAttribute(
     "aria-label",
-    `Close ${navMenuLabel(nav)}`
+    `${t("Close")} ${t(navMenuLabel(nav))}`
   );
   if (focusFirst) {
     const first = Array.from(nav.querySelectorAll("a")).find(
@@ -196,7 +203,7 @@ function setNavMenu(open, focusFirst = false) {
 
 function setChipRef(ref) {
   els.urlChipPath.textContent = ref ? `/p/${ref}` : "/p/";
-  els.urlChip.title = ref ? profileService.canonicalUrl(ref) : "Canonical public URL";
+  els.urlChip.title = ref ? profileService.canonicalUrl(ref) : t("Canonical public URL");
 }
 
 function setCanonicalDisplay(
@@ -225,7 +232,7 @@ function setCanonicalDisplay(
   if (ogDescription && description) {
     ogDescription.setAttribute("content", description.slice(0, 160));
   }
-  document.title = title || "Portfolio — bitos.space";
+  document.title = title || t("Portfolio — bitos.space");
 }
 
 function showLanding() {
@@ -242,7 +249,7 @@ function showLanding() {
   if (span) span.textContent = "bitos.space/p/";
   const link = $("#canonical-link");
   if (link) link.setAttribute("href", profileService.canonicalUrl(""));
-  document.title = "Portfolio on Nostr — bitos.space";
+  document.title = t("Portfolio on Nostr — bitos.space");
   maybeOpenRequestedEditor();
 }
 
@@ -252,7 +259,7 @@ function showLoading(title, text) {
   setHidden(els.demoBanner, !state.demo);
   renderState(els.stateView, { mode: "loading", title, text });
   setChipRef(state.ref);
-  document.title = "Portfolio — bitos.space";
+  document.title = t("Portfolio — bitos.space");
 }
 
 function showRelayError() {
@@ -261,13 +268,13 @@ function showRelayError() {
   setHidden(els.demoBanner, !state.demo);
   renderState(els.stateView, {
     mode: "error",
-    title: "Relays are unavailable",
-    text: "The relays configured in this browser did not answer. Check your connection or change the relay list, then retry.",
-    actions: `<button class="btn btn-primary" type="button" data-action="retry">Retry</button>
-      <button class="btn btn-ghost" type="button" data-action="relay-settings">Relay settings</button>`,
+    title: t("Relays are unavailable"),
+    text: t("The relays configured in this browser did not answer. Check your connection or change the relay list, then retry."),
+    actions: `<button class="btn btn-primary" type="button" data-action="retry">${t("Retry")}</button>
+      <button class="btn btn-ghost" type="button" data-action="relay-settings">${t("Relay settings")}</button>`,
   });
   setChipRef(state.ref);
-  document.title = "Relays unavailable — bitos.space";
+  document.title = t("Relays unavailable — bitos.space");
 }
 
 function showResolveError(message) {
@@ -276,14 +283,14 @@ function showResolveError(message) {
   setHidden(els.demoBanner, true);
   renderState(els.stateView, {
     mode: "error",
-    title: "Profile not found",
-    text: esc(message || "That reference could not be resolved."),
-    actions: `<button class="btn btn-primary" type="button" data-action="retry">Retry</button>
-      <button class="btn btn-ghost" type="button" data-action="signin">Sign in to manage</button>
-      <a class="btn btn-ghost" href="./">Try another profile</a>`,
+    title: t("Profile not found"),
+    text: esc(message || t("That reference could not be resolved.")),
+    actions: `<button class="btn btn-primary" type="button" data-action="retry">${t("Retry")}</button>
+      <button class="btn btn-ghost" type="button" data-action="signin">${t("Sign in to manage")}</button>
+      <a class="btn btn-ghost" href="./">${t("Try another profile")}</a>`,
   });
   setChipRef(state.ref);
-  document.title = "Profile not found — bitos.space";
+  document.title = t("Profile not found — bitos.space");
 }
 
 function renderProfile({ skipView = false } = {}) {
@@ -306,7 +313,7 @@ function renderProfile({ skipView = false } = {}) {
 
   updateCanonical();
   if (editor && editor.isOpen()) {
-    document.title = "Edit portfolio — bitos.space";
+    document.title = t("Edit portfolio — bitos.space");
   }
   updateAuthUI();
   updateNip05Badges(els.profile, normalizeStatus(state.nip05Status));
@@ -340,20 +347,20 @@ function renderEmpty() {
   const npub = hexToNpub(state.profilePubkey);
   const knownName = state.meta ? profileName(state.meta) : "";
   const title = knownName
-    ? `${knownName} hasn't published a portfolio yet`
-    : "No portfolio published for this key";
+    ? t("{name} hasn't published a portfolio yet", { name: knownName })
+    : t("No portfolio published for this key");
   const owner = auth.isOwnerOf(state.profilePubkey);
   let actions = "";
   if (owner) {
-    actions += `<button class="btn btn-primary" type="button" data-action="create">Create your portfolio</button>`;
+    actions += `<button class="btn btn-primary" type="button" data-action="create">${t("Create your portfolio")}</button>`;
   } else if (auth.getState().pubkey) {
-    actions += `<button class="btn btn-primary" type="button" data-action="signin">Switch signer</button>`;
+    actions += `<button class="btn btn-primary" type="button" data-action="signin">${t("Switch signer")}</button>`;
   } else {
-    actions += `<button class="btn btn-primary" type="button" data-action="signin">Sign in as the owner</button>`;
+    actions += `<button class="btn btn-primary" type="button" data-action="signin">${t("Sign in as the owner")}</button>`;
   }
   actions += `<button class="btn btn-ghost" type="button" data-action="copy" data-copy="${esc(
     npub
-  )}">Copy npub</button>`;
+  )}">${t("Copy npub")}</button>`;
 
   const keyLine = `<div class="key-line">
     <span class="npub-chip"><code>${esc(shortKey(npub))}</code></span>
@@ -369,12 +376,12 @@ function renderEmpty() {
   renderState(els.stateView, {
     mode: "empty",
     title,
-    text: `The key resolves, but no signed portfolio event was found on the configured relays. Only the key holder can publish one.${keyLine}`,
+    text: t("The key resolves, but no signed portfolio event was found on the configured relays. Only the key holder can publish one.") + keyLine,
     actions,
   });
   setCanonicalDisplay(npub, {
     title: `${title} — bitos.space`,
-    description: "This Nostr key has not published a portfolio yet.",
+    description: t("This Nostr key has not published a portfolio yet."),
   });
   maybeOpenRequestedEditor();
 }
@@ -382,16 +389,16 @@ function renderEmpty() {
 function updateAuthUI() {
   const authState = auth.getState();
   if (!authState.pubkey) {
-    els.authBtn.textContent = "Sign in";
-    els.authBtn.setAttribute("aria-label", "Sign in to manage your portfolio");
+    els.authBtn.textContent = t("Sign in");
+    els.authBtn.setAttribute("aria-label", t("Sign in to manage your portfolio"));
   } else {
-    els.authBtn.textContent = "Account";
-    els.authBtn.setAttribute("aria-label", "Manage your Nostr signer");
+    els.authBtn.textContent = t("Account");
+    els.authBtn.setAttribute("aria-label", t("Manage your Nostr signer"));
   }
   if (els.landingSigninLabel) {
     els.landingSigninLabel.textContent = authState.pubkey
-      ? "Manage signer"
-      : "Sign in to manage";
+      ? t("Manage signer")
+      : t("Sign in to manage");
   }
   if (els.myPortfolioLink) {
     if (authState.pubkey) {
@@ -482,8 +489,8 @@ async function loadByRef(rawRef) {
   state.emptyReason = "";
 
   showLoading(
-    "Resolving profile…",
-    `Looking up <span class="mono">${esc(state.ref)}</span>.`
+    t("Resolving profile…"),
+    `${t("Looking up")} <span class="mono">${esc(state.ref)}</span>.`
   );
 
   let resolved;
@@ -491,7 +498,7 @@ async function loadByRef(rawRef) {
     resolved = await resolveRef(state.ref);
   } catch (error) {
     if (token !== state.loadToken) return;
-    showResolveError((error && error.message) || "That reference could not be resolved.");
+    showResolveError((error && error.message) || t("That reference could not be resolved."));
     return;
   }
   if (token !== state.loadToken) return;
@@ -512,12 +519,13 @@ async function loadByRef(rawRef) {
     renderProfile();
   } else {
     showLoading(
-      "Loading from relays…",
-      `Asking ${state.relays.length} relay${
-        state.relays.length === 1 ? "" : "s"
-      } for the newest signed portfolio event for <span class="mono">${esc(
-        shortKey(hexToNpub(resolved.pubkey))
-      )}</span>.`
+      t("Loading from relays…"),
+      t("Asking {n} relays for the newest signed portfolio event for {key}.", {
+        n: state.relays.length,
+        key: `<span class="mono">${esc(
+          shortKey(hexToNpub(resolved.pubkey))
+        )}</span>`,
+      })
     );
   }
 
@@ -572,11 +580,11 @@ async function loadDemo() {
   state.nip05FromRef = "";
   state.nip05Checked = "";
 
-  showLoading("Loading sample portfolio…", "Illustrative data only.");
+  showLoading(t("Loading sample portfolio…"), t("Illustrative data only."));
   try {
     const data = await fetchJson("./data/demo.json", 5000);
     if (!data || !data.profile || !/^[0-9a-f]{64}$/i.test(data.pubkey)) {
-      throw new Error("Sample data is malformed.");
+      throw new Error(t("Sample data is malformed."));
     }
     if (token !== state.loadToken) return;
     state.profilePubkey = data.pubkey.toLowerCase();
@@ -590,12 +598,12 @@ async function loadDemo() {
     setHidden(els.demoBanner, false);
     renderState(els.stateView, {
       mode: "error",
-      title: "Sample unavailable",
-      text: esc((error && error.message) || "Could not load the sample portfolio."),
-      actions: `<a class="btn btn-primary" href="./">Open a profile</a>`,
+      title: t("Sample unavailable"),
+      text: esc((error && error.message) || t("Could not load the sample portfolio.")),
+      actions: `<a class="btn btn-primary" href="./">${t("Open a profile")}</a>`,
     });
     setChipRef("");
-    document.title = "Sample unavailable — bitos.space";
+    document.title = t("Sample unavailable — bitos.space");
   }
 }
 
@@ -740,7 +748,7 @@ function handleAuthChange() {
 
 function openEditor({ tab = "profile" } = {}) {
   if (state.demo) {
-    toast("Sample data is read-only. Sign in to create your own portfolio.", true);
+    toast(t("Sample data is read-only. Sign in to create your own portfolio."), true);
     return;
   }
   const authState = auth.getState();
@@ -751,7 +759,7 @@ function openEditor({ tab = "profile" } = {}) {
   const target = state.profilePubkey || authState.pubkey;
   if (target !== authState.pubkey) {
     toast(
-      "This page belongs to a different key. Sign in with the owner key to edit it.",
+      t("This page belongs to a different key. Sign in with the owner key to edit it."),
       true
     );
     return;
@@ -762,7 +770,7 @@ function openEditor({ tab = "profile" } = {}) {
     tab,
   });
   setView("editor");
-  document.title = "Edit portfolio — bitos.space";
+  document.title = t("Edit portfolio — bitos.space");
   setEditParam(true);
   window.scrollTo({ top: 0, behavior: "auto" });
 }
@@ -831,7 +839,7 @@ function maybeOpenRequestedEditor() {
     state.editRequested = false;
     setEditParam(false);
     toast(
-      "This portfolio belongs to a different key. Sign in with the owner key to edit it.",
+      t("This portfolio belongs to a different key. Sign in with the owner key to edit it."),
       true
     );
     return;
@@ -870,8 +878,8 @@ function shareUrl() {
 async function shareProfile() {
   const url = shareUrl();
   const title = state.profile
-    ? `${profileName(state.profile)} — Portfolio`
-    : "Nostr portfolio";
+    ? `${profileName(state.profile)} — ${t("Portfolio")}`
+    : t("Nostr portfolio");
   if (navigator.share) {
     try {
       await navigator.share({ title, url });
@@ -881,7 +889,7 @@ async function shareProfile() {
     }
   }
   const ok = await copyToClipboard(url);
-  toast(ok ? "Link copied." : "Could not copy the link.", !ok);
+  toast(ok ? t("Link copied.") : t("Could not copy the link."), !ok);
 }
 
 async function copyAction(target, text) {
@@ -890,14 +898,14 @@ async function copyAction(target, text) {
     target.classList.add("done");
     window.setTimeout(() => target.classList.remove("done"), 1400);
   }
-  toast(ok ? "Copied." : "Could not copy.", !ok);
+  toast(ok ? t("Copied.") : t("Could not copy."), !ok);
 }
 
 function openQr() {
   const url = shareUrl();
   els.profileQrUrl.textContent = url;
-  if (!renderQr(els.profileQr, url)) {
-    toast("QR rendering is unavailable. Copy the link instead.", true);
+  if (!renderQr(els.profileQr, url, { logo: true })) {
+    toast(t("QR rendering is unavailable. Copy the link instead."), true);
   }
   if (typeof els.qrDialog.showModal === "function") {
     if (!els.qrDialog.open) els.qrDialog.showModal();
@@ -930,7 +938,7 @@ async function onActionClick(event) {
   } else if (action === "contact") {
     const url = contactUrl(target.getAttribute("data-url") || "");
     if (url) location.href = url;
-    else toast("No contact link is configured.", true);
+    else toast(t("No contact link is configured."), true);
   } else if (action === "signin") {
     openAccount();
   } else if (action === "relay-settings") {
@@ -958,6 +966,8 @@ function cacheElements() {
     shareBtn: $("#share-btn"),
     authBtn: $("#auth-btn"),
     myPortfolioLink: $("#my-portfolio-link"),
+    langBtn: $("#lang-btn"),
+    currentLang: $("#current-lang"),
     themeBtn: $("#theme-btn"),
     landingSession: $("#landing-session"),
     lookupForm: $("#lookup-form"),
@@ -993,7 +1003,7 @@ function bindEvents() {
     event.preventDefault();
     const value = cleanRef(els.lookupInput.value);
     if (!value) {
-      toast("Enter an npub, NIP-05 address, or alias.", true);
+      toast(t("Enter an npub, NIP-05 address, or alias."), true);
       return;
     }
     const url = new URL(location.href);
@@ -1085,8 +1095,48 @@ function bindEvents() {
   });
 }
 
+function updateLangButton() {
+  if (els.currentLang) {
+    els.currentLang.textContent = getLang() === "lo" ? "ລາວ" : "EN";
+  }
+  if (els.langBtn) {
+    els.langBtn.setAttribute(
+      "aria-label",
+      t("Switch language")
+    );
+    els.langBtn.setAttribute("title", t("Switch language"));
+  }
+}
+
+function refreshLanguage() {
+  applyTranslations(document);
+  updateLangButton();
+  updateAuthUI();
+  renderSession();
+  if (authDialog && typeof authDialog.refreshLanguage === "function") {
+    authDialog.refreshLanguage();
+  }
+  if (editor && typeof editor.refreshLanguage === "function") {
+    editor.refreshLanguage();
+  }
+  if (state.profile && !els.profile.hidden) {
+    renderProfile({ skipView: true });
+  }
+  if (recentView && typeof recentView.refreshLanguage === "function") {
+    recentView.refreshLanguage();
+  }
+}
+
 function init() {
+  initI18n();
   cacheElements();
+  updateLangButton();
+  if (els.langBtn) {
+    els.langBtn.addEventListener("click", () => {
+      toggleLang();
+    });
+  }
+  window.addEventListener("langchange", refreshLanguage);
   toast = createToast(els.toast);
   initTheme(els.themeBtn);
 

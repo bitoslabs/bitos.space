@@ -22,6 +22,7 @@ import {
   nip44,
   verifyEvent,
 } from "./crypto.js";
+import { t } from "../shared/i18n.js";
 
 function bytesToHex(bytes) {
   return Array.from(bytes)
@@ -80,22 +81,22 @@ export function parseBunkerUrl(input) {
   try {
     url = new URL(String(input || "").trim());
   } catch {
-    throw new Error("That is not a valid bunker:// URL.");
+    throw new Error(t("That is not a valid bunker:// URL."));
   }
   if (url.protocol !== "bunker:") {
-    throw new Error("The connection token must start with bunker://.");
+    throw new Error(t("The connection token must start with bunker://."));
   }
   const remoteSignerPubkey = (
     url.hostname || url.pathname.replace(/^\/+/, "")
   ).toLowerCase();
   if (!isHex64(remoteSignerPubkey)) {
-    throw new Error("The bunker URL does not contain a valid signer pubkey.");
+    throw new Error(t("The bunker URL does not contain a valid signer pubkey."));
   }
   const relays = url.searchParams
     .getAll("relay")
     .flatMap((relay) => parseRelayUrls(relay));
   if (!relays.length) {
-    throw new Error("The bunker URL does not contain a relay.");
+    throw new Error(t("The bunker URL does not contain a relay."));
   }
   return {
     remoteSignerPubkey,
@@ -169,7 +170,7 @@ export class Nip46Session {
 
   async connect() {
     if (!this.remoteSignerPubkey) {
-      throw new Error("This session has no remote signer.");
+      throw new Error(t("This session has no remote signer."));
     }
     await this._ensureSubscription();
     const params = [
@@ -189,7 +190,7 @@ export class Nip46Session {
       connectResult !== "ack" &&
       connectResult !== this.secret
     ) {
-      throw new Error("The signer did not return the expected secret.");
+      throw new Error(t("The signer did not return the expected secret."));
     }
     return this._finishConnection();
   }
@@ -201,14 +202,14 @@ export class Nip46Session {
       .trim()
       .toLowerCase();
     if (!isHex64(this.userPubkey)) {
-      throw new Error("The signer returned an invalid user pubkey.");
+      throw new Error(t("The signer returned an invalid user pubkey."));
     }
     await this._switchRelaysIfNeeded();
     return this.toJSON();
   }
 
   async _ensureSubscription() {
-    if (this.closed) throw new Error("The signer session was closed.");
+    if (this.closed) throw new Error(t("The signer session was closed."));
     if (this.subscription && this.subscription.ready) return;
     const filter = {
       kinds: [NIP46_KIND],
@@ -224,7 +225,7 @@ export class Nip46Session {
       { timeout: 8000 }
     );
     if (!this.subscription.ready) {
-      throw new Error("Could not reach the signer relays. Check your connection.");
+      throw new Error(t("Could not reach the signer relays. Check your connection."));
     }
   }
 
@@ -260,7 +261,7 @@ export class Nip46Session {
 
   async signEvent(unsigned, timeout = NIP46_APPROVAL_TIMEOUT) {
     if (!this.userPubkey) {
-      throw new Error("Connect the remote signer before publishing.");
+      throw new Error(t("Connect the remote signer before publishing."));
     }
     await this._ensureSubscription();
     const result = await this._request(
@@ -270,18 +271,18 @@ export class Nip46Session {
     );
     const signed = typeof result === "string" ? JSON.parse(result) : result;
     if (!signed || !verifyEvent(signed)) {
-      throw new Error("The signer returned an invalid signature.");
+      throw new Error(t("The signer returned an invalid signature."));
     }
     if (String(signed.pubkey).toLowerCase() !== this.userPubkey) {
-      throw new Error("The signer signed with a different key.");
+      throw new Error(t("The signer signed with a different key."));
     }
     return signed;
   }
 
   async _request(method, params, timeout) {
-    if (this.closed) throw new Error("The signer session was closed.");
+    if (this.closed) throw new Error(t("The signer session was closed."));
     if (!this.remoteSignerPubkey) {
-      throw new Error("The remote signer is not connected.");
+      throw new Error(t("The remote signer is not connected."));
     }
     const id = requestId();
     const payload = { id, method, params };
@@ -298,7 +299,7 @@ export class Nip46Session {
     const response = new Promise((resolve, reject) => {
       const timer = window.setTimeout(() => {
         this.pending.delete(id);
-        reject(new Error("The signer did not respond in time."));
+        reject(new Error(t("The signer did not respond in time.")));
       }, timeout);
       this.pending.set(id, { resolve, reject, timer });
     });
@@ -310,7 +311,7 @@ export class Nip46Session {
         clearTimeout(waiter.timer);
         this.pending.delete(id);
         waiter.reject(
-          new Error("No signer relay accepted the request. Check the relay list.")
+          new Error(t("No signer relay accepted the request. Check the relay list."))
         );
       }
     }
@@ -391,12 +392,12 @@ export class Nip46Session {
   async waitForDiscovery(timeout = NIP46_CONNECT_TIMEOUT, signal = null) {
     return new Promise((resolve, reject) => {
       if (signal && signal.aborted) {
-        reject(new Error("Connection cancelled."));
+        reject(new Error(t("Connection cancelled.")));
         return;
       }
       const timer = window.setTimeout(() => {
         this.discovery = null;
-        reject(new Error("The signer app did not approve the connection."));
+        reject(new Error(t("The signer app did not approve the connection.")));
       }, timeout);
       this.discovery = { resolve, reject, timer };
       if (signal) {
@@ -405,7 +406,7 @@ export class Nip46Session {
           () => {
             if (!this.discovery) return;
             this._clearDiscovery();
-            reject(new Error("Connection cancelled."));
+            reject(new Error(t("Connection cancelled.")));
           },
           { once: true }
         );
@@ -430,11 +431,11 @@ export class Nip46Session {
     if (this.discovery) {
       const reject = this.discovery.reject;
       this._clearDiscovery();
-      reject(new Error("Connection cancelled."));
+      reject(new Error(t("Connection cancelled.")));
     }
     for (const waiter of this.pending.values()) {
       clearTimeout(waiter.timer);
-      waiter.reject(new Error("The signer connection closed."));
+      waiter.reject(new Error(t("The signer connection closed.")));
     }
     this.pending.clear();
   }

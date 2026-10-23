@@ -5,6 +5,7 @@
 import { isHex64, npubToHex } from "../shared/bech32.js";
 import { aliasFor, loadAliases } from "../data/aliases.js";
 import { resolveNip05 } from "./nip05.js";
+import { t } from "../shared/i18n.js";
 
 export function cleanRef(raw) {
   let value = String(raw || "").trim();
@@ -46,8 +47,8 @@ export function refFromPath() {
 
 export async function resolveRef(raw, seen = new Set()) {
   const value = cleanRef(raw);
-  if (!value) throw new Error("Enter an npub, NIP-05 address, or alias.");
-  if (seen.has(value)) throw new Error("That alias points back to itself.");
+  if (!value) throw new Error(t("Enter an npub, NIP-05 address, or alias."));
+  if (seen.has(value)) throw new Error(t("That alias points back to itself."));
   seen.add(value);
 
   if (value.toLowerCase().startsWith("npub1")) {

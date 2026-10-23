@@ -3,6 +3,7 @@
  * page and supports arrow-key navigation.
  */
 import { esc } from "../shared/dom.js";
+import { t } from "../shared/i18n.js";
 
 export function createLightbox({
   dialog,
@@ -17,7 +18,7 @@ export function createLightbox({
   let index = 0;
 
   function labelFor(item) {
-    return item.caption || item.alt || (item.type === "video" ? "Video" : "Image");
+    return item.caption || item.alt || t(item.type === "video" ? "Video" : "Image");
   }
 
   function render() {

@@ -5,6 +5,7 @@
  */
 import { getTheme, setTheme } from "../data/storage.js";
 import { normalizeTheme, themeMeta } from "../data/themes.js";
+import { t } from "../shared/i18n.js";
 
 const MEDIA = "(prefers-color-scheme: light)";
 const SITE_COLORS = { dark: "#0b0b0b", light: "#f8f9fa" };
@@ -61,7 +62,7 @@ function paint() {
   }
 
   if (toggleButton) {
-    const label = isLight ? "Switch to dark theme" : "Switch to light theme";
+    const label = t(isLight ? "Switch to dark theme" : "Switch to light theme");
     toggleButton.setAttribute("aria-label", label);
     toggleButton.setAttribute("title", label);
   }
@@ -110,6 +111,8 @@ export function initTheme(button) {
   } catch {
     /* matchMedia unavailable */
   }
+
+  window.addEventListener("langchange", paint);
 
   window.addEventListener("storage", (event) => {
     if (event.key !== "theme") return;

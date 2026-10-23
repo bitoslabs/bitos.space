@@ -283,6 +283,30 @@ img {
   line-height: 1.75;
 }
 
+body.lo h1,
+body.lo h2,
+body.lo h3,
+body.lo h4,
+body.lo p,
+body.lo li,
+body.lo label,
+body.lo button,
+body.lo .btn,
+body.lo .fine,
+body.lo .field,
+body.lo input,
+body.lo textarea,
+body.lo select {
+  font-family: var(--font-lao);
+  line-height: 1.7;
+}
+
+body.lo .mono,
+body.lo code,
+body.lo pre {
+  font-family: var(--font-mono);
+}
+
 .fine {
   font-size: 11.5px;
   line-height: 1.6;

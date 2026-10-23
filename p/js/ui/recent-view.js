@@ -5,6 +5,7 @@ import { $, esc, setHidden } from "../shared/dom.js";
 import { initials, profileName, timeAgo } from "../shared/format.js";
 import { httpUrl, profilePageUrl } from "../shared/urls.js";
 import { discoverRecent } from "../services/discovery.js";
+import { t } from "../shared/i18n.js";
 
 const CACHE_TTL = 5 * 60 * 1000;
 const PAGE_SIZE = 9;
@@ -102,24 +103,24 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
     const galleryCount = (profile.gallery || []).length;
     const stats = [
       projectCount
-        ? `${projectCount} project${projectCount === 1 ? "" : "s"}`
+        ? t("{n} projects", { n: projectCount })
         : "",
-      galleryCount ? `${galleryCount} media` : "",
+      galleryCount ? t("{n} media", { n: galleryCount }) : "",
     ]
       .filter(Boolean)
       .join(" · ");
     const own =
       getAuthPubkey && getAuthPubkey() === item.pubkey
-        ? '<span class="recent-own">You</span>'
+        ? `<span class="recent-own">${t("You")}</span>`
         : "";
     const typeChip =
       profile.type === "organization"
-        ? '<span class="recent-type">Organization</span>'
+        ? `<span class="recent-type">${t("Organization")}</span>`
         : "";
 
     return `<a class="tile recent-card" href="${profilePageUrl(
       item.npub
-    )}" aria-label="Open ${esc(name)}'s portfolio">
+    )}" aria-label="${t("Open {name}'s portfolio", { name })}">
       <div class="recent-top">
         <span class="recent-avatar" aria-hidden="true">${
           avatar ? `<img src="${esc(avatar)}" alt="">` : esc(initials(name))
@@ -128,7 +129,7 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
           <span class="recent-name"><span class="recent-name-text">${esc(
             name
           )}</span>${own}${typeChip}</span>
-          <span class="recent-updated">Updated ${esc(
+          <span class="recent-updated">${t("Updated")} ${esc(
             timeAgo(item.updatedAt)
           )}</span>
         </span>
@@ -183,15 +184,15 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
     );
     const hosts = failedHosts(errors);
     const message = allFailed
-      ? "Discovery is unavailable on these relays."
+      ? t("Discovery is unavailable on these relays.")
       : errors && errors.length
       ? hosts
-        ? `No public portfolios found. No answer from ${hosts}.`
-        : "No public portfolios found. Some relays did not answer."
-      : "No public portfolios found on these relays yet.";
+        ? t("No public portfolios found. No answer from {hosts}.", { hosts })
+        : t("No public portfolios found. Some relays did not answer.")
+      : t("No public portfolios found on these relays yet.");
     setStatus(message, { error: allFailed });
     if (errors && errors.length) {
-      statusEl.innerHTML = `${esc(message)} <button class="head-link" type="button" data-action="relay-settings">Change relays</button>`;
+      statusEl.innerHTML = `${esc(message)} <button class="head-link" type="button" data-action="relay-settings">${t("Change relays")}</button>`;
     }
   }
 
@@ -206,7 +207,7 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
       nextUntil = null;
       currentKey = key;
       renderSkeletons();
-      setStatus("Loading recent portfolios…");
+      setStatus(t("Loading recent portfolios…"));
     }
 
     const requestToken = token;
@@ -221,7 +222,7 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
         until,
       });
     } catch {
-      result = { items: [], errors: [{ error: "Discovery failed" }], nextUntil: null };
+      result = { items: [], errors: [{ error: t("Discovery failed") }], nextUntil: null };
     }
 
     if (requestToken !== token || key !== cacheKey(getRelays())) return;
@@ -246,7 +247,7 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
     if (!reset && !result.items.length && result.errors && result.errors.length) {
       nextUntil = previousUntil;
       render();
-      setStatus("Some relays did not answer. Try again.", { error: true });
+      setStatus(t("Some relays did not answer. Try again."), { error: true });
       return;
     }
 
@@ -287,15 +288,11 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
       nextUntil = cached.nextUntil || null;
       currentKey = cacheKey(relays);
       render();
-      setStatus(
-        `${items.length} public portfolio${
-          items.length === 1 ? "" : "s"
-        } from your relays.`
-      );
+      setStatus(t("{n} public portfolios from your relays.", { n: items.length }));
       if (Date.now() - (cached.savedAt || 0) < CACHE_TTL) return;
     } else {
       renderSkeletons();
-      setStatus("Loading recent portfolios…");
+      setStatus(t("Loading recent portfolios…"));
     }
 
     const schedule =
@@ -330,5 +327,12 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
   refreshBtn?.addEventListener("click", refresh);
   moreBtn?.addEventListener("click", () => load({ reset: false }));
 
-  return { start, refresh, setRelays, renderAuth };
+  function refreshLanguage() {
+    render();
+    if (items.length) {
+      setStatus(t("{n} public portfolios from your relays.", { n: items.length }));
+    }
+  }
+
+  return { start, refresh, setRelays, renderAuth, refreshLanguage };
 }

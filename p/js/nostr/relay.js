@@ -7,6 +7,7 @@ import {
   RELAY_QUERY_TIMEOUT,
   RELAY_SUBSCRIBE_TIMEOUT,
 } from "../config.js";
+import { t } from "../shared/i18n.js";
 
 export { parseRelayUrls } from "../shared/urls.js";
 
@@ -16,7 +17,7 @@ function openSocket(url, timeoutMs) {
     try {
       socket = new WebSocket(url);
     } catch {
-      reject(new Error("Invalid relay URL"));
+      reject(new Error(t("Invalid relay URL")));
       return;
     }
 
@@ -29,7 +30,7 @@ function openSocket(url, timeoutMs) {
       } catch {
         /* ignore */
       }
-      reject(new Error("Connection timed out"));
+      reject(new Error(t("Connection timed out")));
     }, timeoutMs);
 
     socket.onopen = () => {
@@ -42,13 +43,13 @@ function openSocket(url, timeoutMs) {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
-      reject(new Error("Could not connect"));
+      reject(new Error(t("Could not connect")));
     };
     socket.onclose = () => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
-      reject(new Error("Connection closed"));
+      reject(new Error(t("Connection closed")));
     };
   });
 }
@@ -112,7 +113,7 @@ export async function queryRelays(
   { timeout = RELAY_QUERY_TIMEOUT } = {}
 ) {
   if (!relays.length) {
-    return { events: [], errors: [{ relay: "", error: "No relays configured" }] };
+    return { events: [], errors: [{ relay: "", error: t("No relays configured") }] };
   }
 
   const results = await Promise.allSettled(
@@ -169,7 +170,7 @@ async function publishOne(relay, event, timeoutMs) {
     };
 
     timer = window.setTimeout(
-      () => finish(reject, new Error("Timed out waiting for OK")),
+      () => finish(reject, new Error(t("Timed out waiting for OK"))),
       timeoutMs
     );
     socket.onmessage = (messageEvent) => {
@@ -182,7 +183,7 @@ async function publishOne(relay, event, timeoutMs) {
       if (!Array.isArray(message)) return;
       if (message[0] === "OK" && message[1] === event.id) {
         if (message[2]) finish(resolve, message[3] || "accepted");
-        else finish(reject, new Error(message[3] || "Rejected by relay"));
+        else finish(reject, new Error(message[3] || t("Rejected by relay")));
       }
     };
     socket.onerror = () => finish(reject, new Error("Connection error"));
@@ -190,7 +191,7 @@ async function publishOne(relay, event, timeoutMs) {
     try {
       socket.send(JSON.stringify(["EVENT", event]));
     } catch {
-      finish(reject, new Error("Could not send event"));
+      finish(reject, new Error(t("Could not send event")));
     }
   });
 }
@@ -278,7 +279,7 @@ async function subscribeOne(relay, filter, onEvent, timeoutMs, onClose) {
     socket.send(JSON.stringify(["REQ", subId, filter]));
   } catch {
     close();
-    throw new Error("Could not subscribe");
+    throw new Error(t("Could not subscribe"));
   }
 
   return { close };

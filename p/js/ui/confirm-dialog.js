@@ -1,3 +1,5 @@
+import { t } from "../shared/i18n.js";
+
 /**
  * Small promise-based confirmation dialog. Uses the same native dialog shell
  * and button styles as the rest of the app, so confirmations no longer depend
@@ -20,11 +22,11 @@ export function createConfirmDialog({
   }
 
   function open({
-    kicker: kickerText = "Confirm",
-    title: titleText = "Are you sure?",
+    kicker: kickerText = t("Confirm"),
+    title: titleText = t("Are you sure?"),
     message: messageText = "",
-    confirmLabel = "Confirm",
-    cancelLabel = "Cancel",
+    confirmLabel = t("Confirm"),
+    cancelLabel = t("Cancel"),
     tone = "primary",
   } = {}) {
     if (dialog.open) return Promise.resolve(false);

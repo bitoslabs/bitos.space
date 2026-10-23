@@ -32,7 +32,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=18" />
+  <link rel="stylesheet" href="styles.css?v=19" />
 
   <style>
     /* ── Docs page layer: built on the shared bitos.space design tokens ── */
@@ -603,11 +603,240 @@
         <nav class="nav-links" aria-label="Primary">
           <a href="index.html#home">Home</a>
           <a href="index.html#features">Features</a>
-          <a href="index.html#ecosystem">Ecosystem</a>
-          <a href="index.html#about">About</a>
+
+          <div class="nav-item--menu" data-nav-menu>
+            <button
+              type="button"
+              class="nav-menu-toggle"
+              aria-expanded="false"
+              aria-controls="menu-ecosystem"
+            >
+              <span>Ecosystem</span>
+              <svg class="nav-caret" viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M2.5 4.5 6 8l3.5-3.5" />
+              </svg>
+            </button>
+            <div class="nav-menu" id="menu-ecosystem">
+              <p class="nav-menu__label">Apps</p>
+              <div class="nav-menu__grid">
+                <a
+                  class="nav-menu__item"
+                  href="https://app.bitos.space/"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="nav-menu__icon"
+                    ><img
+                      src="assets/icons/app-bnos.png"
+                      alt=""
+                      width="24"
+                      height="24"
+                      loading="lazy"
+                      decoding="async"
+                  /></span>
+                  <span class="nav-menu__text"
+                    ><strong>BNOS</strong
+                    ><small
+                      >Flagship workspace — POS, ERP, CRM, chat, AI
+                      agents</small
+                    ></span
+                  >
+                </a>
+                <a
+                  class="nav-menu__item"
+                  href="https://social.bitos.space/"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="nav-menu__icon"
+                    ><svg class="icon" aria-hidden="true">
+                      <use
+                        href="assets/icons/lucide-sprite.svg#message-circle"
+                      ></use></svg
+                  ></span>
+                  <span class="nav-menu__text"
+                    ><strong>Social</strong
+                    ><small>Local-first Nostr social client</small></span
+                  >
+                </a>
+                <a
+                  class="nav-menu__item"
+                  href="https://pocket.bitos.space/"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="nav-menu__icon"
+                    ><img
+                      src="assets/icons/pocket.svg"
+                      alt=""
+                      width="24"
+                      height="24"
+                      loading="lazy"
+                      decoding="async"
+                  /></span>
+                  <span class="nav-menu__text"
+                    ><strong>PocketZap</strong
+                    ><small>Private journal that pays you sats</small></span
+                  >
+                </a>
+                <a
+                  class="nav-menu__item"
+                  href="https://learn.bitos.space/"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="nav-menu__icon"
+                    ><img
+                      src="assets/icons/learn.svg"
+                      alt=""
+                      width="24"
+                      height="24"
+                      loading="lazy"
+                      decoding="async"
+                  /></span>
+                  <span class="nav-menu__text"
+                    ><strong>Learn</strong
+                    ><small>Offline-first learning platform</small></span
+                  >
+                </a>
+                <a
+                  class="nav-menu__item"
+                  href="https://vatta.bitos.space/"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="nav-menu__icon"
+                    ><img
+                      src="assets/icons/vatta.svg"
+                      alt=""
+                      width="24"
+                      height="24"
+                      loading="lazy"
+                      decoding="async"
+                  /></span>
+                  <span class="nav-menu__text"
+                    ><strong>Vatta</strong
+                    ><small>2D story game about life and rebirth</small></span
+                  >
+                </a>
+                <a
+                  class="nav-menu__item"
+                  href="https://github.com/bitoslabs/bitos-vault"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="nav-menu__icon"
+                    ><img
+                      src="assets/icons/vault.svg"
+                      alt=""
+                      width="24"
+                      height="24"
+                      loading="lazy"
+                      decoding="async"
+                  /></span>
+                  <span class="nav-menu__text"
+                    ><strong>Vault</strong
+                    ><small>Local-first encrypted password vault</small></span
+                  >
+                </a>
+              </div>
+              <a class="nav-menu__foot" href="index.html#ecosystem">
+                <span>Explore the ecosystem</span>
+                <svg class="icon" aria-hidden="true">
+                  <use href="assets/icons/lucide-sprite.svg#arrow-right"></use>
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <div class="nav-item--menu" data-nav-menu>
+            <button
+              type="button"
+              class="nav-menu-toggle active"
+              aria-expanded="false"
+              aria-controls="menu-developers"
+            >
+              <span>Developers</span>
+              <svg class="nav-caret" viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M2.5 4.5 6 8l3.5-3.5" />
+              </svg>
+            </button>
+            <div class="nav-menu nav-menu--tight" id="menu-developers">
+              <p class="nav-menu__label">Developers</p>
+              <div class="nav-menu__grid nav-menu__grid--single">
+                <a
+                  class="nav-menu__item"
+                  href="data-standard.html"
+                  aria-current="page"
+                >
+                  <span class="nav-menu__icon"
+                    ><svg class="icon" aria-hidden="true">
+                      <use
+                        href="assets/icons/lucide-sprite.svg#book"
+                      ></use></svg
+                  ></span>
+                  <span class="nav-menu__text"
+                    ><strong>Data Standard</strong
+                    ><small>63 open Nostr event conventions</small></span
+                  >
+                </a>
+                <a
+                  class="nav-menu__item"
+                  href="https://github.com/bitoslabs/bitos-nostr"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="nav-menu__icon"
+                    ><svg class="icon" aria-hidden="true">
+                      <use
+                        href="assets/icons/lucide-sprite.svg#server"
+                      ></use></svg
+                  ></span>
+                  <span class="nav-menu__text"
+                    ><strong>bitos-nostr</strong
+                    ><small>Protocol layer — relays and events</small></span
+                  >
+                </a>
+                <a
+                  class="nav-menu__item"
+                  href="https://github.com/bitoslabs/bitos-native-app"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="nav-menu__icon"
+                    ><svg class="icon" aria-hidden="true">
+                      <use
+                        href="assets/icons/lucide-sprite.svg#boxes"
+                      ></use></svg
+                  ></span>
+                  <span class="nav-menu__text"
+                    ><strong>bitos-native-app</strong
+                    ><small>ERP, CRM, chat, and AI workspace</small></span
+                  >
+                </a>
+                <a
+                  class="nav-menu__item"
+                  href="https://github.com/bitoslabs"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="nav-menu__icon"
+                    ><svg class="icon" aria-hidden="true">
+                      <use
+                        href="assets/icons/lucide-sprite.svg#github"
+                      ></use></svg
+                  ></span>
+                  <span class="nav-menu__text"
+                    ><strong>GitHub</strong
+                    ><small>Source, issues, and discussions</small></span
+                  >
+                </a>
+              </div>
+            </div>
+          </div>
+
           <a href="index.html#community">Community</a>
           <a href="p/">Profiles</a>
-          <a href="data-standard.html" class="active" aria-current="page">Data Standard</a>
         </nav>
 
         <div class="nav-actions">
@@ -620,7 +849,7 @@
             <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#github"></use></svg>
           </a>
           <a href="https://app.bitos.space" target="_blank" rel="noopener" class="btn-primary nav-cta">
-            <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#rocket"></use></svg><span>Get Started</span>
+            <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#rocket"></use></svg><span>Open app</span>
           </a>
           <button class="mobile-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
             <svg class="icon" aria-hidden="true"><use href="assets/icons/lucide-sprite.svg#menu"></use></svg>
@@ -630,14 +859,70 @@
     </header>
 
     <div class="mobile-nav" id="mobile-nav">
-      <a href="index.html#home">Home</a>
-      <a href="index.html#features">Features</a>
-      <a href="index.html#ecosystem">Ecosystem</a>
-      <a href="index.html#about">About</a>
-      <a href="index.html#community">Community</a>
-      <a href="p/">Profiles</a>
-      <a href="data-standard.html" aria-current="page">Data Standard</a>
-      <a href="https://app.bitos.space" target="_blank" rel="noopener" class="btn-primary">Get Started</a>
+      <div class="mobile-nav__group">
+        <p class="mobile-nav__label">Product</p>
+        <a href="index.html#home">Home</a>
+        <a href="index.html#features">Features</a>
+        <a href="index.html#how">How it works</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="index.html#community">Community</a>
+      </div>
+      <div class="mobile-nav__group">
+        <p class="mobile-nav__label">Apps</p>
+        <a href="index.html#ecosystem">Explore the ecosystem</a>
+        <a href="https://app.bitos.space/" target="_blank" rel="noopener"
+          >BNOS</a
+        >
+        <a href="https://social.bitos.space/" target="_blank" rel="noopener"
+          >Social</a
+        >
+        <a href="https://pocket.bitos.space/" target="_blank" rel="noopener"
+          >PocketZap</a
+        >
+        <a href="https://learn.bitos.space/" target="_blank" rel="noopener"
+          >Learn</a
+        >
+        <a href="https://vatta.bitos.space/" target="_blank" rel="noopener"
+          >Vatta</a
+        >
+        <a
+          href="https://github.com/bitoslabs/bitos-vault"
+          target="_blank"
+          rel="noopener"
+          >Vault</a
+        >
+        <a href="p/">Profiles</a>
+      </div>
+      <div class="mobile-nav__group">
+        <p class="mobile-nav__label">Developers</p>
+        <a href="data-standard.html" aria-current="page">Data Standard</a>
+        <a
+          href="https://github.com/bitoslabs/bitos-nostr"
+          target="_blank"
+          rel="noopener"
+          >bitos-nostr</a
+        >
+        <a
+          href="https://github.com/bitoslabs/bitos-native-app"
+          target="_blank"
+          rel="noopener"
+          >bitos-native-app</a
+        >
+        <a
+          href="https://github.com/bitoslabs"
+          target="_blank"
+          rel="noopener"
+          >GitHub</a
+        >
+      </div>
+      <a
+        href="https://app.bitos.space"
+        target="_blank"
+        rel="noopener"
+        class="btn-primary"
+        >Open app</a
+      >
     </div>
 
     <main id="main">
@@ -1837,6 +2122,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <script src="nav.js?v=2"></script>
     <script>
     (function () {
       'use strict';

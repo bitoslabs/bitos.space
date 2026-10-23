@@ -5,6 +5,7 @@
 import { $, setHidden } from "../shared/dom.js";
 import { copyToClipboard } from "../shared/clipboard.js";
 import { buildNip05Setup, verifyNip05 } from "../nostr/nip05.js";
+import { t } from "../shared/i18n.js";
 
 export function createNip05Wizard({
   root,
@@ -33,7 +34,7 @@ export function createNip05Wizard({
     const identifier = String(getIdentifier ? getIdentifier() : "").trim();
     const pubkey = getPubkey ? getPubkey() : "";
     if (!pubkey) {
-      setStatus("Sign in before generating a NIP-05 file.", "error");
+      setStatus(t("Sign in before generating a NIP-05 file."), "error");
       return;
     }
     const next = buildNip05Setup(
@@ -51,20 +52,20 @@ export function createNip05Wizard({
     if (fileUrl) fileUrl.textContent = next.fileUrl;
     if (jsonEl) jsonEl.textContent = next.text;
     setHidden(panel, false);
-    setStatus("Not checked yet. Host the file, then verify.", "");
+    setStatus(t("Not checked yet. Host the file, then verify."), "");
   }
 
   async function verify() {
     if (!setup) {
-      setStatus("Generate the setup file first.", "error");
+      setStatus(t("Generate the setup file first."), "error");
       return;
     }
     const pubkey = getPubkey ? getPubkey() : "";
     if (!pubkey) {
-      setStatus("Sign in before verifying.", "error");
+      setStatus(t("Sign in before verifying."), "error");
       return;
     }
-    setStatus("Checking the domain…", "");
+    setStatus(t("Checking the domain…"), "");
     if (verifyButton) verifyButton.disabled = true;
     try {
       const result = await verifyNip05(
@@ -72,14 +73,14 @@ export function createNip05Wizard({
         pubkey
       );
       if (result.status === "verified") {
-        setStatus("Verified. This address resolves to your key.", "ok");
+        setStatus(t("Verified. This address resolves to your key."), "ok");
       } else if (result.status === "mismatch") {
         setStatus(
-          "The domain responds, but it points to a different key.",
+          t("The domain responds, but it points to a different key."),
           "error"
         );
       } else {
-        setStatus(result.error || "Could not verify this address.", "error");
+        setStatus(result.error || t("Could not verify this address."), "error");
       }
     } finally {
       if (verifyButton) verifyButton.disabled = false;
@@ -92,7 +93,7 @@ export function createNip05Wizard({
     if (!setup) return;
     const ok = await copyToClipboard(setup.text);
     if (toast) {
-      toast(ok ? "NIP-05 JSON copied." : "Could not copy the JSON.", !ok);
+      toast(ok ? t("NIP-05 JSON copied.") : t("Could not copy the JSON."), !ok);
     }
   });
 

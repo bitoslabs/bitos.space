@@ -5,6 +5,7 @@
 import * as auth from "./auth.js";
 import { sha256Hex } from "../shared/media.js?v=12";
 import { normalizeBlossomServer } from "../shared/urls.js?v=12";
+import { t } from "../shared/i18n.js";
 
 function toBase64Url(value) {
   const bytes = new TextEncoder().encode(value);
@@ -38,11 +39,11 @@ async function signUploadToken(entries, base) {
       ["expiration", String(createdAt + 600)],
       ["server", new URL(base).hostname],
     ],
-    content: "Upload media to Blossom",
+    content: t("Upload media to Blossom"),
   };
   const signed = await auth.signEvent(unsigned);
   if (!signed || !signed.sig) {
-    throw new Error("The signer did not approve the upload.");
+    throw new Error(t("The signer did not approve the upload."));
   }
   return signed;
 }
@@ -81,7 +82,7 @@ function putBlob(base, file, sha256, signed, onProgress) {
           if (/^https?:\/\//i.test(text)) url = text;
         }
         if (!url) {
-          reject(new Error("The server did not return a file URL."));
+          reject(new Error(t("The server did not return a file URL.")));
           return;
         }
         resolve({ url, sha256 });
@@ -90,20 +91,20 @@ function putBlob(base, file, sha256, signed, onProgress) {
       if (xhr.status === 409) {
         reject(
           new Error(
-            "The server rejected the upload because the SHA-256 did not match."
+            t("The server rejected the upload because the SHA-256 did not match.")
           )
         );
         return;
       }
       const message = errorMessage(xhr);
-      reject(new Error(message || `Upload failed (${xhr.status}).`));
+      reject(new Error(message || t("Upload failed ({status}).", { status: xhr.status })));
     };
     xhr.onerror = () =>
       reject(
-        new Error("Upload failed. Check the Blossom server URL and CORS.")
+        new Error(t("Upload failed. Check the Blossom server URL and CORS."))
       );
-    xhr.ontimeout = () => reject(new Error("The upload timed out."));
-    xhr.onabort = () => reject(new Error("Upload cancelled."));
+    xhr.ontimeout = () => reject(new Error(t("The upload timed out.")));
+    xhr.onabort = () => reject(new Error(t("Upload cancelled.")));
 
     xhr.send(file);
   });
@@ -120,15 +121,15 @@ export async function uploadFilesToBlossom(
   { onProgress } = {}
 ) {
   const base = normalizeBlossomServer(server);
-  if (!base) throw new Error("Enter a valid Blossom server URL.");
+  if (!base) throw new Error(t("Enter a valid Blossom server URL."));
   if (!Array.isArray(entries) || !entries.length) {
-    throw new Error("Choose a file to upload.");
+    throw new Error(t("Choose a file to upload."));
   }
 
   const prepared = [];
   for (const entry of entries) {
     const file = entry && entry.file ? entry.file : entry;
-    if (!file || !file.size) throw new Error("Choose a file to upload.");
+    if (!file || !file.size) throw new Error(t("Choose a file to upload."));
     prepared.push({
       file,
       sha256: await sha256Hex(file),

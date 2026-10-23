@@ -11,6 +11,7 @@ import { loadRelays, saveRelays } from "../data/storage.js";
 import { hasSigner } from "../nostr/nip07.js";
 import * as auth from "../services/auth.js";
 import { clearQr, renderQr } from "./qr.js";
+import { t } from "../shared/i18n.js";
 
 export function createAuthDialog({
   dialog,
@@ -78,7 +79,7 @@ export function createAuthDialog({
       link.href = url;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
-      link.textContent = " Open approval link";
+      link.textContent = ` ${t("Open approval link")}`;
       element.appendChild(link);
     }
   }
@@ -88,10 +89,10 @@ export function createAuthDialog({
     if (els.title) {
       const state = auth.getState();
       els.title.textContent = state.connected
-        ? "Nostr account"
+        ? t("Nostr account")
         : tab === "create"
-        ? "Create a Nostr account"
-        : "Sign in with a Nostr signer";
+        ? t("Create a Nostr account")
+        : t("Sign in with a Nostr signer");
     }
     $$("[data-auth-tab]", dialog).forEach((button) => {
       const active = button.getAttribute("data-auth-tab") === tab;
@@ -125,34 +126,34 @@ export function createAuthDialog({
     const editUrl = profilePageUrl(npub, { edit: true });
 
     const name =
-      profile && profileName(profile) !== "Unnamed profile"
+      profile && profileName(profile) !== t("Unnamed profile")
         ? profileName(profile)
-        : "Your portfolio";
+        : t("Your portfolio");
 
     els.myPortfolioName.textContent = name;
     els.myPortfolioUrl.textContent = `bitos.space/p/${shortKey(npub)}`;
     els.myPortfolioView.href = viewUrl;
     els.myPortfolioEdit.href = editUrl;
     els.myPortfolioEdit.textContent = published
-      ? "Edit portfolio"
+      ? t("Edit portfolio")
       : empty
-      ? "Create portfolio"
-      : "Open portfolio";
+      ? t("Create portfolio")
+      : t("Open portfolio");
 
-    let status = "Checking relays…";
+    let status = t("Checking relays…");
     let tone = "";
     if (published) {
       status = mine.updatedAt
-        ? `Published · ${timeAgo(mine.updatedAt)}`
-        : "Published";
+        ? t("Published · {time}", { time: timeAgo(mine.updatedAt) })
+        : t("Published");
       tone = "is-ok";
     } else if (empty) {
-      status = "Not published yet";
+      status = t("Not published yet");
     } else if (errored) {
-      status = "Could not check relays";
+      status = t("Could not check relays");
       tone = "is-error";
     } else if (!checking) {
-      status = "Portfolio status";
+      status = t("Portfolio status");
     }
 
     els.myPortfolioStatus.textContent = status;
@@ -167,21 +168,21 @@ export function createAuthDialog({
     els.signerDot.className = "signer-dot " + (state.connected ? "ok" : "");
     els.signerLabel.textContent = state.connected
       ? state.type === "nip46"
-        ? "Connected with a remote signer"
+        ? t("Connected with a remote signer")
         : state.type === "nsec"
-        ? "Connected with a local key"
-        : "Connected with NIP-07"
-      : "Not signed in";
+        ? t("Connected with a local key")
+        : t("Connected with NIP-07")
+      : t("Not signed in");
 
     if (state.connected) {
       const npub = hexToNpub(state.pubkey);
       const localNote =
         state.type === "nsec"
-          ? `<br><span>Local key · ${
-              state.remember ? "remembered on this device" : "session only"
+          ? `<br><span>${t("Local key")} · ${
+              state.remember ? t("remembered on this device") : t("session only")
             }</span>`
           : "";
-      els.signerId.innerHTML = `<span class="ok">Signed in</span><br><code>${esc(
+      els.signerId.innerHTML = `<span class="ok">${t("Signed in")}</span><br><code>${esc(
         npub
       )}</code><br><span>${esc(state.pubkey)}</span>${localNote}`;
       setHidden(els.signerId, false);
@@ -203,13 +204,13 @@ export function createAuthDialog({
 
     if (els.nip07Note) {
       els.nip07Note.textContent = detected
-        ? "A NIP-07 extension is available in this browser. Your key stays inside the extension."
-        : "No NIP-07 extension detected. Install Alby, nos2x, or another NIP-07 signer, then reload. Or use a NIP-46 remote signer below.";
+        ? t("A NIP-07 extension is available in this browser. Your key stays inside the extension.")
+        : t("No NIP-07 extension detected. Install Alby, nos2x, or another NIP-07 signer, then reload. Or use a NIP-46 remote signer below.");
     }
     if (els.connectNip07Label) {
       els.connectNip07Label.textContent = detected
-        ? "Connect NIP-07 signer"
-        : "Retry NIP-07 detection";
+        ? t("Connect NIP-07 signer")
+        : t("Retry NIP-07 detection");
     }
     setTab(activeTab);
   }
@@ -233,8 +234,8 @@ export function createAuthDialog({
     els.nsecKey.value = "";
     els.nsecKey.type = "password";
     els.nsecRemember.checked = false;
-    els.toggleNsec.setAttribute("aria-label", "Show private key");
-    els.toggleNsec.setAttribute("title", "Show private key");
+    els.toggleNsec.setAttribute("aria-label", t("Show private key"));
+    els.toggleNsec.setAttribute("title", t("Show private key"));
     setHidden(els.nostrConnectBox, true);
     els.openNostrConnect.hidden = true;
     clearQr(els.nostrConnectQr);
@@ -253,17 +254,17 @@ export function createAuthDialog({
   }
 
   async function connectNip07() {
-    setStatus(els.authStatus, "Waiting for the browser extension…");
+    setStatus(els.authStatus, t("Waiting for the browser extension…"));
     try {
       await auth.connectNip07();
-      setStatus(els.authStatus, "Connected.");
+      setStatus(els.authStatus, t("Connected."));
       if (onAuthChanged) onAuthChanged();
       close();
-      toast("Signed in with NIP-07.");
+      toast(t("Signed in with NIP-07."));
     } catch (error) {
       setStatus(
         els.authStatus,
-        (error && error.message) || "Sign-in failed.",
+        (error && error.message) || t("Sign-in failed."),
         { error: true }
       );
     }
@@ -292,14 +293,14 @@ export function createAuthDialog({
       els.createSaved.checked = false;
       setStatus(
         els.createStatus,
-        "Save the nsec shown above. It will not be shown again."
+        t("Save the nsec shown above. It will not be shown again.")
       );
       els.createResult.scrollIntoView({ block: "nearest" });
       els.createSaved.focus();
     } catch (error) {
       setStatus(
         els.createStatus,
-        (error && error.message) || "Could not create an account.",
+        (error && error.message) || t("Could not create an account."),
         { error: true }
       );
     }
@@ -308,7 +309,7 @@ export function createAuthDialog({
   async function continueCreateAccount() {
     if (!generatedAccount || !els.createSaved.checked) return;
     els.createContinue.disabled = true;
-    setStatus(els.createStatus, "Signing in with the new key…");
+    setStatus(els.createStatus, t("Signing in with the new key…"));
     try {
       await auth.connectNsec(generatedAccount.secretHex, {
         remember: els.createRemember.checked,
@@ -317,11 +318,11 @@ export function createAuthDialog({
       resetCreateAccount();
       if (onAuthChanged) onAuthChanged();
       close();
-      toast(`Account created. Back up your nsec to keep ${npub.slice(0, 12)}… safe.`);
+      toast(t("Account created. Back up your nsec to keep {key}… safe.", { key: npub.slice(0, 12) }));
     } catch (error) {
       setStatus(
         els.createStatus,
-        (error && error.message) || "Could not sign in with the new key.",
+        (error && error.message) || t("Could not sign in with the new key."),
         { error: true }
       );
       els.createContinue.disabled = false;
@@ -330,33 +331,33 @@ export function createAuthDialog({
 
   async function copyAccountKey(value, label) {
     const ok = await copyToClipboard(value);
-    toast(ok ? `${label} copied.` : `Could not copy the ${label.toLowerCase()}.`, !ok);
+    toast(ok ? t("{label} copied.", { label }) : t("Could not copy the {label}.", { label: label.toLowerCase() }), !ok);
   }
 
   async function connectWithNsec() {
     const input = els.nsecKey.value.trim();
     if (!input) {
-      setStatus(els.nsecStatus, "Paste your nsec or secret key first.", {
+      setStatus(els.nsecStatus, t("Paste your nsec or secret key first."), {
         error: true,
       });
       els.nsecKey.focus();
       return;
     }
     els.connectNsec.disabled = true;
-    setStatus(els.nsecStatus, "Checking the key…");
+    setStatus(els.nsecStatus, t("Checking the key…"));
     try {
       await auth.connectNsec(input, {
         remember: els.nsecRemember.checked,
       });
       els.nsecKey.value = "";
-      setStatus(els.nsecStatus, "Connected.");
+      setStatus(els.nsecStatus, t("Connected."));
       if (onAuthChanged) onAuthChanged();
       close();
-      toast("Signed in with a local key.");
+      toast(t("Signed in with a local key."));
     } catch (error) {
       setStatus(
         els.nsecStatus,
-        (error && error.message) || "Could not sign in with that key.",
+        (error && error.message) || t("Could not sign in with that key."),
         { error: true }
       );
     } finally {
@@ -369,7 +370,7 @@ export function createAuthDialog({
   async function connectBunker() {
     const input = els.bunkerUrl.value.trim();
     if (!input) {
-      setStatus(els.nip46Status, "Paste a bunker:// URL first.", {
+      setStatus(els.nip46Status, t("Paste a bunker:// URL first."), {
         error: true,
       });
       return;
@@ -377,26 +378,26 @@ export function createAuthDialog({
     els.connectBunker.disabled = true;
     setStatus(
       els.nip46Status,
-      "Waiting for your remote signer to approve the connection…"
+      t("Waiting for your remote signer to approve the connection…")
     );
     try {
       await auth.connectBunker(input, {
         onAuthChallenge(url) {
           setStatus(
             els.nip46Status,
-            "The signer needs approval in another window.",
+            t("The signer needs approval in another window."),
             { url }
           );
         },
       });
-      setStatus(els.nip46Status, "Connected.");
+      setStatus(els.nip46Status, t("Connected."));
       if (onAuthChanged) onAuthChanged();
       close();
-      toast("Signed in with a remote signer.");
+      toast(t("Signed in with a remote signer."));
     } catch (error) {
       setStatus(
         els.nip46Status,
-        (error && error.message) || "Could not connect the remote signer.",
+        (error && error.message) || t("Could not connect the remote signer."),
         { error: true }
       );
     } finally {
@@ -411,7 +412,7 @@ export function createAuthDialog({
     els.startNostrConnect.disabled = true;
     setHidden(els.nostrConnectBox, false);
     clearQr(els.nostrConnectQr);
-    setStatus(els.nip46Status, "Waiting for a signer app to approve…");
+    setStatus(els.nip46Status, t("Waiting for a signer app to approve…"));
 
     try {
       await auth.connectNostrConnect({
@@ -423,27 +424,27 @@ export function createAuthDialog({
           renderQr(els.nostrConnectQr, uri);
           setStatus(
             els.nip46Status,
-            "Waiting for approval in your signer app…"
+            t("Waiting for approval in your signer app…")
           );
         },
         onAuthChallenge(url) {
           setStatus(
             els.nip46Status,
-            "The signer needs approval in another window.",
+            t("The signer needs approval in another window."),
             { url }
           );
         },
       });
-      setStatus(els.nip46Status, "Connected.");
+      setStatus(els.nip46Status, t("Connected."));
       nostrConnectController = null;
       if (onAuthChanged) onAuthChanged();
       close();
-      toast("Signed in with a remote signer.");
+      toast(t("Signed in with a remote signer."));
     } catch (error) {
       if (!controller.signal.aborted) {
         setStatus(
           els.nip46Status,
-          (error && error.message) || "Could not connect the signer app.",
+          (error && error.message) || t("Could not connect the signer app."),
           { error: true }
         );
       }
@@ -461,11 +462,11 @@ export function createAuthDialog({
     setHidden(els.nostrConnectBox, true);
     els.openNostrConnect.hidden = true;
     clearQr(els.nostrConnectQr);
-    setStatus(els.nip46Status, "Connection cancelled.");
+    setStatus(els.nip46Status, t("Connection cancelled."));
   }
 
   async function signOut() {
-    setStatus(els.authStatus, "Signing out…");
+    setStatus(els.authStatus, t("Signing out…"));
     try {
       await auth.disconnect();
     } catch {
@@ -473,19 +474,19 @@ export function createAuthDialog({
     }
     render();
     if (onAuthChanged) onAuthChanged();
-    toast("Signed out.");
+    toast(t("Signed out."));
   }
 
   function saveRelaySettings() {
     const list = parseRelayUrls(els.relays.value);
     if (!list.length) {
-      toast("Add at least one wss:// relay URL.", true);
+      toast(t("Add at least one wss:// relay URL."), true);
       return;
     }
     const saved = saveRelays(list);
     els.relays.value = saved.join("\n");
     if (onRelaysChanged) onRelaysChanged(saved);
-    toast(`Relay list saved (${saved.length}).`);
+    toast(t("Relay list saved ({n}).", { n: saved.length }));
   }
 
   $$("[data-auth-tab]", dialog).forEach((button) => {
@@ -498,7 +499,7 @@ export function createAuthDialog({
   els.toggleNsec.addEventListener("click", () => {
     const reveal = els.nsecKey.type === "password";
     els.nsecKey.type = reveal ? "text" : "password";
-    const label = reveal ? "Hide private key" : "Show private key";
+    const label = t(reveal ? "Hide private key" : "Show private key");
     els.toggleNsec.setAttribute("aria-label", label);
     els.toggleNsec.setAttribute("title", label);
   });
@@ -522,7 +523,7 @@ export function createAuthDialog({
   els.copyNostrConnect.addEventListener("click", async () => {
     const uri = els.nostrConnectUri.value;
     const ok = await copyToClipboard(uri);
-    toast(ok ? "Connection link copied." : "Could not copy the link.", !ok);
+    toast(ok ? t("Connection link copied.") : t("Could not copy the link."), !ok);
   });
   dialog.addEventListener("close", () => {
     if (nostrConnectController) {
@@ -535,5 +536,16 @@ export function createAuthDialog({
     resetCreateAccount();
   });
 
-  return { open, close, render };
+  function refreshLanguage() {
+    if (els.toggleNsec) {
+      const label = t(
+        els.nsecKey.type === "password" ? "Show private key" : "Hide private key"
+      );
+      els.toggleNsec.setAttribute("aria-label", label);
+      els.toggleNsec.setAttribute("title", label);
+    }
+    render();
+  }
+
+  return { open, close, render, refreshLanguage };
 }

@@ -2,7 +2,7 @@
  * Public portfolio rendering. Pure presentation: no network, no auth calls,
  * and no global state. Actions are delegated by the app via data-action.
  */
-import { AVAILABILITY } from "../config.js";
+import { AVAILABILITY, BNOS_BUSINESS_URL } from "../config.js";
 import { esc } from "../shared/dom.js";
 import {
   initials,
@@ -235,6 +235,19 @@ export function renderProfile(container, model) {
     : "";
 
   const badges = [];
+  if (profile.type === "organization") {
+    badges.push(
+      `<a class="type-chip is-org" href="${esc(
+        BNOS_BUSINESS_URL
+      )}" target="_blank" rel="noopener noreferrer">${iconSvg(
+        "layers"
+      )} Organization on BNOS ${iconSvg("external")}</a>`
+    );
+  } else {
+    badges.push(
+      `<span class="type-chip">${iconSvg("focus")} Personal portfolio</span>`
+    );
+  }
   if (profile.nip05) badges.push(nip05Markup(profile));
   if (isOwner) {
     badges.push(

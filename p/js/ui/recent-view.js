@@ -112,6 +112,10 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
       getAuthPubkey && getAuthPubkey() === item.pubkey
         ? '<span class="recent-own">You</span>'
         : "";
+    const typeChip =
+      profile.type === "organization"
+        ? '<span class="recent-type">Organization</span>'
+        : "";
 
     return `<a class="tile recent-card" href="${profilePageUrl(
       item.npub
@@ -123,7 +127,7 @@ export function createRecentView({ section, getRelays, getAuthPubkey }) {
         <span class="recent-id">
           <span class="recent-name"><span class="recent-name-text">${esc(
             name
-          )}</span>${own}</span>
+          )}</span>${own}${typeChip}</span>
           <span class="recent-updated">Updated ${esc(
             timeAgo(item.updatedAt)
           )}</span>

@@ -17,6 +17,7 @@ import { normalizeTheme } from "./themes.js";
 export function emptyProfile() {
   return {
     version: 1,
+    type: "personal",
     name: "",
     displayName: "",
     nip05: "",
@@ -46,6 +47,7 @@ export function normalizeProfile(raw) {
   const profile = emptyProfile();
   if (!raw || typeof raw !== "object") return profile;
 
+  profile.type = raw.type === "organization" ? "organization" : "personal";
   profile.name = text(raw.name, 80);
   profile.displayName = text(raw.displayName || raw.display_name, 40);
   profile.nip05 = text(raw.nip05, 120);

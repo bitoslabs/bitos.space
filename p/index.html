@@ -40,10 +40,10 @@
       href="https://fonts.mts.la/fonts/chanthavong/chanthavong.css"
     />
     <link rel="stylesheet" href="css/tokens.css?v=5" />
-    <link rel="stylesheet" href="css/header.css?v=3" />
-    <link rel="stylesheet" href="css/landing.css?v=3" />
-    <link rel="stylesheet" href="css/profile.css?v=3" />
-    <link rel="stylesheet" href="css/editor.css?v=3" />
+    <link rel="stylesheet" href="css/header.css?v=4" />
+    <link rel="stylesheet" href="css/landing.css?v=4" />
+    <link rel="stylesheet" href="css/profile.css?v=4" />
+    <link rel="stylesheet" href="css/editor.css?v=4" />
     <link rel="stylesheet" href="css/responsive.css?v=3" />
     <link rel="stylesheet" href="css/gallery.css?v=1" />
     <link rel="stylesheet" href="css/themes.css?v=1" />
@@ -507,6 +507,46 @@
                   <span>Short name</span>
                   <input id="f-displayName" type="text" maxlength="40" />
                 </label>
+                <div class="field span2">
+                  <span>Portfolio type</span>
+                  <div class="type-picker" role="radiogroup" aria-label="Portfolio type">
+                    <label class="type-option">
+                      <input type="radio" name="portfolio-type" value="personal" />
+                      <span class="type-icon" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                          <circle cx="12" cy="8" r="3.4" />
+                          <path d="M5 20c.9-3.7 3.7-5.6 7-5.6s6.1 1.9 7 5.6" />
+                        </svg>
+                      </span>
+                      <span class="type-copy">
+                        <span class="type-name">Personal portfolio</span>
+                        <span class="type-desc">One person's work, skills and evidence.</span>
+                      </span>
+                    </label>
+                    <label class="type-option">
+                      <input type="radio" name="portfolio-type" value="organization" />
+                      <span class="type-icon" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                          <path d="M4 21V5.5A1.5 1.5 0 0 1 5.5 4h7A1.5 1.5 0 0 1 14 5.5V21" />
+                          <path d="M14 9h4.5A1.5 1.5 0 0 1 20 10.5V21M2 21h20M7 8h4M7 12h4M7 16h4M17 13v3" />
+                        </svg>
+                      </span>
+                      <span class="type-copy">
+                        <span class="type-name">Organization / business</span>
+                        <span class="type-desc">Team page with a business presence link on BNOS.</span>
+                      </span>
+                    </label>
+                  </div>
+                  <a
+                    class="type-more"
+                    id="type-more"
+                    href="https://bnos.space/b"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    hidden
+                    >Open BNOS business presence ↗</a
+                  >
+                </div>
                 <label class="field span2">
                   <span>Headline</span>
                   <input id="f-headline" type="text" maxlength="160" />
@@ -1423,6 +1463,6 @@
     </noscript>
 
     <script src="vendor/qrcode.js"></script>
-    <script type="module" src="js/app.js?v=5"></script>
+    <script type="module" src="js/app.js?v=6"></script>
   </body>
 </html>

@@ -23,6 +23,12 @@ export const DEFAULT_RELAYS = [
 ];
 
 export const SITE_ORIGIN = "https://bitos.space";
+export const BNOS_BUSINESS_URL = "https://bnos.space/b";
+
+export const PROFILE_TYPE_TAGS = {
+  personal: "bitos-personal",
+  organization: "bitos-organization",
+};
 
 export const CLIENT_METADATA = {
   name: "BitOS Portfolio",

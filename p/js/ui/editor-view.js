@@ -64,6 +64,7 @@ export function createEditorView({
     results: $("#publish-results", root),
     fName: $("#f-name", root),
     fDisplayName: $("#f-displayName", root),
+    typeMore: $("#type-more", root),
     fHeadline: $("#f-headline", root),
     fBio: $("#f-bio", root),
     fLocation: $("#f-location", root),
@@ -146,6 +147,11 @@ export function createEditorView({
     const profile = current.profile;
     els.fName.value = profile.name || "";
     els.fDisplayName.value = profile.displayName || "";
+    const type = profile.type === "organization" ? "organization" : "personal";
+    $$('input[name="portfolio-type"]', root).forEach((input) => {
+      input.checked = input.value === type;
+    });
+    setHidden(els.typeMore, type !== "organization");
     els.fHeadline.value = profile.headline || "";
     els.fBio.value = profile.bio || "";
     els.fLocation.value = profile.location || "";
@@ -222,6 +228,11 @@ export function createEditorView({
     const profile = current.profile;
     profile.name = els.fName.value.trim();
     profile.displayName = els.fDisplayName.value.trim();
+    const typeInput = root.querySelector('input[name="portfolio-type"]:checked');
+    profile.type =
+      typeInput && typeInput.value === "organization"
+        ? "organization"
+        : "personal";
     profile.headline = els.fHeadline.value.trim();
     profile.bio = els.fBio.value.trim();
     profile.location = els.fLocation.value.trim();
@@ -1000,6 +1011,9 @@ export function createEditorView({
   body.addEventListener("change", (event) => {
     if (event.target && event.target.id === "f-relays") return;
     if (event.target && event.target.id === "gallery-file") return;
+    if (event.target && event.target.name === "portfolio-type") {
+      setHidden(els.typeMore, event.target.value !== "organization");
+    }
     if (event.target && event.target.closest(".gallery-row")) {
       syncFromForm();
       renderGalleryBudget();

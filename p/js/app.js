@@ -29,7 +29,7 @@ import {
 } from "./ui/profile-view.js";
 import { createAuthDialog } from "./ui/auth-dialog.js";
 import { renderQr } from "./ui/qr.js";
-import { createEditorView } from "./ui/editor-view.js";
+import { createEditorView } from "./ui/editor-view.js?v=11";
 import { createRecentView } from "./ui/recent-view.js";
 import { createLightbox } from "./ui/lightbox.js";
 import { createConfirmDialog } from "./ui/confirm-dialog.js";

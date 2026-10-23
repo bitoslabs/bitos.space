@@ -1,9 +1,9 @@
 /**
  * Browser persistence. All keys and TTLs live in config.js.
  */
-import { BLOSSOM_SERVER, DEFAULT_RELAYS, STORAGE } from "../config.js";
-import { normalizeProfile } from "./profile-model.js";
-import { normalizeBlossomServer, parseRelayUrls } from "../shared/urls.js";
+import { BLOSSOM_SERVER, DEFAULT_RELAYS, STORAGE } from "../config.js?v=11";
+import { normalizeProfile } from "./profile-model.js?v=11";
+import { normalizeBlossomServer, parseRelayUrls } from "../shared/urls.js?v=11";
 
 function readRaw(key) {
   try {

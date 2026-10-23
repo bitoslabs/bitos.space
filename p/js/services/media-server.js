@@ -7,8 +7,8 @@
  * body is not a form, so it passes CSRF once the API answers the CORS preflight
  * (the route exports OPTIONS with the required headers).
  */
-import { BITOS_MEDIA_UPLOAD_URL } from "../config.js";
-import { sha256Hex } from "../shared/media.js";
+import { BITOS_MEDIA_UPLOAD_URL } from "../config.js?v=11";
+import { sha256Hex } from "../shared/media.js?v=11";
 
 function endpoint(pubkey) {
   const url = new URL(BITOS_MEDIA_UPLOAD_URL);

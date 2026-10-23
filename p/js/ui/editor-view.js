@@ -13,7 +13,7 @@ import {
   httpUrl,
   normalizeBlossomServer,
   parseRelayUrls,
-} from "../shared/urls.js";
+} from "../shared/urls.js?v=11";
 import {
   GALLERY_LIMIT,
   INLINE_IMAGE_BUDGET,
@@ -25,13 +25,13 @@ import {
   inlineImageBytes,
   isDataImage,
   isInlineMedia,
-} from "../shared/media.js";
+} from "../shared/media.js?v=11";
 import { normalizeTheme } from "../data/themes.js";
 import {
   emptyProfile,
   normalizeProfile,
   validateProfile,
-} from "../data/profile-model.js";
+} from "../data/profile-model.js?v=11";
 import {
   clearDraft,
   loadBlossomServer,
@@ -40,12 +40,12 @@ import {
   saveBlossomServer,
   saveRelays,
   writeDraft,
-} from "../data/storage.js";
+} from "../data/storage.js?v=11";
 import { hexToNpub } from "../shared/bech32.js";
 import * as auth from "../services/auth.js";
-import { publishProfile } from "../services/publish.js";
-import { uploadFilesToBlossom } from "../services/blossom.js";
-import { uploadEntriesToMediaServer } from "../services/media-server.js";
+import { publishProfile } from "../services/publish.js?v=11";
+import { uploadFilesToBlossom } from "../services/blossom.js?v=11";
+import { uploadEntriesToMediaServer } from "../services/media-server.js?v=11";
 import { createNip05Wizard } from "./nip05-wizard.js";
 
 export function createEditorView({

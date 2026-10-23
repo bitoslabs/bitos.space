@@ -2,13 +2,13 @@
  * Publish orchestration: validate, build the NIP-78 event, sign through the
  * active signer, and write it to the selected relays.
  */
-import { D_TAG, KIND, PROFILE_TYPE_TAGS } from "../config.js";
+import { D_TAG, KIND, PROFILE_TYPE_TAGS } from "../config.js?v=11";
 import { publishToRelays } from "../nostr/relay.js";
 import { verifyEvent } from "../nostr/crypto.js";
 import {
   toPublicProfile,
   validateProfile,
-} from "../data/profile-model.js";
+} from "../data/profile-model.js?v=11";
 import * as auth from "./auth.js";
 
 export function buildPortfolioEvent(publicProfile, createdAt) {

@@ -13,7 +13,7 @@ import {
   httpUrl,
   normalizeBlossomServer,
   parseRelayUrls,
-} from "../shared/urls.js?v=11";
+} from "../shared/urls.js?v=12";
 import {
   GALLERY_LIMIT,
   INLINE_IMAGE_BUDGET,
@@ -25,13 +25,13 @@ import {
   inlineImageBytes,
   isDataImage,
   isInlineMedia,
-} from "../shared/media.js?v=11";
+} from "../shared/media.js?v=12";
 import { normalizeTheme } from "../data/themes.js";
 import {
   emptyProfile,
   normalizeProfile,
   validateProfile,
-} from "../data/profile-model.js?v=11";
+} from "../data/profile-model.js?v=12";
 import {
   clearDraft,
   loadBlossomServer,
@@ -40,12 +40,12 @@ import {
   saveBlossomServer,
   saveRelays,
   writeDraft,
-} from "../data/storage.js?v=11";
+} from "../data/storage.js?v=12";
 import { hexToNpub } from "../shared/bech32.js";
 import * as auth from "../services/auth.js";
-import { publishProfile } from "../services/publish.js?v=11";
-import { uploadFilesToBlossom } from "../services/blossom.js?v=11";
-import { uploadEntriesToMediaServer } from "../services/media-server.js?v=11";
+import { publishProfile } from "../services/publish.js?v=12";
+import { uploadFilesToBlossom } from "../services/blossom.js?v=12";
+import { uploadEntriesToMediaServer } from "../services/media-server.js?v=12";
 import { createNip05Wizard } from "./nip05-wizard.js";
 
 export function createEditorView({
@@ -138,13 +138,26 @@ export function createEditorView({
   function open(profile, pubkey, { updatedAt = 0, tab = "profile" } = {}) {
     const draft = readDraft(pubkey);
     const publishedProfile = profile ? clone(profile) : null;
+    const draftAt = draft ? Number(draft.draftUpdatedAt) || 0 : 0;
+    const publishedAt = Number(updatedAt) * 1000;
+    const staleDraft = Boolean(
+      draft &&
+        publishedProfile &&
+        draftAt > 0 &&
+        publishedAt > 0 &&
+        draftAt < publishedAt
+    );
+    if (staleDraft) clearDraft(pubkey);
+    const restoredDraft = Boolean(draft && !staleDraft);
     current = {
-      profile: clone(draft || publishedProfile || emptyProfile()),
+      profile: clone(
+        (restoredDraft ? draft : null) || publishedProfile || emptyProfile()
+      ),
       publishedProfile,
       pubkey,
       updatedAt,
       dirty: false,
-      restoredDraft: Boolean(draft),
+      restoredDraft,
       tab,
     };
     expandedProjects = new Set();
@@ -152,7 +165,11 @@ export function createEditorView({
     fill();
     setTab(tab, false);
     nip05.reset();
-    if (draft) toast("Local draft restored. Publish when ready.");
+    if (restoredDraft) {
+      toast("Local draft restored. Publish when ready.");
+    } else if (staleDraft) {
+      toast("Older local draft ignored. Showing the published version.");
+    }
   }
 
   function isOpen() {
@@ -952,6 +969,8 @@ export function createEditorView({
       }
       current.updatedAt = result.signed.created_at;
       current.publishedProfile = normalizeProfile(result.publicProfile);
+      clearDraft(current.pubkey);
+      current.restoredDraft = false;
       els.status.textContent = `Last published ${timeAgo(current.updatedAt)}.`;
       toast(
         `Published to ${result.accepted} of ${result.results.length} relays.`

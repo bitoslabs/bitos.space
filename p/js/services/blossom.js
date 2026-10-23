@@ -3,8 +3,8 @@
  * Blossom server and only the returned URLs are stored in the portfolio event.
  */
 import * as auth from "./auth.js";
-import { sha256Hex } from "../shared/media.js?v=11";
-import { normalizeBlossomServer } from "../shared/urls.js?v=11";
+import { sha256Hex } from "../shared/media.js?v=12";
+import { normalizeBlossomServer } from "../shared/urls.js?v=12";
 
 function toBase64Url(value) {
   const bytes = new TextEncoder().encode(value);

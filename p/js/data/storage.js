@@ -1,9 +1,9 @@
 /**
  * Browser persistence. All keys and TTLs live in config.js.
  */
-import { BLOSSOM_SERVER, DEFAULT_RELAYS, STORAGE } from "../config.js?v=11";
-import { normalizeProfile } from "./profile-model.js?v=11";
-import { normalizeBlossomServer, parseRelayUrls } from "../shared/urls.js?v=11";
+import { BLOSSOM_SERVER, DEFAULT_RELAYS, STORAGE } from "../config.js?v=12";
+import { normalizeProfile } from "./profile-model.js?v=12";
+import { normalizeBlossomServer, parseRelayUrls } from "../shared/urls.js?v=12";
 
 function readRaw(key) {
   try {
@@ -96,7 +96,13 @@ export function writeCache(pubkey, profile, createdAt) {
 
 export function readDraft(pubkey) {
   const raw = readJson(STORAGE.draft(pubkey));
-  return raw ? normalizeProfile(raw) : null;
+  if (!raw) return null;
+  const profile = normalizeProfile(raw);
+  // normalizeProfile drops unknown fields; keep the draft timestamp so the
+  // editor can tell a stale draft from a newer published event.
+  profile.draftUpdatedAt =
+    Number(raw.draftUpdatedAt) || Number(raw.draft_updated_at) || 0;
+  return profile;
 }
 
 export function writeDraft(pubkey, profile) {

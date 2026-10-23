@@ -29,6 +29,7 @@ import {
 import { createToast } from "./ui/toast.js";
 import { renderLandingSession } from "./ui/landing-view.js";
 import { renderState } from "./ui/state-view.js";
+import { renderProfileSkeleton } from "./ui/profile-skeleton.js";
 import {
   publicGallery,
   renderProfile as renderProfileView,
@@ -79,6 +80,7 @@ function setView(view) {
   els.main.hidden = false;
   setHidden(els.landing, view !== "landing");
   setHidden(els.stateView, view !== "state");
+  setHidden(els.profileSkeleton, view !== "skeleton");
   setHidden(els.profile, view !== "profile");
   setHidden(els.editorView, view !== "editor");
   const isProfile = view === "profile";
@@ -255,9 +257,9 @@ function showLanding() {
 
 function showLoading(title, text) {
   resetPortfolioTheme();
-  setView("state");
+  setView("skeleton");
   setHidden(els.demoBanner, !state.demo);
-  renderState(els.stateView, { mode: "loading", title, text });
+  renderProfileSkeleton(els.profileSkeleton, { label: title });
   setChipRef(state.ref);
   document.title = t("Portfolio — bitos.space");
 }
@@ -955,6 +957,7 @@ function cacheElements() {
     main: $("#main"),
     landing: $("#landing-view"),
     stateView: $("#state-view"),
+    profileSkeleton: $("#profile-skeleton"),
     profile: $("#profile-view"),
     demoBanner: $("#demo-banner"),
     urlChip: $("#url-chip"),

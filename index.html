@@ -104,12 +104,12 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/fonts/stylesheet.css" />
-    <link rel="stylesheet" href="styles.css?v=19" />
+    <link rel="stylesheet" href="styles.css?v=22" />
 
     <!-- title tab icon -->
-    <link rel="icon" href="assets/bee.svg" type="image/svg+xml" />
+    <link rel="icon" href="assets/bitos-icon.svg" type="image/svg+xml" />
     <link rel="icon" href="favicon.ico" sizes="any" />
-    <link rel="apple-touch-icon" href="assets/icons/bee-icon-180.png" />
+    <link rel="apple-touch-icon" href="assets/icons/bitos-icon-180.png" />
   </head>
   <body>
     <a class="skip-link" href="#home" data-i18n="skip_link"
@@ -122,7 +122,17 @@
         <a href="#" class="logo" aria-label="BitOS">
           <span class="logo-icon">
             <img
-              src="assets/bee-animated.svg"
+              class="logo-mark--dark"
+              src="assets/bitos-logo-animated-dark.svg?v=2"
+              width="66"
+              height="44"
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              class="logo-mark--light"
+              src="assets/bitos-logo-animated.svg?v=2"
+              width="66"
               height="44"
               alt=""
               aria-hidden="true"
@@ -614,8 +624,13 @@
               </div>
               <div class="orb__core">
                 <img
-                  class="bee-logo"
-                  src="assets/bee-animated.svg"
+                  class="bee-logo logo-mark--dark"
+                  src="assets/bitos-logo-animated-dark.svg?v=2"
+                  alt="bitos.space"
+                />
+                <img
+                  class="bee-logo logo-mark--light"
+                  src="assets/bitos-logo-animated.svg?v=2"
                   alt="bitos.space"
                 />
               </div>
@@ -1271,7 +1286,8 @@
       <section id="community" class="community-section">
         <div class="container community-inner reveal">
           <div class="seal" aria-hidden="true">
-            <img src="assets/bee-animated.svg" alt="" width="40" height="40" />
+            <img class="logo-mark--dark" src="assets/bitos-logo-animated-dark.svg?v=2" alt="" width="48" height="32" />
+            <img class="logo-mark--light" src="assets/bitos-logo-animated.svg?v=2" alt="" width="48" height="32" />
           </div>
           <h2 data-i18n="community_title">Join the build</h2>
           <p data-i18n="community_desc">
@@ -1306,7 +1322,10 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-brand">
-            <h3 class="en">bitos.space</h3>
+            <h3 class="en">
+                <!--bitos.space-->
+                <img src="/assets/bitos-logo-long.png" height="80" />
+            </h3>
             <p data-i18n="footer_desc">
               Open source project for local bit spaces.
             </p>

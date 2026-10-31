@@ -4,7 +4,7 @@
  */
 import { setHidden } from "../shared/dom.js";
 
-const LOGO_URL = new URL("../../../assets/bee.svg", import.meta.url).href;
+const LOGO_URL = new URL("../../../assets/bitos-logo.svg", import.meta.url).href;
 
 export function renderQr(container, text, { logo = false } = {}) {
   if (!container) return false;

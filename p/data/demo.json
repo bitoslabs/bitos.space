@@ -20,7 +20,7 @@
       "status": "available",
       "note": "Open to selected projects and partnerships"
     },
-    "avatar": "https://bitos.space/assets/bee-animated.svg",
+    "avatar": "https://bitos.space/assets/bitos-logo-animated.svg?v=2",
     "banner": "",
     "contact": {
       "label": "Request contact",
@@ -163,10 +163,10 @@
       {
         "id": "md_mark",
         "type": "image",
-        "url": "/assets/bee-animated.svg",
+        "url": "/assets/bitos-logo-animated.svg?v=2",
         "poster": "",
         "caption": "The BitOS mark, animated",
-        "alt": "Animated golden bee used as the BitOS identity mark",
+        "alt": "Animated BitOS bee mark",
         "public": true
       },
       {

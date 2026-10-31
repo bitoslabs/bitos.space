@@ -255,11 +255,32 @@ html.light-mode .text-gradient {
   align-items: center;
 }
 
-/* Logo (assets = coloured bee mark, no filter needed) */
+/* Logo (assets/bitos-logo.svg = coloured bee mark, no filter needed) */
 .logo img {
+  height: 44px;
+  width: auto;
   filter: none;
   transition: filter 0.3s ease;
   display: block;
+}
+
+/* Dark theme uses the light-line-art mark; light theme keeps the black-line mark. */
+.logo img.logo-mark--light,
+.orb__core img.logo-mark--light,
+.seal img.logo-mark--light {
+  display: none;
+}
+
+html.light-mode .logo img.logo-mark--light,
+html.light-mode .orb__core img.logo-mark--light,
+html.light-mode .seal img.logo-mark--light {
+  display: block;
+}
+
+html.light-mode .logo img.logo-mark--dark,
+html.light-mode .orb__core img.logo-mark--dark,
+html.light-mode .seal img.logo-mark--dark {
+  display: none;
 }
 
 .logo-text {
@@ -959,11 +980,11 @@ html.light-mode .orb__core img {
   filter: none;
 }
 
-/* Animated bee mascot (assets/bee-animated.svg) — keep brand colours, no invert */
+/* Brand mark (assets/bitos-logo.svg) — keep brand colours, no invert */
 .orb__core img.bee-logo,
 html.light-mode .orb__core img.bee-logo {
-  width: 82%;
-  height: 82%;
+  width: 98%;
+  height: auto;
   filter: none;
 }
 
@@ -1883,8 +1904,8 @@ main {
 .seal img {
   position: relative;
   z-index: 1;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: auto;
 }
 
 .community-inner h2 {

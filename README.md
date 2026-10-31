@@ -15,7 +15,7 @@ build step.
 
 | Path | Purpose |
 | --- | --- |
-| `index.html` | Landing page (hero, features, ecosystem links) |
+| `index.html` | Landing page (hero, product preview, audience, features, ecosystem links) |
 | `script.js` | Landing page behavior (navigation, theme, animations) |
 | `styles.css` | Landing page styles |
 | `data-standard.html` | Open event conventions used across the BitOS ecosystem |
